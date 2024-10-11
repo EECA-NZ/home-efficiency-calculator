@@ -3,6 +3,7 @@ pandas
 networkx
 geopandas
 matplotlib
+seaborn
 fiona
 pyproj
 coverage

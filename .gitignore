@@ -147,3 +147,6 @@ coverage.xml
 
 # Lookup tables
 lookup
+
+# Figures generated
+*.png
