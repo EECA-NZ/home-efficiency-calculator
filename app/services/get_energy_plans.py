@@ -8,7 +8,7 @@ from .configuration import (
     get_default_lpg_plan,
     get_default_wood_price,
     get_default_petrol_price,
-    get_default_diesel_price
+    get_default_diesel_price,
 )
 
 

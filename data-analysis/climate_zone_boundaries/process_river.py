@@ -13,9 +13,11 @@ from shapely.ops import nearest_points
 
 # Setting a constant for the path to the GeoPackage.
 # File downloaded from https://data.linz.govt.nz/layer/103632-nz-river-name-lines-pilot/
-GPKG_PATH = ("../supplementary_data/"
-             "lds-nz-river-name-lines-pilot-GPKG/"
-             "nz-river-name-lines-pilot.gpkg")
+GPKG_PATH = (
+    "../supplementary_data/"
+    "lds-nz-river-name-lines-pilot-GPKG/"
+    "nz-river-name-lines-pilot.gpkg"
+)
 
 # pylint: disable=too-many-locals
 
@@ -76,6 +78,7 @@ def load_and_process_river(name, extend_to_end_points=None):
     river = rivers[rivers["name"] == name]
     return simplified_river_path(river.geometry, extend_to_end_points)
 
+
 if __name__ == "__main__":
     MY_RIVER_NAME = "Otekaieke River"
     my_river_path = load_and_process_river(MY_RIVER_NAME)
@@ -84,7 +87,7 @@ if __name__ == "__main__":
         fig, ax = plt.subplots(figsize=(10, 6))
         all_rivers = gpd.read_file(GPKG_PATH)
         my_river = all_rivers[all_rivers["name"] == MY_RIVER_NAME]
-        my_river.plot(ax=ax, color='grey', alpha=0.5, edgecolor='none')
+        my_river.plot(ax=ax, color="grey", alpha=0.5, edgecolor="none")
         gpd.GeoSeries([my_river_path]).plot(ax=ax, color="red", linewidth=2)
         ax.set_title(f"Simplified Path of {MY_RIVER_NAME}")
         ax.set_xlabel("Longitude")

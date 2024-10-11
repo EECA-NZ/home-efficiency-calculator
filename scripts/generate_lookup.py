@@ -23,7 +23,7 @@ logging.basicConfig(level=logging.INFO)
 # Constant for the lookup directory
 LOOKUP_DIR = "../lookup"
 
-REPORT_EVERY_N_ROWS = 1E5
+REPORT_EVERY_N_ROWS = 1e5
 
 # Ensure the directory exists
 os.makedirs(LOOKUP_DIR, exist_ok=True)
@@ -75,6 +75,7 @@ def clear_output_dir(output_dir):
         if file.endswith(".csv"):
             os.remove(os.path.join(output_dir, file))
 
+
 def uniquify_rows_and_write_to_csv(raw_df, filename):
     """
     Write unique rows to a CSV file.
@@ -82,6 +83,7 @@ def uniquify_rows_and_write_to_csv(raw_df, filename):
     final_df = raw_df.drop_duplicates().reset_index(drop=True)
     final_df.to_csv(filename, index=False)
     return final_df
+
 
 def get_energy_plan_cached(postcode):
     """
@@ -93,6 +95,7 @@ def get_energy_plan_cached(postcode):
     energy_plan_cache[postcode] = plan
     return plan
 
+
 def get_climate_zone_cached(postcode):
     """
     Cached version of climate_zone function.
@@ -102,6 +105,7 @@ def get_climate_zone_cached(postcode):
     zone = climate_zone(postcode)
     climate_zone_cache[postcode] = zone
     return zone
+
 
 def calculate_cost_and_emissions(your_home, answers):
     """
@@ -125,6 +129,7 @@ def calculate_cost_and_emissions(your_home, answers):
     result = {"cost": cost, "emissions": my_emissions}
     cost_emissions_cache[cache_key] = result
     return result
+
 
 def generate_postcode_lookup_table():
     """
@@ -151,6 +156,7 @@ def generate_postcode_lookup_table():
         os.path.join(LOOKUP_DIR, "postcode_to_climate_and_energy_plans.csv"),
     )
 
+
 def generate_heating_lookup_table():
     """
     Generate the heating lookup table.
@@ -164,7 +170,9 @@ def generate_heating_lookup_table():
         heating_during_day,
         insulation_quality,
     ):
-        people, postcode, disconnect, heating_source, heating_day, insulation = combination
+        people, postcode, disconnect, heating_source, heating_day, insulation = (
+            combination
+        )
 
         your_home = YourHomeAnswers(
             people_in_house=people,
@@ -207,6 +215,7 @@ def generate_heating_lookup_table():
     return uniquify_rows_and_write_to_csv(
         space_heating_df, os.path.join(LOOKUP_DIR, "space_heating_lookup_table.csv")
     )
+
 
 def generate_hot_water_lookup_table():
     """
@@ -262,6 +271,7 @@ def generate_hot_water_lookup_table():
         hot_water_df, os.path.join(LOOKUP_DIR, "hot_water_lookup_table.csv")
     )
 
+
 def generate_cooktop_lookup_table():
     """
     Generate the cooktop lookup table.
@@ -310,6 +320,7 @@ def generate_cooktop_lookup_table():
         cooktop_df, os.path.join(LOOKUP_DIR, "cooktop_lookup_table.csv")
     )
 
+
 def generate_vehicle_lookup_table():
     """
     Generate the vehicle lookup table.
@@ -323,7 +334,9 @@ def generate_vehicle_lookup_table():
         vehicle_sizes,
         km_per_week,
     ):
-        people, postcode, disconnect, vehicle_type, vehicle_size, kilometers = combination
+        people, postcode, disconnect, vehicle_type, vehicle_size, kilometers = (
+            combination
+        )
 
         your_home = YourHomeAnswers(
             people_in_house=people,
@@ -367,6 +380,7 @@ def generate_vehicle_lookup_table():
         vehicle_df, os.path.join(LOOKUP_DIR, "vehicle_lookup_table.csv")
     )
 
+
 def generate_natural_gas_fixed_cost_lookup_table():
     """
     Generate the natural gas fixed cost lookup table.
@@ -384,6 +398,7 @@ def generate_natural_gas_fixed_cost_lookup_table():
         natural_gas_fixed_costs_df,
         os.path.join(LOOKUP_DIR, "natural_gas_fixed_cost_lookup_table.csv"),
     )
+
 
 def generate_lpg_fixed_cost_lookup_table():
     """

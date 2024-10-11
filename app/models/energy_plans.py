@@ -28,7 +28,8 @@ class ElectricityPlan(BaseModel):
         """
         return (
             profile.day_kwh * self.nzd_per_day_kwh
-            + profile.flexible_kwh * min(self.nzd_per_night_kwh, self.nzd_per_controlled_kwh)
+            + profile.flexible_kwh
+            * min(self.nzd_per_night_kwh, self.nzd_per_controlled_kwh)
             + profile.elx_connection_days * self.daily_charge
         )
 

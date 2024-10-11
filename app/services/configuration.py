@@ -54,6 +54,7 @@ def get_default_wood_price():
         per_wood_kwh=0.05,
     )
 
+
 def get_default_petrol_price():
     """
     Return a default petrol plan.
