@@ -150,3 +150,7 @@ lookup
 
 # Figures generated
 *.png
+
+# Data analysis inputs and outputs
+data-analysis/climate_zone_boundaries/output/
+data-analysis/supplementary_data/
