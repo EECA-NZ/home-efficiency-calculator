@@ -34,7 +34,7 @@ OTEKAIEKE_END_POINTS = [
 OTEKAIEKE = load_and_process_river(
     "Otekaieke River", OTEKAIEKE_END_POINTS
 )  # Get the river geometry, removing braiding and extending to just past the TA boundary
-DIRECTORY_PATH = "./statsnz-territorial-authority-2023-clipped-generalised-SHP"
+DIRECTORY_PATH = "../supplementary_data/statsnz-territorial-authority-2023-clipped-generalised-SHP"
 INPUT_SHAPEFILE_NAME = "territorial-authority-2023-clipped-generalised.shp"
 INPUT_SHAPEFILE_PATH = f"{DIRECTORY_PATH}/{INPUT_SHAPEFILE_NAME}"
 OUTPUT_PATH = "./output"
