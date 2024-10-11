@@ -1,5 +1,6 @@
 pylint
 pandas
+openpyxl
 networkx
 geopandas
 matplotlib
