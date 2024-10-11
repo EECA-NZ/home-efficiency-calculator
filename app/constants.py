@@ -25,6 +25,7 @@ SOLAR_RESOURCE_KWH_PER_DAY = {
     "Central Otago": 25.0,
     "Dunedin": 25.0,
     "Invercargill": 25.0,
+    "Unknown": 25.0,
 }
 
 EMISSIONS_FACTORS = {
@@ -54,6 +55,7 @@ HEATING_DEGREE_DAYS = {
     "Central Otago": 3164,
     "Dunedin": 2657,
     "Invercargill": 2937,
+    "Unknown": 2000,
 }
 
 STANDARD_HOME_KWH_HEATING_DEMAND_PER_HEATING_DEGREE_DAY = 1.94
@@ -91,6 +93,7 @@ HEAT_PUMP_COP_BY_CLIMATE_ZONE = {
     "Central Otago": 3.0,
     "Dunedin": 3.0,
     "Invercargill": 3.0,
+    "Unknown": 3.0,
 }
 
 HEATING_DAYS_PER_WEEK = {

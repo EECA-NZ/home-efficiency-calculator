@@ -8,7 +8,7 @@ import itertools
 import pandas as pd
 
 from app.services.get_energy_plans import energy_plan
-from app.services.get_climate_zone import climate_zone
+from app.services.get_climate_zone import climate_zone, postcode_dict
 from app.services.energy_calculator import emissions
 from app.models.user_answers import (
     YourHomeAnswers,
@@ -30,7 +30,7 @@ os.makedirs(LOOKUP_DIR, exist_ok=True)
 
 USER_PROVIDED = False
 people_in_house = [1, 2, 3, 4, 5, 6]
-postcodes = [f"{i:04d}" for i in range(1000, 3000)]  # Example: 2000 postcodes
+postcodes = list(postcode_dict.keys())
 disconnect_gas = [True, False]
 main_heating_sources = [
     "Piped gas heater",

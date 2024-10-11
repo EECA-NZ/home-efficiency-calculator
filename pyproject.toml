@@ -15,6 +15,7 @@ dependencies = [
     "requests",
     "httpx"
 ]
+
 [project.scripts]
 electrify_app = "app.main:run"
 
@@ -23,3 +24,4 @@ Homepage = "https://github.com/EECA-NZ/home-efficiency-calculator"
 
 [tool.setuptools]
 packages = { find = { exclude = ["lookup", "lookup.*"] } }
+include-package-data = true

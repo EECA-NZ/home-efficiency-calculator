@@ -14,7 +14,7 @@ from shapely.ops import transform
 from shapely.geometry import shape
 
 # Constants
-OUTPUT_CSV = "../../lookup/postcode_to_climate_zone.csv"
+OUTPUT_CSV = "./output/postcode_to_climate_zone.csv"
 SHAPEFILE = "../supplementary_data/PNF_V2024Q2_V01/PN_V2024Q2V01_POLYGONS.shp"
 CLIMATE_GPKG = (
     "../climate_zone_boundaries/"
@@ -245,7 +245,7 @@ def main():
     climate_zones_gdf = load_gpkg(CLIMATE_GPKG)
 
     # Plot the postcode and climate zone boundaries
-    plot_maps(postcode_gdf, climate_zones_gdf, "postcode_climate_boundaries.png")
+    plot_maps(postcode_gdf, climate_zones_gdf, "output/postcode_climate_boundaries.png")
 
     # Reproject to EPSG:2193 (New Zealand Transverse Mercator 2000)
     print("Reprojecting GeoDataFrames to EPSG:2193...")
@@ -256,7 +256,7 @@ def main():
     results = process_postcodes(postcode_gdf, climate_zones_gdf)
 
     # Plot the histogram
-    plot_histogram(results, "percentage_in_main_climate_zone.png")
+    plot_histogram(results, "output/percentage_in_main_climate_zone.png")
 
     # Prepare and save the lookup table
     lookup_table = (
