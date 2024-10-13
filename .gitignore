@@ -152,5 +152,5 @@ lookup
 *.png
 
 # Data analysis inputs and outputs
-data-analysis/climate_zone_boundaries/output/
-data-analysis/supplementary_data/
+data_analysis/climate_zone_boundaries/output/
+data_analysis/supplementary_data/
