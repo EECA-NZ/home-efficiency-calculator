@@ -64,19 +64,19 @@ def plot_maps(postcode_gdf, overlay_gdf, column, title1, title2, legend_title, f
     print(f"Plotting {title1} and {title2} ...")
     postcode_gdf_plot = postcode_gdf.to_crs(epsg=4326)
     overlay_gdf_plot = overlay_gdf.to_crs(epsg=4326)
-
     _, axes = plt.subplots(1, 2, figsize=(20, 10))
-
     postcode_gdf_plot.plot(ax=axes[0], color="none", edgecolor="blue", linewidth=0.5)
     axes[0].set_title(title1)
     axes[0].set_xlabel("Longitude")
     axes[0].set_ylabel("Latitude")
-
+    # Synchronize the limits
+    xmin, xmax = axes[0].get_xlim()
+    ymin, ymax = axes[0].get_ylim()
     overlay_gdf_plot.plot(
         ax=axes[1],
         column=column,
-        cmap="tab20",
-        alpha=0.5,
+        cmap="tab20b",
+        alpha=0.8,
         legend=True,
         edgecolor="black",
         linewidth=0.5,
@@ -84,11 +84,11 @@ def plot_maps(postcode_gdf, overlay_gdf, column, title1, title2, legend_title, f
     axes[1].set_title(title2)
     axes[1].set_xlabel("Longitude")
     axes[1].set_ylabel("Latitude")
-
+    axes[1].set_xlim(xmin, xmax)
+    axes[1].set_ylim(ymin, ymax)
     leg = axes[1].get_legend()
-    leg.set_bbox_to_anchor((1.15, 1))
+    leg.set_bbox_to_anchor((1.55, 1))
     leg.set_title(legend_title)
-
     plt.tight_layout()
     plt.savefig(figname)
     plt.close()

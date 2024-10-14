@@ -5,12 +5,12 @@ As a side effect, generate some data visualizations.
 """
 
 import pandas as pd
-from .helpers import (
+from data_analysis.postcode_lookup_tables.helpers import (
     save_results,
     plot_histogram,
     process_postcodes
 )
-from .geo_utils import (
+from data_analysis.postcode_lookup_tables.geo_utils import (
     load_and_transform_shapefile,
     plot_maps,
     reproject_gdf
