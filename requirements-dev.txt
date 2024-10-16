@@ -1,4 +1,7 @@
 pylint
+black
+isort
+pre-commit
 pandas
 openpyxl
 networkx
@@ -8,3 +11,4 @@ seaborn
 fiona
 pyproj
 coverage
+img2pdf

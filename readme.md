@@ -30,6 +30,12 @@ It is assumed that the user is working in a powershell environment on a windows 
     python -m pip install -r requirements-dev.txt
     ```
 
+1. Install the pre-commit hooks:
+   ```
+   pre-commit install
+   ```
+    This installs the Git hooks specified in `.pre-commit-config.yaml` and ensures that code formatting and linting checks run before each commit.
+
 1. **Run the test suite:**
     ```bash
     python -m pytest --verbose

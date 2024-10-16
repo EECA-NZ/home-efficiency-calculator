@@ -25,3 +25,10 @@ Homepage = "https://github.com/EECA-NZ/home-efficiency-calculator"
 [tool.setuptools]
 packages = { find = { exclude = ["lookup", "lookup.*"] } }
 include-package-data = true
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+
+[tool.isort]
+profile = "black"
