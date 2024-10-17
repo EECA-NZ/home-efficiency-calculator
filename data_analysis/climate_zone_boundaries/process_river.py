@@ -1,14 +1,17 @@
 """
-This script processes river data from a GeoPackage file to extract the longest simple path
+This script processes river data from a GeoPackage
+file to extract the longest simple path
 
-Used as a helper script for the climate zone boundaries project.
+Used as a helper script for the climate zone
+boundaries project.
 """
 
 import itertools
+
 import geopandas as gpd
-import networkx as nx
 import matplotlib.pyplot as plt
-from shapely.geometry import MultiLineString, LineString, Point
+import networkx as nx
+from shapely.geometry import LineString, MultiLineString, Point
 from shapely.ops import nearest_points
 
 # Setting a constant for the path to the GeoPackage.

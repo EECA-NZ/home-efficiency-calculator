@@ -20,5 +20,5 @@ repos:
         entry: pylint
         language: system
         types: [python]
-        args: ["--errors-only"]
+        args: ["--rcfile=.pylintrc", "--errors-only"]
         additional_dependencies: []
