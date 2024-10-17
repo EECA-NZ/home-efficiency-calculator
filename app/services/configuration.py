@@ -17,6 +17,10 @@ Petrol and Diesel pricing:
 From MBIE: Average Petrol and Diesel Costs from 1/09/2023 to 23/08/2024
     • Diesel_discounted_retail_price_NZc.p.l = 216.1612458
     • Regular_Petrol_discounted_retail_price_NZc.p.l = 278.716297
+Source:
+    https://www.mbie.govt.nz/building-and-energy/
+energy-and-natural-resources/energy-statistics-and-modelling/
+energy-statistics/oil-statistics
 
 Wood pricing:
 
