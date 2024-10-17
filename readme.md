@@ -33,7 +33,7 @@ It is assumed that the user is working in a powershell environment on a windows 
     python -m pip install -r requirements-dev.txt
     ```
 
-1. Install the pre-commit hooks:
+1. **Install the pre-commit hooks:**
    ```
    pre-commit install
    ```
