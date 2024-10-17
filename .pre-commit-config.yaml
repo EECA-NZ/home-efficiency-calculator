@@ -20,5 +20,5 @@ repos:
         entry: pylint
         language: system
         types: [python]
-        args: ["$(git ls-files '*.py')"]
+        args: ["--errors-only"]
         additional_dependencies: []

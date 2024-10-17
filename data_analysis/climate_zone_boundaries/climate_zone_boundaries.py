@@ -7,17 +7,16 @@ some adjustments.
 
 import os
 import shutil
+
 import fiona
-import pyproj
-import pandas as pd
-from pyproj import CRS
 import geopandas as gpd
 import matplotlib.pyplot as plt
-from shapely.ops import split, transform
-from shapely.geometry import shape, LineString
-from shapely.geometry import Polygon, MultiPolygon
-
+import pandas as pd
+import pyproj
 from process_river import load_and_process_river
+from pyproj import CRS
+from shapely.geometry import LineString, MultiPolygon, Polygon, shape
+from shapely.ops import split, transform
 from ta_to_climate_zone import ta_to_climate_zone
 
 # pylint: disable=possibly-used-before-assignment, too-many-locals
@@ -33,7 +32,8 @@ OTEKAIEKE_END_POINTS = [
 ]  # Force the river to cross the TA boundary
 OTEKAIEKE = load_and_process_river(
     "Otekaieke River", OTEKAIEKE_END_POINTS
-)  # Get the river geometry, removing braiding and extending to just past the TA boundary
+)  # Get the river geometry, removing braiding and
+# extending to just past the TA boundary
 DIRECTORY_PATH = (
     "../supplementary_data/statsnz-territorial-authority-2023-clipped-generalised-SHP"
 )
@@ -274,7 +274,8 @@ def main():
     # Save as a geopackage for use in the DNA library
     merged_gdf.to_file(OUTPUT_SHAPEFILE_PATH.replace(".shp", ".gpkg"), driver="GPKG")
     print(
-        f"Saved merged climate zone boundaries to {OUTPUT_SHAPEFILE_PATH.replace('.shp', '.gpkg')}"
+        "Saved merged climate zone boundaries to ",
+        "{OUTPUT_SHAPEFILE_PATH.replace('.shp', '.gpkg')}",
     )
     return merged_gdf
 
