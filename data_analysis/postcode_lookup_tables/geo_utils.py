@@ -3,16 +3,18 @@ Geo-spatial utilities for loading, transforming, and plotting GeoDataFrames.
 """
 
 import fiona
-import pyproj
-from pyproj import CRS
 import geopandas as gpd
 import matplotlib.pyplot as plt
-from shapely.ops import transform
+import pyproj
+from pyproj import CRS
 from shapely.geometry import shape
+from shapely.ops import transform
+
 
 def load_gpkg(gpkg_path):
     """Load the first layer of a GeoPackage as a GeoDataFrame."""
     return gpd.read_file(gpkg_path, layer=0)
+
 
 def reproject_gdf(gdf, epsg=2193):
     """
@@ -21,15 +23,17 @@ def reproject_gdf(gdf, epsg=2193):
     """
     return gdf.to_crs(epsg=epsg)
 
+
 def adjust_longitude(x, y):
     """Adjust longitudes to be within [0, 360]."""
     if x < 0:
         x += 360
     return x, y
 
+
 def load_and_transform_shapefile(shapefile_path):
     """
-    Load a shapefile, transform geometries to WGS84, and 
+    Load a shapefile, transform geometries to WGS84, and
     adjust longitudes. Returns a GeoDataFrame.
     """
     with fiona.open(shapefile_path, "r") as shapefile:

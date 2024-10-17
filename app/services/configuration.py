@@ -1,77 +1,161 @@
 """
-Configuration functions including default values for energy plans, usage profiles, and answers.
+Configuration functions including default values for
+energy plans, usage profiles, and answers.
+
+Rewiring Aotearoa:
+    • Electricity variable cost: 24.2c/kWh or 18c/kWh off-peak/ripple.
+    • Electricity connection cost: Not included in any calculations.
+        (Homes are assumed on-grid in all cases.)
+    • Piped gas variable cost: 11c/kWh.
+    • Piped gas connection cost: $1.60 per day ($587 per year).
+    • LPG variable cost: 24.4c/kWh.
+    • LPG bottle rental (2 x 45kg bottles):
+        $5.75 per bottle per month ($138 per year for two bottles).
+
+Petrol and Diesel pricing:
+
+From MBIE: Average Petrol and Diesel Costs from 1/09/2023 to 23/08/2024
+    • Diesel_discounted_retail_price_NZc.p.l = 216.1612458
+    • Regular_Petrol_discounted_retail_price_NZc.p.l = 278.716297
+
+Wood pricing:
+
+Base this on:
+    • Price per cord: NZD $375
+    • Volume of a Cord = 128 cubic feet = 3.62m^3
+    • Density of dry pine = 480 kg/m^3
+    • Energy content of dry pine = 15 MJ / tonne
+        = 15E6 / 3.6 / 1E6 = 4.17 kWh / kg
+    • Efficiency of modern wood stove = 70%
+
+kWh per dollar = (
+    Volume of a Cord *
+    Density of dry pine *
+    Energy content of dry pine *
+    Efficiency of modern wood stove) / Price per cord
+ = (3.62 * 480 * 4.17 * 0.7) / 375
+ = 13.52 kWh per dollar
+
+Inverting this gives $0.074 per kWh of heat from a modern wood stove.
 """
 
 from ..models.energy_plans import (
-    ElectricityPlan,
-    NaturalGasPlan,
-    LPGPlan,
-    WoodPrice,
-    PetrolPrice,
     DieselPrice,
+    ElectricityPlan,
+    LPGPlan,
+    NaturalGasPlan,
+    PetrolPrice,
+    WoodPrice,
 )
 from ..models.usage_profiles import HouseholdYearlyFuelUsageProfile
-from ..models.user_answers import YourHomeAnswers, HeatingAnswers
-from ..models.user_answers import HotWaterAnswers, CooktopAnswers
-from ..models.user_answers import DrivingAnswers, SolarAnswers
+from ..models.user_answers import (
+    CooktopAnswers,
+    DrivingAnswers,
+    HeatingAnswers,
+    HotWaterAnswers,
+    SolarAnswers,
+    YourHomeAnswers,
+)
 
 
 def get_default_electricity_plan():
     """
     Return a default electricity plan.
+
+    Rewiring Aotearoa:
+    • Electricity variable cost: 24.2c/kWh or 18c/kWh off-peak/ripple.
+    • Electricity connection cost: Not included in any calculations.
+        (Homes are assumed on-grid in all cases.)
     """
     return ElectricityPlan(
         name="Default Electricity Plan",
-        nzd_per_day_kwh=0.20,
+        nzd_per_day_kwh=0.242,
         nzd_per_night_kwh=0.18,
-        nzd_per_controlled_kwh=0.15,
-        daily_charge=1.25,
+        nzd_per_controlled_kwh=0.18,
+        daily_charge=2.0,
     )
 
 
 def get_default_natural_gas_plan():
     """
     Return a default natural gas plan.
+
+    Rewiring Aotearoa:
+    • Piped gas variable cost: 11c/kWh.
+    • Piped gas connection cost: $1.60 per day ($587 per year).
     """
     return NaturalGasPlan(
-        name="Default Natural Gas Plan", per_natural_gas_kwh=0.10, daily_charge=1.5
+        name="Default Natural Gas Plan", per_natural_gas_kwh=0.11, daily_charge=1.6
     )
 
 
 def get_default_lpg_plan():
     """
     Return a default LPG plan.
+
+    Rewiring Aotearoa:
+        • LPG variable cost: 24.4c/kWh.
+        • LPG bottle rental (per 45kg bottle):
+            $5.75 per bottle per month ($69 per year per bottle).
     """
-    return LPGPlan(name="Default LPG Plan", per_lpg_kwh=0.25, daily_charge=80 / 365.25)
+    return LPGPlan(name="Default LPG Plan", per_lpg_kwh=0.244, daily_charge=69 / 365.25)
 
 
 def get_default_wood_price():
     """
     Return a default wood plan.
+
+    Wood price: $0.074 per kWh for a modern wood stove with 70% efficiency.
+
+    This is based on:
+        • Price per cord: NZD $375
+        • Volume of a Cord = 128 cubic feet = 3.62m^3
+        • Density of dry pine = 480 kg/m^3
+        • Energy content of dry pine = 15 MJ / tonne = 15E6 / 3.6E6 = 4.17 kWh / kg
+        • Efficiency of modern wood stove = 70%
+
+    kWh per dollar = (
+        Volume of a Cord *
+        Density of dry pine *
+        Energy content of dry pine *
+        Efficiency of modern wood stove) / Price per cord
+
+    = (3.62 * 480 * 4.17 * 0.7) / 375
+    = 13.52 kWh per dollar
+
+    Inverting this gives $0.074 per kWh
     """
     return WoodPrice(
         name="Default Wood Price",
-        per_wood_kwh=0.05,
+        per_wood_kwh=0.074,
     )
 
 
 def get_default_petrol_price():
     """
     Return a default petrol plan.
+
+    From MBIE: Average of Petrol Costs from 1/09/2023 to 23/08/2024
+    Regular_Petrol_discounted_retail_price_NZc.p.l = 278.716297
     """
     return PetrolPrice(
         name="Default Petrol Price",
-        per_petrol_litre=1.50,
+        per_petrol_litre=2.78,
     )
 
 
 def get_default_diesel_price():
     """
     Return a default diesel plan.
+
+    From MBIE: Average of Diesel Costs from 1/09/2023 to 23/08/2024
+    Diesel_discounted_retail_price_NZc.p.l = 216.1612458
+
+    Add in RUCs (Road User Charges) for diesel vehicles.
     """
     return DieselPrice(
         name="Default Diesel Price",
-        per_diesel_litre=1.25,
+        per_diesel_litre=2.16,
     )
 
 

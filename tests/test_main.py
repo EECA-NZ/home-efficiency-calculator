@@ -6,36 +6,34 @@ To run the tests, use the following command:
 python -m pytest --verbose
 """
 
+from fastapi.testclient import TestClient
 from pytest import approx, raises
 
-from fastapi.testclient import TestClient
-
-from app.models.energy_plans import HouseholdEnergyPlan
-from app.services.configuration import (
-    get_default_electricity_plan,
-    get_default_natural_gas_plan,
-    get_default_lpg_plan,
-    get_default_wood_price,
-    get_default_petrol_price,
-    get_default_diesel_price,
-    get_default_usage_profile,
-    get_default_your_home_answers,
-    get_default_heating_answers,
-    get_default_hot_water_answers,
-    get_default_cooktop_answers,
-    get_default_driving_answers,
-    get_default_solar_answers,
-)
-from app.models.user_answers import (
-    YourHomeAnswers,
-    HouseholdEnergyProfileAnswers,
-    CooktopAnswers,
-)
-from app.services.energy_calculator import estimate_usage_from_profile
-from app.services.cost_calculator import calculate_savings_options
 from app.constants import DAYS_IN_YEAR
 from app.main import app
-
+from app.models.energy_plans import HouseholdEnergyPlan
+from app.models.user_answers import (
+    CooktopAnswers,
+    HouseholdEnergyProfileAnswers,
+    YourHomeAnswers,
+)
+from app.services.configuration import (
+    get_default_cooktop_answers,
+    get_default_diesel_price,
+    get_default_driving_answers,
+    get_default_electricity_plan,
+    get_default_heating_answers,
+    get_default_hot_water_answers,
+    get_default_lpg_plan,
+    get_default_natural_gas_plan,
+    get_default_petrol_price,
+    get_default_solar_answers,
+    get_default_usage_profile,
+    get_default_wood_price,
+    get_default_your_home_answers,
+)
+from app.services.cost_calculator import calculate_savings_options
+from app.services.energy_calculator import estimate_usage_from_profile
 
 client = TestClient(app)
 
@@ -64,7 +62,7 @@ def test_calculate_annual_costs():
     )
     my_profile = get_default_usage_profile()
     my_cost = my_plan.calculate_cost(my_profile)
-    expected_cost = 2506.25
+    expected_cost = 4174.0
     assert my_cost == expected_cost
 
 

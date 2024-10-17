@@ -2,9 +2,9 @@
 General helper functions for processing postcodes and spatial data.
 """
 
-import seaborn as sns
 import geopandas as gpd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 def save_results(results, output_csv):
@@ -21,7 +21,7 @@ def process_postcodes(
     overlay_gdf,
     overlay_column,
     result_column_name,
-    percentage_column_name
+    percentage_column_name,
 ):
     """
     Process the postcodes to determine overlapping zones (e.g., climate zones, EDB regions).
@@ -87,7 +87,7 @@ def process_postcodes(
     total_postcodes = postcode_gdf["POSTCODE"].nunique()
     print(
         "Number of postcodes entirely within a single zone: ",
-        f"{int(num_entirely_within)} out of {total_postcodes}"
+        f"{int(num_entirely_within)} out of {total_postcodes}",
     )
     # Prepare the results DataFrame
     results = postcode_gdf[
@@ -107,13 +107,7 @@ def process_postcodes(
     return results
 
 
-def plot_histogram(
-    results,
-    percentage_column_name,
-    title,
-    xlabel,
-    figname
-):
+def plot_histogram(results, percentage_column_name, title, xlabel, figname):
     """
     Plot a histogram of the percentage of each postcode's area in the main zone.
 

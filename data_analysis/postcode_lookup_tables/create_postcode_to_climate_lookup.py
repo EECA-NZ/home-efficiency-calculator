@@ -4,16 +4,16 @@ Generate a lookup table from postcode to climate zone.
 As a side effect, generate some data visualizations.
 """
 
-from data_analysis.postcode_lookup_tables.helpers import (
-    save_results,
-    plot_histogram,
-    process_postcodes
-)
 from data_analysis.postcode_lookup_tables.geo_utils import (
-    load_gpkg,
     load_and_transform_shapefile,
+    load_gpkg,
     plot_maps,
-    reproject_gdf
+    reproject_gdf,
+)
+from data_analysis.postcode_lookup_tables.helpers import (
+    plot_histogram,
+    process_postcodes,
+    save_results,
 )
 
 # Constants
@@ -27,6 +27,7 @@ CLIMATE_GPKG = (
 
 
 # Functions
+
 
 def main():
     """
@@ -42,11 +43,11 @@ def main():
     plot_maps(
         my_postcode_gdf,
         my_climate_zones_gdf,
-        column='climate',
+        column="climate",
         title1="New Zealand Postcode Boundaries",
         title2="New Zealand Climate Zone Boundaries",
         legend_title="Climate Zones",
-        figname="output/postcode_climate_boundaries.png"
+        figname="output/postcode_climate_boundaries.png",
     )
 
     my_postcode_gdf = reproject_gdf(my_postcode_gdf)
@@ -55,16 +56,16 @@ def main():
     my_results = process_postcodes(
         postcode_gdf=my_postcode_gdf,
         overlay_gdf=my_climate_zones_gdf,
-        overlay_column='climate',
-        result_column_name='climate_zone',
-        percentage_column_name='percentage_in_climate_zone'
+        overlay_column="climate",
+        result_column_name="climate_zone",
+        percentage_column_name="percentage_in_climate_zone",
     )
     plot_histogram(
         results=my_results,
-        percentage_column_name='percentage_in_climate_zone',
+        percentage_column_name="percentage_in_climate_zone",
         title="Histogram of Percentage of Each Postcode's Area in the Main Climate Zone",
         xlabel="Percentage of Area in Main Climate Zone",
-        figname="output/percentage_in_main_climate_zone.png"
+        figname="output/percentage_in_main_climate_zone.png",
     )
     print("Prepare and save the lookup table")
     my_lookup_table = (

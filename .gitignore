@@ -154,3 +154,4 @@ lookup
 # Data analysis inputs and outputs
 data_analysis/climate_zone_boundaries/output/
 data_analysis/supplementary_data/
+data_analysis/energy_plans_available/bynetwork/
