@@ -159,6 +159,25 @@ def get_default_diesel_price():
     )
 
 
+def get_default_plans():
+    """
+    Return a default set of energy plans.
+
+    Returns
+    -------
+    dict
+        A dictionary of default energy plans.
+    """
+    return {
+        "electricity_plan": get_default_electricity_plan(),
+        "natural_gas_plan": get_default_natural_gas_plan(),
+        "lpg_plan": get_default_lpg_plan(),
+        "wood_price": get_default_wood_price(),
+        "petrol_price": get_default_petrol_price(),
+        "diesel_price": get_default_diesel_price(),
+    }
+
+
 def get_default_usage_profile():
     """
     Return a default energy usage profile.

@@ -213,8 +213,7 @@ def plot_subset(df, edb=None, hue_column=None, output_dir="scatterplots"):
 
 
 full_df = pd.read_csv("../supplementary_data/tariff_data/tariffDataReport_240903.csv")
-# full_df = full_df.loc[full_df['Energy type'] == 'electricity']
-full_df = full_df[full_df["Energy type"] == "electricity"].copy()
+full_df = full_df.loc[full_df["Energy type"] == "electricity"].copy()
 NUMERICAL_COLUMNS = [
     "All inclusive",
     "Night only",

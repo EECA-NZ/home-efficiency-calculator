@@ -20,5 +20,5 @@ repos:
         entry: pylint
         language: system
         types: [python]
-        args: ["src/", "tests/"]
+        args: ["app/", "data_analysis/", "tests/"]
         additional_dependencies: []

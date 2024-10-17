@@ -63,7 +63,8 @@ def main():
     plot_histogram(
         results=my_results,
         percentage_column_name="percentage_in_climate_zone",
-        title="Histogram of Percentage of Each Postcode's Area in the Main Climate Zone",
+        title="Histogram of Percentage of Each Postcode's "
+        + "Area in the Main Climate Zone",
         xlabel="Percentage of Area in Main Climate Zone",
         figname="output/percentage_in_main_climate_zone.png",
     )

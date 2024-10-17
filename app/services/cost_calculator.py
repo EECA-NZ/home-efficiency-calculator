@@ -2,10 +2,7 @@
 This module provides functions to optimize the cost of energy for a household.
 """
 
-from .energy_calculator import (
-    estimate_usage_from_profile,
-    emissions,
-)
+from .energy_calculator import emissions, estimate_usage_from_profile
 from .get_energy_plans import energy_plan
 
 
@@ -96,7 +93,8 @@ def calculate_savings_for_option(option, field, answers, your_plan, your_home):
 # pylint: disable=unused-argument
 def calculate_emissions_reduction(answers, your_home):
     """
-    Placeholder function to calculate percentage emissions reduction based on user input.
+    Placeholder function to calculate percentage
+    emissions reduction based on user input.
     """
     return 20  # Placeholder for actual emissions reduction logic
 
