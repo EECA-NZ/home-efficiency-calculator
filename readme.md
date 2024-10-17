@@ -1,4 +1,8 @@
 # Home Efficiency Calculator
+
+![Tests](https://github.com/EECA-NZ/home-efficiency-calculator/actions/workflows/python-tests.yml/badge.svg)
+![Linting](https://github.com/EECA-NZ/home-efficiency-calculator/actions/workflows/pylint.yml/badge.svg)
+
 This repository contains the source code for the home efficiency calculator, a FastAPI application designed to provide insights into household energy costs and CO2 emissions.
 
 This is a prototype for an approach to deploying our models that aims to make it easy:
