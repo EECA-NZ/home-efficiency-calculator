@@ -1,7 +1,8 @@
 # Home Efficiency Calculator
 
-![Tests](https://github.com/EECA-NZ/home-efficiency-calculator/actions/workflows/python-tests.yml/badge.svg)
 ![Linting](https://github.com/EECA-NZ/home-efficiency-calculator/actions/workflows/pylint.yml/badge.svg)
+![Tests](https://github.com/EECA-NZ/home-efficiency-calculator/actions/workflows/python-tests.yml/badge.svg)
+[Test Coverage Report](https://eeca-nz.github.io/home-efficiency-calculator/htmlcov)
 
 This repository contains the source code for the home efficiency calculator, a FastAPI application designed to provide insights into household energy costs and CO2 emissions.
 
@@ -12,8 +13,6 @@ This is a prototype for an approach to deploying our models that aims to make it
 * to use locally as a library for research.
 
 In either case the same codebase is used, providing a single source of truth, and allowing EECA teams to manage the model in a single place.
-
-A unit test coverage report for the python codebase can be found at [https://eeca-nz.github.io/home-efficiency-calculator/htmlcov](https://eeca-nz.github.io/home-efficiency-calculator/htmlcov).
 
 ## Prerequisites
 Before running the application, ensure you have Python and Docker installed on your system. Python 3.12 or higher is recommended.
