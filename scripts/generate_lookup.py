@@ -21,8 +21,8 @@ from app.services.get_energy_plans import energy_plan
 
 logging.basicConfig(level=logging.INFO)
 
-# Constant for the lookup directory
-LOOKUP_DIR = "../lookup"
+# Constant for the lookup directory. Relative to the script location.
+LOOKUP_DIR = os.path.join(os.path.dirname(__file__), "..", "lookup")
 
 REPORT_EVERY_N_ROWS = 1e5
 
@@ -433,6 +433,23 @@ def generate_lpg_fixed_cost_lookup_table():
     )
 
 
+def generate_average_household_savings_lookup_table():
+    """
+    Generate the average household savings lookup table.
+    """
+    average_household_savings_rows = [
+        {
+            "average_household_savings_nzd": 1000,
+            "average_household_emissions_co2e_reduction_percentage": 85,
+        }
+    ]
+    average_household_savings_df = pd.DataFrame(average_household_savings_rows)
+    return uniquify_rows_and_write_to_csv(
+        average_household_savings_df,
+        os.path.join(LOOKUP_DIR, "average_household_savings_lookup_table.csv"),
+    )
+
+
 #### MAIN ####
 
 clear_output_dir(LOOKUP_DIR)
@@ -450,3 +467,5 @@ logging.info("Generating natural gas fixed cost lookup table...")
 natural_gas_fixed_cost_table = generate_natural_gas_fixed_cost_lookup_table()
 logging.info("Generating LPG fixed cost lookup table...")
 lpg_fixed_cost_table = generate_lpg_fixed_cost_lookup_table()
+logging.info("Generating average household savings lookup table...")
+average_household_savings_table = generate_average_household_savings_lookup_table()
