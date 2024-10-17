@@ -79,7 +79,7 @@ def calculate_savings_for_option(option, field, answers, your_plan, your_home):
     alternative_emissions = emissions_kg_co2e(alternative_use)
 
     # Calculate the savings and emissions reduction percentage
-    savings = current_costs - alternative_costs
+    savings = sum(current_costs) - sum(alternative_costs)
     emissions_reduction_percentage = (
         100 * (current_emissions - alternative_emissions) / current_emissions
     )

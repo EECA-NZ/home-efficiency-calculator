@@ -24,14 +24,16 @@ class ElectricityPlan(BaseModel):
         profile: HouseholdYearlyFuelUsageProfile object
 
         Returns:
-        cost: float, the total cost of electricity for the household
+        Tuple[float, float], the variable and fixed
+        cost of electricity for the household
         """
-        return (
+        variable_cost_nzd = (
             profile.day_kwh * self.nzd_per_day_kwh
             + profile.flexible_kwh
             * min(self.nzd_per_night_kwh, self.nzd_per_controlled_kwh)
-            + profile.elx_connection_days * self.daily_charge
         )
+        fixed_cost_nzd = profile.elx_connection_days * self.daily_charge
+        return (fixed_cost_nzd, variable_cost_nzd)
 
 
 class NaturalGasPlan(BaseModel):
@@ -51,12 +53,12 @@ class NaturalGasPlan(BaseModel):
         profile: HouseholdYearlyFuelUsageProfile object
 
         Returns:
-        cost: float, the total cost of natural gas for the household
+        Tuple[float, float], the variable and fixed cost
+        of natural gas for the household
         """
-        return (
-            profile.natural_gas_kwh * self.per_natural_gas_kwh
-            + profile.natural_gas_connection_days * self.daily_charge
-        )
+        variable_cost_nzd = profile.natural_gas_kwh * self.per_natural_gas_kwh
+        fixed_cost_nzd = profile.natural_gas_connection_days * self.daily_charge
+        return (fixed_cost_nzd, variable_cost_nzd)
 
 
 class LPGPlan(BaseModel):
@@ -76,12 +78,12 @@ class LPGPlan(BaseModel):
         profile: HouseholdYearlyFuelUsageProfile object
 
         Returns:
-        cost: float, the total cost of LPG for the household
+        Tuple[float, float], the variable and fixed
+        cost of LPG for the household
         """
-        return (
-            profile.lpg_kwh * self.per_lpg_kwh
-            + profile.lpg_tank_rental_days * self.daily_charge
-        )
+        variable_cost_nzd = profile.lpg_kwh * self.per_lpg_kwh
+        fixed_cost_nzd = profile.lpg_tank_rental_days * self.daily_charge
+        return (fixed_cost_nzd, variable_cost_nzd)
 
 
 class WoodPrice(BaseModel):
@@ -100,9 +102,10 @@ class WoodPrice(BaseModel):
         profile: HouseholdYearlyFuelUsageProfile object
 
         Returns:
-        cost: float, the total cost of wood for the household
+        Tuple[float, float], the variable cost of wood
+        for the household and fixed cost (which is 0)
         """
-        return profile.wood_kwh * self.per_wood_kwh
+        return (0, profile.wood_kwh * self.per_wood_kwh)
 
 
 class PetrolPrice(BaseModel):
@@ -121,9 +124,10 @@ class PetrolPrice(BaseModel):
         profile: HouseholdYearlyFuelUsageProfile object
 
         Returns:
-        cost: float, the total cost of petrol for the household
+        Tuple[float, float], the variable cost of petrol
+        for the household and fixed cost (which is 0)
         """
-        return profile.petrol_litres * self.per_petrol_litre
+        return (0, profile.petrol_litres * self.per_petrol_litre)
 
 
 class DieselPrice(BaseModel):
@@ -142,9 +146,10 @@ class DieselPrice(BaseModel):
         profile: HouseholdYearlyFuelUsageProfile object
 
         Returns:
-        cost: float, the total cost of diesel for the household
+        Tuple[float, float], the variable cost of diesel
+        for the household and fixed cost (which is 0)
         """
-        return profile.diesel_litres * self.per_diesel_litre
+        return (0, profile.diesel_litres * self.per_diesel_litre)
 
 
 class HouseholdEnergyPlan(BaseModel):
@@ -168,13 +173,21 @@ class HouseholdEnergyPlan(BaseModel):
         profile: HouseholdYearlyFuelUsageProfile object
 
         Returns:
-        cost: float, the total cost of energy for the household
+        Tuple[float, float], the total fixed and variable
+        cost of energy for the household
         """
-        return (
-            self.electricity_plan.calculate_cost(profile)
-            + self.natural_gas_plan.calculate_cost(profile)
-            + self.lpg_plan.calculate_cost(profile)
-            + self.wood_price.calculate_cost(profile)
-            + self.petrol_price.calculate_cost(profile)
-            + self.diesel_price.calculate_cost(profile)
-        )
+        fixed_cost_nzd = 0
+        variable_cost_nzd = 0
+        for plan in [
+            self.electricity_plan,
+            self.natural_gas_plan,
+            self.lpg_plan,
+            self.wood_price,
+            self.petrol_price,
+            self.diesel_price,
+        ]:
+            fixed, variable = plan.calculate_cost(profile)
+            fixed_cost_nzd += fixed
+            variable_cost_nzd += variable
+
+        return (fixed_cost_nzd, variable_cost_nzd)

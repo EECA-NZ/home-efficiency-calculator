@@ -61,9 +61,9 @@ def test_calculate_annual_costs():
         diesel_price=get_default_diesel_price(),
     )
     my_profile = get_default_usage_profile()
-    my_cost = my_plan.calculate_cost(my_profile)
-    expected_cost = 4174.0
-    assert my_cost == expected_cost
+    my_costs = my_plan.calculate_cost(my_profile)
+    expected_costs = (730.0, 3444.0)
+    assert my_costs == expected_costs
 
 
 def test_create_household_profile_answers():
@@ -106,7 +106,7 @@ def test_create_household_energy_profile_to_cost():
     )
     household_energy_use = estimate_usage_from_profile(household_profile)
     total_energy_costs = my_plan.calculate_cost(household_energy_use)
-    assert total_energy_costs > 0
+    assert sum(total_energy_costs) > 0
 
 
 def test_cooking_energy_usage():

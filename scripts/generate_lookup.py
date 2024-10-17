@@ -125,7 +125,7 @@ def calculate_cost_and_emissions(your_home, answers):
 
     energy_usage_profile = answers.energy_usage_pattern(your_home)
     my_plan = get_energy_plan_cached(your_home.postcode)
-    variable_cost_nzd = my_plan.calculate_cost(energy_usage_profile)
+    (_, variable_cost_nzd) = my_plan.calculate_cost(energy_usage_profile)
     my_emissions_kg_co2e = emissions_kg_co2e(energy_usage_profile)
     result = {
         "variable_cost_nzd": variable_cost_nzd,
