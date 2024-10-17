@@ -2,7 +2,7 @@
 This module provides functions to optimize the cost of energy for a household.
 """
 
-from .energy_calculator import emissions, estimate_usage_from_profile
+from .energy_calculator import emissions_kg_co2e, estimate_usage_from_profile
 from .get_energy_plans import energy_plan
 
 
@@ -55,8 +55,8 @@ def calculate_current_usage_and_costs(answers, your_plan, your_home):
     """
     household_energy_use = answers.energy_usage_pattern(your_home)
     household_energy_costs = your_plan.calculate_cost(household_energy_use)
-    household_emissions = emissions(household_energy_use)
-    return household_energy_costs, household_emissions
+    household_emissions_kg_co2e = emissions_kg_co2e(household_energy_use)
+    return household_energy_costs, household_emissions_kg_co2e
 
 
 def calculate_savings_for_option(option, field, answers, your_plan, your_home):
@@ -76,7 +76,7 @@ def calculate_savings_for_option(option, field, answers, your_plan, your_home):
     # Calculate the energy use, costs, and emissions for the alternative option
     alternative_use = alternative_answers.energy_usage_pattern(your_home)
     alternative_costs = your_plan.calculate_cost(alternative_use)
-    alternative_emissions = emissions(alternative_use)
+    alternative_emissions = emissions_kg_co2e(alternative_use)
 
     # Calculate the savings and emissions reduction percentage
     savings = current_costs - alternative_costs

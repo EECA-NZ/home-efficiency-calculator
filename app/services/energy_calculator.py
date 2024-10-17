@@ -4,12 +4,12 @@ This module provides functions to estimate a household's yearly fuel usage profi
 
 # pylint: disable=too-many-locals
 
-from app.models.user_answers import HouseholdEnergyProfileAnswers
+from app.constants import DAYS_IN_YEAR, EMISSIONS_FACTORS
 from app.models.usage_profiles import (
     HouseholdYearlyFuelUsageProfile,
     YearlyFuelUsageProfile,
 )
-from app.constants import DAYS_IN_YEAR, EMISSIONS_FACTORS
+from app.models.user_answers import HouseholdEnergyProfileAnswers
 
 
 def uses_electricity(profile: HouseholdEnergyProfileAnswers) -> bool:
@@ -120,7 +120,7 @@ def estimate_usage_from_profile(
     )
 
 
-def emissions(usage_profile: YearlyFuelUsageProfile) -> float:
+def emissions_kg_co2e(usage_profile: YearlyFuelUsageProfile) -> float:
     """
     Return the household's yearly CO2 emissions in kg.
     """

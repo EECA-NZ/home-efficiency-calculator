@@ -2,21 +2,22 @@
 Script to generate lookup table for the deviate PHP web app.
 """
 
-import os
-import logging
 import itertools
+import logging
+import os
+
 import pandas as pd
 
-from app.services.get_energy_plans import energy_plan
-from app.services.get_climate_zone import climate_zone, postcode_dict
-from app.services.energy_calculator import emissions
 from app.models.user_answers import (
-    YourHomeAnswers,
-    HeatingAnswers,
-    HotWaterAnswers,
     CooktopAnswers,
     DrivingAnswers,
+    HeatingAnswers,
+    HotWaterAnswers,
+    YourHomeAnswers,
 )
+from app.services.energy_calculator import emissions_kg_co2e
+from app.services.get_climate_zone import climate_zone, postcode_dict
+from app.services.get_energy_plans import energy_plan
 
 logging.basicConfig(level=logging.INFO)
 
@@ -124,9 +125,12 @@ def calculate_cost_and_emissions(your_home, answers):
 
     energy_usage_profile = answers.energy_usage_pattern(your_home)
     my_plan = get_energy_plan_cached(your_home.postcode)
-    cost = my_plan.calculate_cost(energy_usage_profile)
-    my_emissions = emissions(energy_usage_profile)
-    result = {"cost": cost, "emissions": my_emissions}
+    variable_cost_nzd = my_plan.calculate_cost(energy_usage_profile)
+    my_emissions_kg_co2e = emissions_kg_co2e(energy_usage_profile)
+    result = {
+        "variable_cost_nzd": variable_cost_nzd,
+        "emissions_kg_co2e": my_emissions_kg_co2e,
+    }
     cost_emissions_cache[cache_key] = result
     return result
 
@@ -170,9 +174,14 @@ def generate_heating_lookup_table():
         heating_during_day,
         insulation_quality,
     ):
-        people, postcode, disconnect, heating_source, heating_day, insulation = (
-            combination
-        )
+        (
+            people,
+            postcode,
+            disconnect,
+            heating_source,
+            heating_day,
+            insulation,
+        ) = combination
 
         your_home = YourHomeAnswers(
             people_in_house=people,
@@ -203,8 +212,8 @@ def generate_heating_lookup_table():
             "main_heating_source": heating_source,
             "heating_during_day": heating_day,
             "insulation_quality": insulation,
-            "annual_variable_cost": cost_emissions["cost"],
-            "annual_co2e": cost_emissions["emissions"],
+            "annual_variable_cost": cost_emissions["variable_cost_nzd"],
+            "annual_kg_co2e": cost_emissions["emissions_kg_co2e"],
         }
         heating_rows.append(row)
 
@@ -258,8 +267,8 @@ def generate_hot_water_lookup_table():
             "disconnect_gas": disconnect,
             "hot_water_usage": usage,
             "hot_water_heating_source": heating_source,
-            "annual_variable_cost": cost_emissions["cost"],
-            "annual_co2e": cost_emissions["emissions"],
+            "annual_variable_cost": cost_emissions["variable_cost_nzd"],
+            "annual_kg_co2e": cost_emissions["emissions_kg_co2e"],
         }
         hot_water_rows.append(row)
 
@@ -307,8 +316,8 @@ def generate_cooktop_lookup_table():
             "people_in_house": people,
             "disconnect_gas": disconnect,
             "cooktop_type": cooktop_type,
-            "annual_variable_cost": cost_emissions["cost"],
-            "annual_co2e": cost_emissions["emissions"],
+            "annual_variable_cost": cost_emissions["variable_cost_nzd"],
+            "annual_kg_co2e": cost_emissions["emissions_kg_co2e"],
         }
         cooktop_rows.append(row)
 
@@ -334,9 +343,14 @@ def generate_vehicle_lookup_table():
         vehicle_sizes,
         km_per_week,
     ):
-        people, postcode, disconnect, vehicle_type, vehicle_size, kilometers = (
-            combination
-        )
+        (
+            people,
+            postcode,
+            disconnect,
+            vehicle_type,
+            vehicle_size,
+            kilometers,
+        ) = combination
 
         your_home = YourHomeAnswers(
             people_in_house=people,
@@ -367,8 +381,8 @@ def generate_vehicle_lookup_table():
             "vehicle_type": vehicle_type,
             "vehicle_size": vehicle_size,
             "km_per_week": kilometers,
-            "annual_variable_cost": cost_emissions["cost"],
-            "annual_co2e": cost_emissions["emissions"],
+            "annual_variable_cost": cost_emissions["variable_cost_nzd"],
+            "annual_kg_co2e": cost_emissions["emissions_kg_co2e"],
         }
         vehicle_rows.append(row)
 
