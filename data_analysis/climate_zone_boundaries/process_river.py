@@ -75,7 +75,8 @@ def simplified_river_path(geometries, extend_to_end_points=None):
 
 def load_and_process_river(name, extend_to_end_points=None):
     """
-    Load river data from a specified GeoPackage and process to find the simplified river path.
+    Load river data from a specified GeoPackage
+    and process to find the simplified river path.
     """
     rivers = gpd.read_file(GPKG_PATH)
     river = rivers[rivers["name"] == name]
