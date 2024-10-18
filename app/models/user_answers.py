@@ -3,26 +3,32 @@ Classes for storing user answers to the questions provided by online users.
 """
 
 from typing import Literal, Optional
-from pydantic import BaseModel, constr, conint
-from .usage_profiles import (
-    HeatingYearlyFuelUsageProfile,
-    HotWaterYearlyFuelUsageProfile,
-    CooktopYearlyFuelUsageProfile,
-    DrivingYearlyFuelUsageProfile,
-    SolarYearlyFuelGenerationProfile,
+
+from pydantic import BaseModel, conint, constr
+
+from ..constants import (
+    AVERAGE_HOUSEHOLD_SIZE,
+    DAYS_IN_YEAR,
+    ELECTRIC_HEATER_SPACE_HEATING_EFFICIENCY,
+    GAS_SPACE_HEATING_EFFICIENCY,
+    HEAT_PUMP_COP_BY_CLIMATE_ZONE,
+    HEATING_DAYS_PER_WEEK,
+    HEATING_DEGREE_DAYS,
+    LIVING_AREA_FRACTION,
+    LOG_BURNER_SPACE_HEATING_EFFICIENCY,
+    LPG_SPACE_HEATING_EFFICIENCY,
+    SOLAR_RESOURCE_KWH_PER_DAY,
+    STANDARD_HOME_KWH_HEATING_DEMAND_PER_HEATING_DEGREE_DAY,
+    THERMAL_ENVELOPE_QUALITY,
 )
 from ..services import get_climate_zone
 from ..services.helpers import heating_frequency_factor
-from ..constants import (
-    DAYS_IN_YEAR,
-    AVERAGE_HOUSEHOLD_SIZE,
-    SOLAR_RESOURCE_KWH_PER_DAY,
-    HEATING_DEGREE_DAYS,
-    STANDARD_HOME_KWH_HEATING_DEMAND_PER_HEATING_DEGREE_DAY,
-    LIVING_AREA_FRACTION,
-    THERMAL_ENVELOPE_QUALITY,
-    HEATING_DAYS_PER_WEEK,
-    HEAT_PUMP_COP_BY_CLIMATE_ZONE,
+from .usage_profiles import (
+    CooktopYearlyFuelUsageProfile,
+    DrivingYearlyFuelUsageProfile,
+    HeatingYearlyFuelUsageProfile,
+    HotWaterYearlyFuelUsageProfile,
+    SolarYearlyFuelGenerationProfile,
 )
 
 
@@ -46,7 +52,6 @@ class HeatingAnswers(BaseModel):
         "Piped gas heater",
         "Bottled gas heater",
         "Heat pump",
-        "Heat pump (ducted)",
         "Electric heater",
         "Wood burner",
     ]
@@ -55,7 +60,6 @@ class HeatingAnswers(BaseModel):
             "Piped gas heater",
             "Bottled gas heater",
             "Heat pump",
-            "Heat pump (ducted)",
             "Electric heater",
             "Wood burner",
         ]
@@ -95,7 +99,6 @@ class HeatingAnswers(BaseModel):
             else self.main_heating_source
         )
         climate_zone = get_climate_zone.climate_zone(your_home.postcode)
-        heat_pump_cop = HEAT_PUMP_COP_BY_CLIMATE_ZONE[climate_zone]
         heating_energy_service_demand = (
             HEATING_DEGREE_DAYS[climate_zone]
             * STANDARD_HOME_KWH_HEATING_DEMAND_PER_HEATING_DEGREE_DAY
@@ -105,24 +108,25 @@ class HeatingAnswers(BaseModel):
         )
         fuel_usage = {
             "Piped gas heater": {
-                "natural_gas_kwh": heating_energy_service_demand,
+                "natural_gas_kwh": heating_energy_service_demand
+                / GAS_SPACE_HEATING_EFFICIENCY,
                 "natural_gas_connection_days": DAYS_IN_YEAR,
             },
             "Bottled gas heater": {
-                "lpg_kwh": heating_energy_service_demand,
+                "lpg_kwh": heating_energy_service_demand / LPG_SPACE_HEATING_EFFICIENCY,
                 "lpg_tank_rental_days": 2 * DAYS_IN_YEAR,
             },
             "Heat pump": {
-                "day_kwh": heating_energy_service_demand / heat_pump_cop,
-            },
-            "Heat pump (ducted)": {
-                "day_kwh": heating_energy_service_demand / heat_pump_cop,
+                "day_kwh": heating_energy_service_demand
+                / HEAT_PUMP_COP_BY_CLIMATE_ZONE[climate_zone],
             },
             "Electric heater": {
-                "day_kwh": heating_energy_service_demand,
+                "day_kwh": heating_energy_service_demand
+                / ELECTRIC_HEATER_SPACE_HEATING_EFFICIENCY,
             },
             "Wood burner": {
-                "wood_kwh": heating_energy_service_demand,
+                "wood_kwh": heating_energy_service_demand
+                / LOG_BURNER_SPACE_HEATING_EFFICIENCY,
             },
         }
         return HeatingYearlyFuelUsageProfile(

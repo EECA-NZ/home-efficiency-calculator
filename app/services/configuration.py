@@ -30,17 +30,23 @@ Base this on:
     • Density of dry pine = 480 kg/m^3
     • Energy content of dry pine = 15 MJ / tonne
         = 15E6 / 3.6 / 1E6 = 4.17 kWh / kg
-    • Efficiency of modern wood stove = 70%
 
+Exclude the following factor:
+    • Efficiency of modern wood stove = 70%
+We calculate the price per kWh of heat content in the wood and
+account for the efficiency of a modern wood stove separately.
+    
 kWh per dollar = (
     Volume of a Cord *
     Density of dry pine *
     Energy content of dry pine *
     Efficiency of modern wood stove) / Price per cord
- = (3.62 * 480 * 4.17 * 0.7) / 375
- = 13.52 kWh per dollar
+ = (3.62 * 480 * 4.17) / 375
+ = 19.32 kWh per dollar
 
-Inverting this gives $0.074 per kWh of heat from a modern wood stove.
+Inverting this gives $0.052 per kWh of heat in the wood.
+
+This works out to $0.074 per kWh of heat output from a modern wood stove.
 """
 
 from ..models.energy_plans import (
@@ -116,22 +122,26 @@ def get_default_wood_price():
         • Volume of a Cord = 128 cubic feet = 3.62m^3
         • Density of dry pine = 480 kg/m^3
         • Energy content of dry pine = 15 MJ / tonne = 15E6 / 3.6E6 = 4.17 kWh / kg
+
+    Exclude the following factor:
         • Efficiency of modern wood stove = 70%
+    We calculate the price per kWh of heat content in the wood and
+    account for the efficiency of a modern wood stove separately.
 
     kWh per dollar = (
         Volume of a Cord *
         Density of dry pine *
-        Energy content of dry pine *
-        Efficiency of modern wood stove) / Price per cord
+        Energy content of dry pine) / Price per cord
 
-    = (3.62 * 480 * 4.17 * 0.7) / 375
-    = 13.52 kWh per dollar
+    = (3.62 * 480 * 4.17) / 375
+    = 19.32 kWh per dollar
 
-    Inverting this gives $0.074 per kWh
+    Inverting this gives $0.052 per kWh of heat in the wood.
+    This works out to $0.074 per kWh of heat output from a modern wood stove.
     """
     return WoodPrice(
         name="Default Wood Price",
-        per_wood_kwh=0.074,
+        per_wood_kwh=0.052,
     )
 
 

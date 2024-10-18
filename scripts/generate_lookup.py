@@ -37,7 +37,6 @@ main_heating_sources = [
     "Piped gas heater",
     "Bottled gas heater",
     "Heat pump",
-    "Heat pump (ducted)",
     "Electric heater",
     "Wood burner",
 ]
