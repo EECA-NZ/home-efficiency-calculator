@@ -78,13 +78,22 @@ def calculate_optimal_plan_by_edb(profiles, filtered_df):
 
             # Iterate over the plans in the group (EDB)
             for _, plan_data in group.iterrows():
-                plan = ElectricityPlan(
-                    name=str(plan_data["PlanId"]),
-                    nzd_per_day_kwh=plan_data["Day"],
-                    nzd_per_night_kwh=plan_data["Night"],
-                    nzd_per_controlled_kwh=plan_data["Controlled"],
-                    daily_charge=plan_data["Daily charge"],
-                )
+                if not pd.isna(plan_data["All inclusive"]):
+                    plan = ElectricityPlan(
+                        name=str(plan_data["PlanId"]),
+                        nzd_per_day_kwh=plan_data["All inclusive"],
+                        nzd_per_night_kwh=plan_data["All inclusive"],
+                        nzd_per_controlled_kwh=plan_data["All inclusive"],
+                        daily_charge=plan_data["Daily charge"],
+                    )
+                else:
+                    plan = ElectricityPlan(
+                        name=str(plan_data["PlanId"]),
+                        nzd_per_day_kwh=plan_data["Day"],
+                        nzd_per_night_kwh=plan_data["Night"],
+                        nzd_per_controlled_kwh=plan_data["Controlled"],
+                        daily_charge=plan_data["Daily charge"],
+                    )
 
                 # Calculate the cost of the plan for the household profile
                 fixed_cost, variable_cost = plan.calculate_cost(profile)
