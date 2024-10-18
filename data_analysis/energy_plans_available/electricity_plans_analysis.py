@@ -223,6 +223,63 @@ def show_plan(plan_id, full_df, dropna=True):
     return full_df.loc[idx]
 
 
+def get_filtered_df():
+    """
+    Load, process, and return a filtered DataFrame based on the tariff data.
+
+    Returns:
+    --------
+    pd.DataFrame : The filtered DataFrame after applying the filters.
+    """
+    full_df = pd.read_csv(
+        "../supplementary_data/tariff_data/tariffDataReport_240903.csv"
+    )
+    full_df = full_df.loc[full_df["Energy type"] == "electricity"].copy()
+
+    for col in NUMERICAL_COLUMNS:
+        full_df[col] = full_df[col].apply(
+            lambda x: np.mean(eval_or_return(x)) if pd.notnull(x) else x
+        )
+
+    full_df["EDB"] = full_df["Network location names"].apply(map_locations_to_edb)
+
+    full_df = full_df[
+        full_df.apply(open_plans, axis=1)
+    ]  # Exclude plans where retailer is not accepting new customers
+    full_df = full_df[
+        ~full_df["Network location names"].apply(contains_exclude_patterns)
+    ]
+
+    full_df.loc[:, "Network location names"] = full_df[
+        "Network location names"
+    ].str.split(",")
+    full_df = full_df.explode("Network location names")
+    full_df.loc[:, "Network location names"] = full_df[
+        "Network location names"
+    ].str.strip()
+    full_df = full_df.reset_index(drop=True)
+
+    retailer_locs = full_df["Retailer location name"].unique()
+    network_locs = full_df["Network location names"].unique()
+    logger.info("There are %s unique retailer locations", len(retailer_locs))
+    logger.info("There are %s unique network locations", len(network_locs))
+
+    filters = (
+        (~full_df["Fixed term"])
+        & (~full_df["Low user"])
+        & (~full_df["Name"].str.contains("Energy Plus", na=False))
+        & (
+            ~full_df["Name"]
+            .str.lower()
+            .str.contains("no electric hot water cylinder", na=False)
+        )
+        & (~full_df["Name"].str.lower().str.contains("broadband", na=False))
+        & full_df.apply(issimple, axis=1)
+    )
+
+    return full_df[filters]
+
+
 def plot_subset(df, edb=None, hue_column=None, output_dir="scatterplots"):
     """
     Plot an EDB-specific subset of the DataFrame.
@@ -324,67 +381,43 @@ def generate_pdf_from_png(output_dir, output_pdf):
     logger.info("PDF generated: %s", output_pdf)
 
 
+def clear_output_dir(output_dir):
+    """
+    Attempts to delete all files in the output directory.
+    If a file cannot be deleted (e.g., it is open in another process),
+    logs an error message indicating the file should be closed.
+
+    Parameters:
+    -----------
+    output_dir : str
+        The directory containing the files to delete.
+    """
+    for file in os.listdir(output_dir):
+        file_path = os.path.join(output_dir, file)
+        try:
+            os.remove(file_path)
+        except PermissionError:
+            logger.error(
+                "Could not delete %s. Please close the file and try again.", file_path
+            )
+        except (
+            OSError
+        ) as os_err:  # Catching specific exception instead of broad Exception
+            logger.error("An error occurred while deleting %s: %s", file_path, os_err)
+
+
 def main():
     """
     Main function to process the electricity tariff data and plot the results.
     """
-    full_df = pd.read_csv(
-        "../supplementary_data/tariff_data/tariffDataReport_240903.csv"
-    )
-    full_df = full_df.loc[full_df["Energy type"] == "electricity"].copy()
-
-    for col in NUMERICAL_COLUMNS:
-        full_df[col] = full_df[col].apply(
-            lambda x: np.mean(eval_or_return(x)) if pd.notnull(x) else x
-        )
+    my_df = get_filtered_df()
 
     my_edb_boundaries_gdf = load_and_transform_shapefile(EDB_REGION_SHAPEFILE)
     my_edb_boundaries_gdf.loc[
         my_edb_boundaries_gdf["name"] == "CentraLines Ltd", "name"
     ] = "Centralines Ltd"
 
-    full_df["EDB"] = full_df["Network location names"].apply(map_locations_to_edb)
-
-    full_df = full_df[
-        full_df.apply(open_plans, axis=1)
-    ]  # Exclude plans where retailer is not accepting new customers
-    full_df = full_df[
-        ~full_df["Network location names"].apply(contains_exclude_patterns)
-    ]
-
-    full_df.loc[:, "Network location names"] = full_df[
-        "Network location names"
-    ].str.split(",")
-    full_df = full_df.explode("Network location names")
-    full_df.loc[:, "Network location names"] = full_df[
-        "Network location names"
-    ].str.strip()
-    full_df = full_df.reset_index(drop=True)
-
-    retailer_locs = full_df["Retailer location name"].unique()
-    network_locs = full_df["Network location names"].unique()
-    logger.info("There are %s unique retailer locations", len(retailer_locs))
-    logger.info("There are %s unique network locations", len(network_locs))
-
-    my_df = full_df.copy()
-    filters = (
-        (~my_df["Fixed term"])
-        & (~my_df["Low user"])
-        & (~my_df["Name"].str.contains("Energy Plus", na=False))
-        & (
-            ~my_df["Name"]
-            .str.lower()
-            .str.contains("no electric hot water cylinder", na=False)
-        )
-        & (~my_df["Name"].str.lower().str.contains("broadband", na=False))
-        & my_df.apply(issimple, axis=1)
-    )
-
-    my_df = my_df[filters]
-
-    # Clear OUTPUT_DIR
-    for file in os.listdir(OUTPUT_DIR):
-        os.remove(os.path.join(OUTPUT_DIR, file))
+    clear_output_dir(OUTPUT_DIR)
 
     for my_edb in sorted(my_edb_boundaries_gdf["name"].unique()):
         if my_edb == "Stewart Island Electrical Supply Authority":
