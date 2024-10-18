@@ -5,9 +5,11 @@ household's profile is generated based on day and night electricity usage data.
 """
 
 import logging
+import os
 
 import pandas as pd
 
+from app.constants import DAYS_IN_YEAR
 from app.models.energy_plans import ElectricityPlan
 from app.models.usage_profiles import YearlyFuelUsageProfile
 from data_analysis.energy_plans_available.electricity_plans_analysis import (
@@ -78,7 +80,7 @@ def calculate_optimal_plan_by_edb(profiles, filtered_df):
             # Iterate over the plans in the group (EDB)
             for _, plan_data in group.iterrows():
                 plan = ElectricityPlan(
-                    name=str(plan_data["PlanId"]),  # Ensure the PlanId is a string
+                    name=str(plan_data["PlanId"]),
                     nzd_per_day_kwh=plan_data["Day"],
                     nzd_per_night_kwh=plan_data["Night"],
                     nzd_per_controlled_kwh=plan_data["Controlled"],
@@ -99,10 +101,30 @@ def calculate_optimal_plan_by_edb(profiles, filtered_df):
     return results
 
 
+def save_results_to_csv(results, output_file):
+    """
+    Save the optimal electricity plans to a CSV file.
+
+    Args:
+    results: List of tuples containing EDB, profile, and the optimal plan
+    output_file: str, the path to the output CSV file
+    """
+    rows = []
+    for edb, _, best_plan, _ in results:
+        rows.append({"EDB": edb, "Optimal PlanId": best_plan.name})
+
+    # Convert to DataFrame and save as CSV
+    df = pd.DataFrame(rows)
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    df.to_csv(output_file, index=False)
+    logger.info("Results saved to %s", output_file)
+
+
 def main():
     """
-    Main function to load household profiles, calculate the
-    optimal electricity plan by EDB, and display the results.
+    Main function to load household profiles,
+    calculate the optimal electricity plan by EDB,
+    and save the results to a CSV file.
     """
     logger.info("Load the filtered electricity plans")
     filtered_df = get_filtered_df()
@@ -110,11 +132,15 @@ def main():
     logger.info("Load household profiles using the day/night usage data")
     profiles = load_household_profiles(
         usage_csv_file="../electricity_usage_profile/output/day_night_usage.csv",
-        elx_connection_days=365.25,  # Assuming a full year of connection
+        elx_connection_days=DAYS_IN_YEAR,
     )
 
     logger.info("Calculate the optimal electricity plan for each profile and EDB")
     results = calculate_optimal_plan_by_edb(profiles, filtered_df)
+
+    logger.info("Save the results to CSV")
+    output_file = "output/selected_electricity_plans.csv"
+    save_results_to_csv(results, output_file)
 
     logger.info("Output the results")
     for edb, profile, plan, cost in results:
