@@ -1,7 +1,6 @@
 """
 This script calculates the optimal electricity plan for a household by comparing
-different electricity plans against a household's yearly fuel usage profile. The
-household's profile is generated based on day and night electricity usage data.
+different electricity plans against a household's yearly fuel usage profile.
 """
 
 import logging
@@ -144,6 +143,7 @@ def main():
 
     logger.info("Output the results")
     for edb, profile, plan, cost in results:
+        print("--------------------")
         print(f"EDB: {edb}")
         print(f"Household Profile: {profile}")
         print(f"Optimal Plan: {plan.name}")
