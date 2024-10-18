@@ -51,46 +51,58 @@ def load_household_profiles(usage_csv_file, elx_connection_days):
     return profiles
 
 
-def calculate_optimal_plan(profiles, filtered_df):
+def calculate_optimal_plan_by_edb(profiles, filtered_df):
     """
-    Calculate the optimal electricity plan for each household profile.
+    Calculate the optimal electricity plan for each EDB and household profile.
 
     Args:
     profiles: List of YearlyFuelUsageProfile objects
     filtered_df: pd.DataFrame, filtered electricity plans
 
     Returns:
-    List of tuples containing profile and the optimal plan
+    List of tuples containing EDB, profile, and the optimal plan
     """
     results = []
-    for profile in profiles:
-        best_plan = None
-        lowest_cost = float("inf")
 
-        for _, plan_data in filtered_df.iterrows():
-            plan = ElectricityPlan(
-                name=str(plan_data["PlanId"]),  # Ensure the PlanId is a string
-                nzd_per_day_kwh=plan_data["Day"],
-                nzd_per_night_kwh=plan_data["Night"],
-                nzd_per_controlled_kwh=plan_data["Controlled"],
-                daily_charge=plan_data["Daily charge"],
-            )
+    # Group plans by EDB
+    grouped = filtered_df.groupby("EDB")
 
-            fixed_cost, variable_cost = plan.calculate_cost(profile)
-            total_cost = fixed_cost + variable_cost
+    # Iterate over each EDB
+    for edb, group in grouped:
+        logger.info("Processing EDB: %s", edb)
 
-            if total_cost < lowest_cost:
-                lowest_cost = total_cost
-                best_plan = plan
+        for profile in profiles:
+            best_plan = None
+            lowest_cost = float("inf")
 
-        results.append((profile, best_plan, lowest_cost))
+            # Iterate over the plans in the group (EDB)
+            for _, plan_data in group.iterrows():
+                plan = ElectricityPlan(
+                    name=str(plan_data["PlanId"]),  # Ensure the PlanId is a string
+                    nzd_per_day_kwh=plan_data["Day"],
+                    nzd_per_night_kwh=plan_data["Night"],
+                    nzd_per_controlled_kwh=plan_data["Controlled"],
+                    daily_charge=plan_data["Daily charge"],
+                )
+
+                # Calculate the cost of the plan for the household profile
+                fixed_cost, variable_cost = plan.calculate_cost(profile)
+                total_cost = fixed_cost + variable_cost
+
+                # Find the cheapest plan
+                if total_cost < lowest_cost:
+                    lowest_cost = total_cost
+                    best_plan = plan
+
+            results.append((edb, profile, best_plan, lowest_cost))
+
     return results
 
 
 def main():
     """
-    Main function to load household profiles, calculate the optimal electricity plan,
-    and display the results.
+    Main function to load household profiles, calculate the
+    optimal electricity plan by EDB, and display the results.
     """
     logger.info("Load the filtered electricity plans")
     filtered_df = get_filtered_df()
@@ -101,11 +113,12 @@ def main():
         elx_connection_days=365.25,  # Assuming a full year of connection
     )
 
-    logger.info("Calculate the optimal electricity plan for each profile")
-    results = calculate_optimal_plan(profiles, filtered_df)
+    logger.info("Calculate the optimal electricity plan for each profile and EDB")
+    results = calculate_optimal_plan_by_edb(profiles, filtered_df)
 
     logger.info("Output the results")
-    for profile, plan, cost in results:
+    for edb, profile, plan, cost in results:
+        print(f"EDB: {edb}")
         print(f"Household Profile: {profile}")
         print(f"Optimal Plan: {plan.name}")
         print(f"Total Annual Cost: {cost}\n")
