@@ -105,10 +105,12 @@ def get_default_lpg_plan():
 
     Rewiring Aotearoa:
         • LPG variable cost: 24.4c/kWh.
-        • LPG bottle rental (per 45kg bottle):
+        • LPG bottle rental (per 45kg bottle): two bottles at
             $5.75 per bottle per month ($69 per year per bottle).
     """
-    return LPGPlan(name="Default LPG Plan", per_lpg_kwh=0.244, daily_charge=69 / 365.25)
+    return LPGPlan(
+        name="Default LPG Plan", per_lpg_kwh=0.244, daily_charge=2 * 69 / 365.25
+    )
 
 
 def get_default_wood_price():
@@ -202,7 +204,7 @@ def get_default_usage_profile():
         flexible_kwh=1000,
         natural_gas_connection_days=0,
         natural_gas_kwh=0,
-        lpg_tank_rental_days=0,
+        lpg_tanks_rental_days=0,
         lpg_kwh=0,
         wood_kwh=0,
         petrol_litres=1000,

@@ -135,7 +135,7 @@ def test_cooking_energy_usage():
             "natural_gas_kwh": 0,
             "lpg_kwh": 0,
             "natural_gas_connection_days": 0,
-            "lpg_tank_rental_days": 0,
+            "lpg_tanks_rental_days": 0,
         },
         "Piped gas": {
             "elx_connection_days": 0,
@@ -143,14 +143,14 @@ def test_cooking_energy_usage():
             "flexible_kwh": 0,
             "lpg_kwh": 0,
             "natural_gas_connection_days": DAYS_IN_YEAR,
-            "lpg_tank_rental_days": 0,
+            "lpg_tanks_rental_days": 0,
         },
         "Bottled gas": {
             "elx_connection_days": 0,
             "day_kwh": 0,
             "flexible_kwh": 0,
             "natural_gas_connection_days": 0,
-            "lpg_tank_rental_days": 2 * DAYS_IN_YEAR,
+            "lpg_tanks_rental_days": DAYS_IN_YEAR,
         },
         "Electric (coil or ceramic)": {
             "elx_connection_days": DAYS_IN_YEAR,
@@ -158,7 +158,7 @@ def test_cooking_energy_usage():
             "natural_gas_kwh": 0,
             "lpg_kwh": 0,
             "natural_gas_connection_days": 0,
-            "lpg_tank_rental_days": 0,
+            "lpg_tanks_rental_days": 0,
         },
     }
 

@@ -114,7 +114,7 @@ class HeatingAnswers(BaseModel):
             },
             "Bottled gas heater": {
                 "lpg_kwh": heating_energy_service_demand / LPG_SPACE_HEATING_EFFICIENCY,
-                "lpg_tank_rental_days": 2 * DAYS_IN_YEAR,
+                "lpg_tanks_rental_days": DAYS_IN_YEAR,
             },
             "Heat pump": {
                 "day_kwh": heating_energy_service_demand
@@ -137,8 +137,8 @@ class HeatingAnswers(BaseModel):
                 "natural_gas_connection_days", 0
             ),
             natural_gas_kwh=fuel_usage[main_heating_source].get("natural_gas_kwh", 0),
-            lpg_tank_rental_days=fuel_usage[main_heating_source].get(
-                "lpg_tank_rental_days", 0
+            lpg_tanks_rental_days=fuel_usage[main_heating_source].get(
+                "lpg_tanks_rental_days", 0
             ),
             lpg_kwh=fuel_usage[main_heating_source].get("lpg_kwh", 0),
             wood_kwh=fuel_usage[main_heating_source].get("wood_kwh", 0),
@@ -206,7 +206,7 @@ class HotWaterAnswers(BaseModel):
             flexible_kwh=flexible_kwh,
             natural_gas_connection_days=0,
             natural_gas_kwh=0,
-            lpg_tank_rental_days=0,
+            lpg_tanks_rental_days=0,
             lpg_kwh=0,
             wood_kwh=0,
             petrol_litres=0,
@@ -263,7 +263,7 @@ class CooktopAnswers(BaseModel):
             },
             "Bottled gas": {
                 "standard_household_kwh": 760,
-                "lpg_tank_rental_days": 2 * DAYS_IN_YEAR,
+                "lpg_tanks_rental_days": DAYS_IN_YEAR,
             },
         }
         cooktop_type = self.alternative_cooktop if use_alternative else self.cooktop
@@ -283,7 +283,7 @@ class CooktopAnswers(BaseModel):
             flexible_kwh=0,
             natural_gas_connection_days=factor.get("natural_gas_connection_days", 0),
             natural_gas_kwh=total_kwh if cooktop_type == "Piped gas" else 0,
-            lpg_tank_rental_days=factor.get("lpg_tank_rental_days", 0),
+            lpg_tanks_rental_days=factor.get("lpg_tanks_rental_days", 0),
             lpg_kwh=total_kwh if cooktop_type == "Bottled gas" else 0,
             wood_kwh=0,
             petrol_litres=0,
@@ -332,7 +332,7 @@ class DrivingAnswers(BaseModel):
             flexible_kwh=0,
             natural_gas_connection_days=0,
             natural_gas_kwh=0,
-            lpg_tank_rental_days=0,
+            lpg_tanks_rental_days=0,
             lpg_kwh=0,
             wood_kwh=0,
             petrol_litres=petrol_usage,
@@ -377,7 +377,7 @@ class SolarAnswers(BaseModel):
             flexible_kwh=0,
             natural_gas_connection_days=0,
             natural_gas_kwh=0,
-            lpg_tank_rental_days=0,
+            lpg_tanks_rental_days=0,
             lpg_kwh=0,
             wood_kwh=0,
             petrol_litres=0,

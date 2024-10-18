@@ -82,7 +82,7 @@ class LPGPlan(BaseModel):
         cost of LPG for the household
         """
         variable_cost_nzd = profile.lpg_kwh * self.per_lpg_kwh
-        fixed_cost_nzd = profile.lpg_tank_rental_days * self.daily_charge
+        fixed_cost_nzd = profile.lpg_tanks_rental_days * self.daily_charge
         return (fixed_cost_nzd, variable_cost_nzd)
 
 

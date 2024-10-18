@@ -71,12 +71,12 @@ def estimate_usage_from_profile(
 
     # Determine fixed charges
     elx_connection_days = 0
-    lpg_tank_rental_days = 0
+    lpg_tanks_rental_days = 0
     natural_gas_connection_days = 0
     if uses_electricity(answers):
         elx_connection_days = DAYS_IN_YEAR
     if uses_lpg(answers):
-        lpg_tank_rental_days = 2 * DAYS_IN_YEAR
+        lpg_tanks_rental_days = DAYS_IN_YEAR
     if uses_natural_gas(answers):
         natural_gas_connection_days = DAYS_IN_YEAR
 
@@ -112,7 +112,7 @@ def estimate_usage_from_profile(
         flexible_kwh=flexible_kwh,
         natural_gas_connection_days=natural_gas_connection_days,
         natural_gas_kwh=natural_gas_kwh,
-        lpg_tank_rental_days=lpg_tank_rental_days,
+        lpg_tanks_rental_days=lpg_tanks_rental_days,
         lpg_kwh=lpg_kwh,
         wood_kwh=wood_kwh,
         petrol_litres=driving_profile.petrol_litres,

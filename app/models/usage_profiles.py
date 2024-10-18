@@ -19,8 +19,8 @@ class YearlyFuelUsageProfile(BaseModel):
     natural_gas_connection_days: float, number of days with natural gas
         connection
     natural_gas_kwh: float, natural gas usage
-    lpg_tank_rental_days: float, number of days with LPG tank rental
-        (typically 1 year times two bottles if using bottled gas)
+    lpg_tanks_rental_days: float, number of days with LPG tanks rental
+        (if using bottled gas, we apply a daily cost based on 2 tanks)
     lpg_kwh: float, LPG usage
     wood_kwh: float, wood usage
     petrol_litres: float, petrol usage
@@ -32,7 +32,7 @@ class YearlyFuelUsageProfile(BaseModel):
     flexible_kwh: float
     natural_gas_connection_days: float
     natural_gas_kwh: float
-    lpg_tank_rental_days: float
+    lpg_tanks_rental_days: float
     lpg_kwh: float
     wood_kwh: float
     petrol_litres: float
