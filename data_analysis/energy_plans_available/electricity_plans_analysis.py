@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
+from app.models.energy_plans import ElectricityPlan
 from data_analysis.energy_plans_available.edb_to_locations import edb_to_locations
 from data_analysis.postcode_lookup_tables.geo_utils import load_and_transform_shapefile
 
@@ -246,6 +247,33 @@ def show_plan(plan_id, full_df, dropna=True):
     if dropna:
         return full_df.loc[idx].dropna()
     return full_df.loc[idx]
+
+
+def row_to_plan(row):
+    """
+    Converts a DataFrame row to an ElectricityPlan instance.
+    Args:
+        row: pd.Series, a row from the electricity plan DataFrame
+
+    Returns:
+        ElectricityPlan: an instantiated object of ElectricityPlan
+    """
+    pricing_dict = {}
+    for key in [
+        "Uncontrolled",
+        "All inclusive",
+        "Day",
+        "Night",
+        "Controlled",
+    ]:
+        if not pd.isna(row.get(key)):
+            pricing_dict[key] = row[key]
+
+    return ElectricityPlan(
+        name=str(row["PlanId"]),
+        daily_charge=row["Daily charge"],
+        nzd_per_kwh=pricing_dict,
+    )
 
 
 def get_filtered_df():

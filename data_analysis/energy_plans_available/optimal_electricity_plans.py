@@ -9,10 +9,10 @@ import os
 import pandas as pd
 
 from app.constants import DAYS_IN_YEAR
-from app.models.energy_plans import ElectricityPlan
 from app.models.usage_profiles import YearlyFuelUsageProfile
 from data_analysis.energy_plans_available.electricity_plans_analysis import (
     get_filtered_df,
+    row_to_plan,
     show_plan,
 )
 
@@ -20,35 +20,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def row_to_plan(row):
-    """
-    Converts a DataFrame row to an ElectricityPlan instance.
-    Args:
-        row: pd.Series, a row from the electricity plan DataFrame
-
-    Returns:
-        ElectricityPlan: an instantiated object of ElectricityPlan
-    """
-    pricing_dict = {}
-    for key in [
-        "Uncontrolled",
-        "All inclusive",
-        "Day",
-        "Night",
-        "Night only",
-        "Controlled",
-    ]:
-        if not pd.isna(row.get(key)):
-            pricing_dict[key] = row[key]
-
-    return ElectricityPlan(
-        name=str(row["PlanId"]),
-        daily_charge=row["Daily charge"],
-        nzd_per_kwh=pricing_dict,
-    )
-
-
-def load_household_profiles(usage_csv_file, elx_connection_days):
+def load_household_profile(usage_csv_file, elx_connection_days):
     """
     Load household profiles from the day/night electricity usage CSV file.
 
@@ -63,24 +35,22 @@ def load_household_profiles(usage_csv_file, elx_connection_days):
     day_kwh = df[df["Period"] == "Day"]["kWh"].values[0]
     flexible_kwh = df[df["Period"] == "Night"]["kWh"].values[0]
 
-    profiles = [
-        YearlyFuelUsageProfile(
-            elx_connection_days=elx_connection_days,
-            day_kwh=day_kwh * elx_connection_days,
-            flexible_kwh=flexible_kwh * elx_connection_days,
-            natural_gas_connection_days=0,
-            natural_gas_kwh=0,
-            lpg_tanks_rental_days=0,
-            lpg_kwh=0,
-            wood_kwh=0,
-            petrol_litres=0,
-            diesel_litres=0,
-        )
-    ]
-    return profiles
+    profile = YearlyFuelUsageProfile(
+        elx_connection_days=elx_connection_days,
+        day_kwh=day_kwh * elx_connection_days,
+        flexible_kwh=flexible_kwh * elx_connection_days,
+        natural_gas_connection_days=0,
+        natural_gas_kwh=0,
+        lpg_tanks_rental_days=0,
+        lpg_kwh=0,
+        wood_kwh=0,
+        petrol_litres=0,
+        diesel_litres=0,
+    )
+    return profile
 
 
-def calculate_optimal_plan_by_edb(profiles, filtered_df):
+def calculate_optimal_plan_by_edb(profile, filtered_df):
     """
     Calculate the optimal electricity plan for each EDB and household profile.
     """
@@ -93,24 +63,23 @@ def calculate_optimal_plan_by_edb(profiles, filtered_df):
     for edb, group in grouped:
         logger.info("Processing EDB: %s", edb)
 
-        for profile in profiles:
-            best_plan = None
-            lowest_cost = float("inf")
+        best_plan = None
+        lowest_cost = float("inf")
 
-            # Iterate over the plans in the group (EDB)
-            for _, plan_data in group.iterrows():
-                plan = row_to_plan(plan_data)
+        # Iterate over the plans in the group (EDB)
+        for _, plan_data in group.iterrows():
+            plan = row_to_plan(plan_data)
 
-                # Calculate the cost of the plan for the household profile
-                fixed_cost, variable_cost = plan.calculate_cost(profile)
-                total_cost = fixed_cost + variable_cost
+            # Calculate the cost of the plan for the household profile
+            fixed_cost, variable_cost = plan.calculate_cost(profile)
+            total_cost = fixed_cost + variable_cost
 
-                # Find the cheapest plan
-                if total_cost < lowest_cost:
-                    lowest_cost = total_cost
-                    best_plan = plan
+            # Find the cheapest plan
+            if total_cost < lowest_cost:
+                lowest_cost = total_cost
+                best_plan = plan
 
-            results.append((edb, profile, best_plan, lowest_cost))
+        results.append((edb, profile, best_plan, lowest_cost))
 
     return results
 
@@ -144,13 +113,13 @@ def main():
     filtered_df = get_filtered_df()
 
     logger.info("Load household profiles using the day/night usage data")
-    profiles = load_household_profiles(
+    profile = load_household_profile(
         usage_csv_file="../electricity_usage_profile/output/day_night_usage.csv",
         elx_connection_days=DAYS_IN_YEAR,
     )
 
     logger.info("Calculate the optimal electricity plan for each profile and EDB")
-    results = calculate_optimal_plan_by_edb(profiles, filtered_df)
+    results = calculate_optimal_plan_by_edb(profile, filtered_df)
 
     logger.info("Save the results to CSV")
     output_file = "output/selected_electricity_plans.csv"
