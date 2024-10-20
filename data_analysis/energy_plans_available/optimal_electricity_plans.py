@@ -20,6 +20,34 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+def row_to_plan(row):
+    """
+    Converts a DataFrame row to an ElectricityPlan instance.
+    Args:
+        row: pd.Series, a row from the electricity plan DataFrame
+
+    Returns:
+        ElectricityPlan: an instantiated object of ElectricityPlan
+    """
+    pricing_dict = {}
+    for key in [
+        "Uncontrolled",
+        "All inclusive",
+        "Day",
+        "Night",
+        "Night only",
+        "Controlled",
+    ]:
+        if not pd.isna(row.get(key)):
+            pricing_dict[key] = row[key]
+
+    return ElectricityPlan(
+        name=str(row["PlanId"]),
+        daily_charge=row["Daily charge"],
+        nzd_per_kwh=pricing_dict,
+    )
+
+
 def load_household_profiles(usage_csv_file, elx_connection_days):
     """
     Load household profiles from the day/night electricity usage CSV file.
@@ -55,13 +83,6 @@ def load_household_profiles(usage_csv_file, elx_connection_days):
 def calculate_optimal_plan_by_edb(profiles, filtered_df):
     """
     Calculate the optimal electricity plan for each EDB and household profile.
-
-    Args:
-    profiles: List of YearlyFuelUsageProfile objects
-    filtered_df: pd.DataFrame, filtered electricity plans
-
-    Returns:
-    List of tuples containing EDB, profile, and the optimal plan
     """
     results = []
 
@@ -78,22 +99,7 @@ def calculate_optimal_plan_by_edb(profiles, filtered_df):
 
             # Iterate over the plans in the group (EDB)
             for _, plan_data in group.iterrows():
-                if not pd.isna(plan_data["All inclusive"]):
-                    plan = ElectricityPlan(
-                        name=str(plan_data["PlanId"]),
-                        nzd_per_day_kwh=plan_data["All inclusive"],
-                        nzd_per_night_kwh=plan_data["All inclusive"],
-                        nzd_per_controlled_kwh=plan_data["All inclusive"],
-                        daily_charge=plan_data["Daily charge"],
-                    )
-                else:
-                    plan = ElectricityPlan(
-                        name=str(plan_data["PlanId"]),
-                        nzd_per_day_kwh=plan_data["Day"],
-                        nzd_per_night_kwh=plan_data["Night"],
-                        nzd_per_controlled_kwh=plan_data["Controlled"],
-                        daily_charge=plan_data["Daily charge"],
-                    )
+                plan = row_to_plan(plan_data)
 
                 # Calculate the cost of the plan for the household profile
                 fixed_cost, variable_cost = plan.calculate_cost(profile)

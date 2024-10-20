@@ -53,6 +53,37 @@ NUMERICAL_COLUMNS = [
 ]
 
 
+def daily_charge_nan(row):
+    """Check if the daily charge is NaN."""
+    return pd.isna(row["Daily charge"])
+
+
+def all_pricing_columns_nan(row):
+    """Check if all variable-rate pricing columns are NaN."""
+    pricing_columns = [
+        "All inclusive",
+        "Night only",
+        "Controlled",
+        "Day",
+        "Night",
+        "Day - Controlled",
+        "Night - Controlled",
+        "Off peak",
+        "Shoulder",
+        "Peak",
+        "NightBoost",
+        "Uncontrolled",
+        "Discount per unit",
+        "Discount per day",
+        "Discount from total",
+        "Discount - Other",
+        "Controlled - Off peak",
+        "Controlled - Shoulder",
+        "Controlled - Peak",
+    ]
+    return row[pricing_columns].isna().all()
+
+
 def open_plans(row):
     """Check if the plan is open for new customers."""
     return "open" in row["Status"]
@@ -88,14 +119,9 @@ def no_discount(row):
     )
 
 
-def has_constant_day_rate(row):
-    """Check if the plan has a constant day rate."""
-    return isinstance(row.Day, float) or (row.Day.count(",") == 0)
-
-
-def has_constant_night_rat(row):
-    """Check if the plan has a constant night rate."""
-    return isinstance(row.Night, float) or (row.Night.count(",") == 0)
+def has_night_only_rate(row):
+    """Check if the plan has a night-only rate."""
+    return not pd.isna(row["Night only"])
 
 
 def no_hot_water_cylinder(row):
@@ -116,7 +142,6 @@ def issimple(row):
     return (
         pd.isna(row["Day - Controlled"])
         and pd.isna(row["Night - Controlled"])
-        and pd.isna(row["Controlled"])
         and pd.isna(row["Off peak"])
         and pd.isna(row["Shoulder"])
         and pd.isna(row["Peak"])
@@ -275,6 +300,9 @@ def get_filtered_df():
         )
         & (~full_df["Name"].str.lower().str.contains("broadband", na=False))
         & full_df.apply(issimple, axis=1)
+        & (~full_df.apply(daily_charge_nan, axis=1))
+        & (~full_df.apply(all_pricing_columns_nan, axis=1))
+        & (~full_df.apply(has_night_only_rate, axis=1))
     )
 
     return full_df[filters]

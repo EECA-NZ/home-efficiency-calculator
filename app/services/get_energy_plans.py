@@ -44,9 +44,7 @@ def energy_plan(postcode: str) -> HouseholdEnergyPlan:
     if my_edb_zone == "EDB1":
         plans["electricity_plan"] = ElectricityPlan(
             name="Basic Electricity Plan",
-            nzd_per_day_kwh=0.25,
-            nzd_per_night_kwh=0.18,
-            nzd_per_controlled_kwh=0.15,
             daily_charge=1.25,
+            nzd_per_kwh={"Uncontrolled": 0.25, "Night": 0.18, "Controlled": 0.15},
         )
     return HouseholdEnergyPlan(name=f"Plan for {postcode}", **plans)

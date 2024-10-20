@@ -79,10 +79,11 @@ def get_default_electricity_plan():
     """
     return ElectricityPlan(
         name="Default Electricity Plan",
-        nzd_per_day_kwh=0.242,
-        nzd_per_night_kwh=0.18,
-        nzd_per_controlled_kwh=0.18,
         daily_charge=2.0,
+        nzd_per_kwh={
+            "Day": 0.242,
+            "Night": 0.18,
+        },
     )
 
 

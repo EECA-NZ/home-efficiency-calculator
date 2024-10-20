@@ -2,6 +2,8 @@
 Classes representing different energy plans for households.
 """
 
+from typing import Dict
+
 from pydantic import BaseModel
 
 
@@ -11,27 +13,62 @@ class ElectricityPlan(BaseModel):
     """
 
     name: str
-    nzd_per_day_kwh: float
-    nzd_per_night_kwh: float
-    nzd_per_controlled_kwh: float
     daily_charge: float
+    nzd_per_kwh: Dict[str, float]
 
     def calculate_cost(self, profile):
         """
-        Calculate the cost of electricity for a household.
+        Calculate the cost of electricity for a household based
+        on specific patterns of nzd_per_kwh fields.
 
         Args:
-        profile: HouseholdYearlyFuelUsageProfile object
+            profile: HouseholdYearlyFuelUsageProfile object
+            containing day_kwh, night_kwh, and other usage data.
 
         Returns:
-        Tuple[float, float], the variable and fixed
-        cost of electricity for the household
+            Tuple[float, float]: the fixed and variable cost of
+            electricity for the household.
         """
-        variable_cost_nzd = (
-            profile.day_kwh * self.nzd_per_day_kwh
-            + profile.flexible_kwh
-            * min(self.nzd_per_night_kwh, self.nzd_per_controlled_kwh)
-        )
+        keys = set(self.nzd_per_kwh.keys())
+        variable_cost_nzd = 0
+
+        if keys == {"All inclusive"}:
+            variable_cost_nzd += (
+                profile.day_kwh + profile.flexible_kwh
+            ) * self.nzd_per_kwh["All inclusive"]
+        elif keys == {"Day", "Night"}:
+            variable_cost_nzd += profile.day_kwh * self.nzd_per_kwh["Day"]
+            variable_cost_nzd += profile.flexible_kwh * self.nzd_per_kwh["Night"]
+        elif keys == {"Uncontrolled"}:
+            variable_cost_nzd += (
+                profile.day_kwh + profile.flexible_kwh
+            ) * self.nzd_per_kwh["Uncontrolled"]
+        elif keys == {"Uncontrolled", "Controlled"}:
+            variable_cost_nzd += profile.day_kwh * self.nzd_per_kwh["Uncontrolled"]
+            variable_cost_nzd += profile.flexible_kwh * self.nzd_per_kwh["Controlled"]
+        elif keys == {"Uncontrolled", "All inclusive"}:  # this pattern is a bit weird
+            variable_cost_nzd += (profile.day_kwh + profile.flexible_kwh) * min(
+                self.nzd_per_kwh["All inclusive"], self.nzd_per_kwh["Uncontrolled"]
+            )
+        elif keys == {"Night", "Controlled", "Day"}:
+            variable_cost_nzd += profile.day_kwh * self.nzd_per_kwh["Day"]
+            variable_cost_nzd += profile.flexible_kwh * min(
+                self.nzd_per_kwh["Controlled"], self.nzd_per_kwh["Night"]
+            )
+        elif keys == {"Night", "All inclusive"}:
+            variable_cost_nzd += profile.flexible_kwh * self.nzd_per_kwh["Night"]
+            variable_cost_nzd += profile.day_kwh * self.nzd_per_kwh["All inclusive"]
+        elif keys == {"Night", "Uncontrolled", "Controlled"}:
+            variable_cost_nzd += profile.day_kwh * self.nzd_per_kwh["Uncontrolled"]
+            variable_cost_nzd += profile.flexible_kwh * min(
+                self.nzd_per_kwh["Night"], self.nzd_per_kwh["Controlled"]
+            )
+        elif keys == {"Night", "Uncontrolled"}:
+            variable_cost_nzd += profile.flexible_kwh * self.nzd_per_kwh["Night"]
+            variable_cost_nzd += profile.day_kwh * self.nzd_per_kwh["Uncontrolled"]
+        else:
+            raise ValueError(f"Unexpected nzd_per_kwh keys: {keys}")
+
         fixed_cost_nzd = profile.elx_connection_days * self.daily_charge
         return (fixed_cost_nzd, variable_cost_nzd)
 
