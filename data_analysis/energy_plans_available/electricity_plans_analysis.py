@@ -22,6 +22,7 @@ from data_analysis.postcode_lookup_tables.geo_utils import load_and_transform_sh
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+LOCAL_TARIFF_DATA_PATH = "../supplementary_data/tariff_data/tariffDataReport_240903.csv"
 EDB_REGION_SHAPEFILE = "../supplementary_data/EDB_Boundaries/EDBBoundaries.shp"
 EXCLUDE_PATTERNS = ["Small Capacity"]
 OUTPUT_DIR = "bynetwork"
@@ -276,7 +277,7 @@ def row_to_plan(row):
     )
 
 
-def get_filtered_df():
+def get_filtered_df(path=LOCAL_TARIFF_DATA_PATH):
     """
     Load, process, and return a filtered DataFrame based on the tariff data.
 
@@ -284,9 +285,8 @@ def get_filtered_df():
     --------
     pd.DataFrame : The filtered DataFrame after applying the filters.
     """
-    full_df = pd.read_csv(
-        "../supplementary_data/tariff_data/tariffDataReport_240903.csv"
-    )
+    full_df = pd.read_csv(path)
+
     full_df = full_df.loc[full_df["Energy type"] == "electricity"].copy()
 
     for col in NUMERICAL_COLUMNS:

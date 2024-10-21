@@ -6,13 +6,11 @@ import importlib.resources as pkg_resources
 
 import pandas as pd
 
-# Access the file using the modern approach with importlib.resources.files()
 csv_path = (
     pkg_resources.files("data_analysis.postcode_lookup_tables.output")
     / "postcode_to_climate_zone.csv"
 )
 
-# Open the file using the new API and load it into pandas
 with csv_path.open("r", encoding="utf-8") as csv_file:
     postcode_dict = (
         pd.read_csv(csv_file, dtype=str).set_index("postcode").to_dict()["climate_zone"]

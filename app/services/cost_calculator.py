@@ -3,7 +3,7 @@ This module provides functions to optimize the cost of energy for a household.
 """
 
 from .energy_calculator import emissions_kg_co2e, estimate_usage_from_profile
-from .get_energy_plans import energy_plan
+from .get_energy_plans import postcode_to_energy_plan
 
 
 def find_lowest_cost(profiles, pricing_structures):
@@ -38,7 +38,7 @@ def calculate_savings_options(answers, field, your_home):
     """
     result = {}
     # Retrieve the current energy plan based on the user's postcode
-    your_plan = energy_plan(your_home.postcode)
+    your_plan = postcode_to_energy_plan(your_home.postcode)
     # Get all the possible options for the given field (e.g., 'main_heating_source')
     options = getattr(type(answers).model_fields[field], "annotation").__args__
     for option in options:

@@ -17,7 +17,7 @@ from app.models.user_answers import (
 )
 from app.services.energy_calculator import emissions_kg_co2e
 from app.services.get_climate_zone import climate_zone, postcode_dict
-from app.services.get_energy_plans import energy_plan
+from app.services.get_energy_plans import postcode_to_energy_plan
 
 logging.basicConfig(level=logging.INFO)
 
@@ -91,7 +91,7 @@ def get_energy_plan_cached(postcode):
     """
     if postcode in energy_plan_cache:
         return energy_plan_cache[postcode]
-    plan = energy_plan(postcode)
+    plan = postcode_to_energy_plan(postcode)
     energy_plan_cache[postcode] = plan
     return plan
 

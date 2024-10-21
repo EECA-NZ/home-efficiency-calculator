@@ -94,9 +94,7 @@ def save_results_to_csv(results, output_file):
     """
     rows = []
     for edb, _, best_plan, _ in results:
-        rows.append({"EDB": edb, "Optimal PlanId": best_plan.name})
-
-    # Convert to DataFrame and save as CSV
+        rows.append({"EDB": edb, "PlanId": best_plan.name})
     df = pd.DataFrame(rows)
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
     df.to_csv(output_file, index=False)
@@ -120,7 +118,6 @@ def main():
 
     logger.info("Calculate the optimal electricity plan for each profile and EDB")
     results = calculate_optimal_plan_by_edb(profile, filtered_df)
-
     logger.info("Save the results to CSV")
     output_file = "output/selected_electricity_plans.csv"
     save_results_to_csv(results, output_file)
