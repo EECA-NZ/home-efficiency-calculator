@@ -2,6 +2,8 @@
 Module for generic helper functions.
 """
 
+from pydantic import BaseModel
+
 from ..constants import HEATING_PERIOD_FACTOR
 
 
@@ -36,3 +38,21 @@ def heating_frequency_factor(heating_days_per_week):
         + HEATING_PERIOD_FACTOR["Day (per day)"] * heating_days_per_week
         + HEATING_PERIOD_FACTOR["Evening (per day)"] * heating_evenings
     )
+
+
+def add_gst(plan: BaseModel) -> BaseModel:
+    """
+    Adjust all cost-related fields in a plan by adding 15% GST.
+    Don't alter the original plan object but manipulate a copy.
+    """
+    gst_rate = 1.15
+    plancopy = plan.model_copy()
+    for field, value in plan.model_dump().items():
+        if isinstance(value, dict):
+            # Apply GST to each value in the dictionary
+            adjusted_dict = {k: v * gst_rate for k, v in value.items()}
+            setattr(plancopy, field, adjusted_dict)
+        elif "charge" in field or "per_" in field:
+            # Apply GST to flat rate fields
+            setattr(plancopy, field, value * gst_rate)
+    return plancopy

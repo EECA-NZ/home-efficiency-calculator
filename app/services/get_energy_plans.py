@@ -13,6 +13,7 @@ from data_analysis.energy_plans_available.electricity_plans_analysis import (
 
 from ..models.energy_plans import ElectricityPlan, HouseholdEnergyPlan
 from .configuration import get_default_plans
+from .helpers import add_gst
 
 filtered_plans_stub = pd.DataFrame(
     {"PlanId": [], "Daily charge": [], "nzd_per_kwh": []}
@@ -56,6 +57,7 @@ joined_df = pd.merge(
 )
 
 joined_df["electricity_plan"] = joined_df.apply(row_to_plan, axis=1)
+joined_df["electricity_plan"] = joined_df["electricity_plan"].apply(add_gst)
 
 postcode_to_edb_dict = postcode_to_edb.set_index("postcode").to_dict()["edb_region"]
 edb_to_electricity_plan_dict = joined_df.set_index("edb_region").to_dict()[
