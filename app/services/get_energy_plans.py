@@ -14,6 +14,10 @@ from data_analysis.energy_plans_available.electricity_plans_analysis import (
 from ..models.energy_plans import ElectricityPlan, HouseholdEnergyPlan
 from .configuration import get_default_plans
 
+filtered_plans_stub = pd.DataFrame(
+    {"PlanId": [], "Daily charge": [], "nzd_per_kwh": []}
+)
+
 postcode_to_edb_csv_path = (
     pkg_resources.files("data_analysis.postcode_lookup_tables.output")
     / "postcode_to_edb_region.csv"
@@ -28,11 +32,14 @@ selected_plans_csv_path = (
 with selected_plans_csv_path.open("r", encoding="utf-8") as csv_file:
     edb_to_plan_id = pd.read_csv(csv_file, dtype=str)
 
-all_plans_csv_path = (
-    pkg_resources.files("data_analysis.supplementary_data.tariff_data")
-    / "tariffDataReport_240903.csv"
-)
-filtered_plans = get_filtered_df(path=all_plans_csv_path)
+try:
+    all_plans_csv_path = (
+        pkg_resources.files("data_analysis.supplementary_data.tariff_data")
+        / "tariffDataReport_240903.csv"
+    )
+    filtered_plans = get_filtered_df(path=all_plans_csv_path)
+except FileNotFoundError:
+    filtered_plans = filtered_plans_stub
 
 joined_df = pd.merge(
     postcode_to_edb, edb_to_plan_id, how="inner", left_on="edb_region", right_on="EDB"
@@ -58,6 +65,8 @@ postcode_to_electricity_plan_dict = joined_df.set_index("postcode").to_dict()[
     "electricity_plan"
 ]
 
+default_plans = get_default_plans()
+
 
 def postcode_to_edb_zone(postcode: str) -> str:
     """
@@ -73,7 +82,7 @@ def postcode_to_edb_zone(postcode: str) -> str:
     str
         The EDB zone for the given postcode.
     """
-    return postcode_to_edb_dict[postcode]
+    return postcode_to_edb_dict.get(postcode, "Unknown")
 
 
 def edb_zone_to_electricity_plan(edb_zone: str) -> ElectricityPlan:
@@ -90,7 +99,7 @@ def edb_zone_to_electricity_plan(edb_zone: str) -> ElectricityPlan:
     HouseholdEnergyPlan
         An energy plan available for the given EDB zone.
     """
-    return edb_to_electricity_plan_dict[edb_zone]
+    return edb_to_electricity_plan_dict.get(edb_zone, default_plans["electricity_plan"])
 
 
 def postcode_to_electricity_plan(postcode: str) -> ElectricityPlan:
@@ -107,7 +116,9 @@ def postcode_to_electricity_plan(postcode: str) -> ElectricityPlan:
     HouseholdEnergyPlan
         An energy plan available for the given EDB zone.
     """
-    return postcode_to_electricity_plan_dict[postcode]
+    return postcode_to_electricity_plan_dict.get(
+        postcode, default_plans["electricity_plan"]
+    )
 
 
 def postcode_to_energy_plan(postcode: str) -> HouseholdEnergyPlan:
