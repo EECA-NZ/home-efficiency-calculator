@@ -3,17 +3,17 @@ Tests for the configuration module.
 """
 
 from app.services.configuration import (
-    get_default_electricity_plan,
-    get_default_natural_gas_plan,
-    get_default_lpg_plan,
-    get_default_usage_profile,
-    get_default_your_home_answers,
-    get_default_heating_answers,
-    get_default_hot_water_answers,
     get_default_cooktop_answers,
     get_default_driving_answers,
-    get_default_solar_answers,
+    get_default_electricity_plan,
+    get_default_heating_answers,
+    get_default_hot_water_answers,
     get_default_household_energy_profile,
+    get_default_lpg_plan,
+    get_default_natural_gas_plan,
+    get_default_solar_answers,
+    get_default_usage_profile,
+    get_default_your_home_answers,
 )
 
 

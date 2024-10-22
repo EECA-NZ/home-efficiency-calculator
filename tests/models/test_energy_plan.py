@@ -234,6 +234,14 @@ class TestElectricityPlan(unittest.TestCase):
         cost = self.electricity_plan_night_uncontrolled.calculate_cost(self.profile)
         self.assertEqual(cost, (1.0 * DAYS_IN_YEAR, 300 * 0.22 + 100 * 0.15))
 
+    def test_unexpected_keys(self):
+        """
+        Test with an unexpected key scenario
+        """
+        self.electricity_plan_night_uncontrolled.nzd_per_kwh = {"Unexpected": 0.30}
+        with self.assertRaises(ValueError):
+            self.electricity_plan_night_uncontrolled.calculate_cost(self.profile)
+
 
 if __name__ == "__main__":
     unittest.main()
