@@ -10,7 +10,16 @@ from ..models.energy_plans import ElectricityPlan, HouseholdEnergyPlan
 from .configuration import get_default_plans
 
 filtered_plans_stub = pd.DataFrame(
-    {"PlanId": [], "Daily charge": [], "nzd_per_kwh": []}
+    {
+        "edb_region": [],
+        "name": [],
+        "daily_charge": [],
+        "nzd_per_kwh.Uncontrolled": [],
+        "nzd_per_kwh.Controlled": [],
+        "nzd_per_kwh.All inclusive": [],
+        "nzd_per_kwh.Day": [],
+        "nzd_per_kwh.Night": [],
+    }
 )
 
 postcode_to_edb_csv_path = (
@@ -20,12 +29,15 @@ postcode_to_edb_csv_path = (
 with postcode_to_edb_csv_path.open("r", encoding="utf-8") as csv_file:
     postcode_to_edb = pd.read_csv(csv_file, dtype=str)
 
-selected_plans_csv_path = (
-    pkg_resources.files("data_analysis.electricity_plans_available.output")
-    / "selected_electricity_plan_tariffs_by_edb.csv"
-)
-with selected_plans_csv_path.open("r", encoding="utf-8") as csv_file:
-    edb_to_plan_tariff = pd.read_csv(csv_file, dtype=str)
+try:
+    selected_plans_csv_path = (
+        pkg_resources.files("data_analysis.electricity_plans_available.output")
+        / "selected_electricity_plan_tariffs_by_edb.csv"
+    )
+    with selected_plans_csv_path.open("r", encoding="utf-8") as csv_file:
+        edb_to_plan_tariff = pd.read_csv(csv_file, dtype=str)
+except FileNotFoundError:
+    edb_to_plan_tariff = filtered_plans_stub
 
 postcode_to_edb_dict = postcode_to_edb.set_index("postcode").to_dict()["edb_region"]
 postcode_to_plan_tariff = pd.merge(
