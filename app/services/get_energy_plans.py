@@ -36,8 +36,11 @@ try:
     )
     with selected_plans_csv_path.open("r", encoding="utf-8") as csv_file:
         edb_to_plan_tariff = pd.read_csv(csv_file, dtype=str)
-except FileNotFoundError:
+except (FileNotFoundError, ModuleNotFoundError):
     edb_to_plan_tariff = filtered_plans_stub
+except Exception as e:
+    print(e)
+    raise e
 
 postcode_to_edb_dict = postcode_to_edb.set_index("postcode").to_dict()["edb_region"]
 postcode_to_plan_tariff = pd.merge(
