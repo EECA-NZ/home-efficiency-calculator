@@ -89,7 +89,7 @@ postcode_to_electricity_plan_dict = {}
 for idx, current_row in postcode_to_plan_tariff.iterrows():
     nzd_per_kwh = create_nzd_per_kwh(current_row)
     electricity_plan = ElectricityPlan(
-        name=str(current_row["name"]),
+        name="Electricity PlanId " + str(current_row["name"]),
         daily_charge=current_row["daily_charge"],
         nzd_per_kwh=nzd_per_kwh,
     )

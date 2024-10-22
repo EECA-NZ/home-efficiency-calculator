@@ -28,7 +28,7 @@ def test_edb_zone_to_electricity_plan():
     Test the edb_zone_to_electricity_plan function.
     """
     plan = edb_zone_to_electricity_plan("Wellington Electricity")
-    assert plan.name in ("37887", "Default Electricity Plan")
+    assert plan.name in ("Electricity PlanId 37887", "Default Electricity Plan")
     assert plan.daily_charge in (2.304945, 2.0)
     assert plan.nzd_per_kwh in (
         {"All inclusive": 0.18462291666666666},
@@ -41,7 +41,7 @@ def test_postcode_to_electricity_plan():
     Test the postcode_to_electricity_plan function.
     """
     plan = postcode_to_electricity_plan("6012")
-    assert plan.name in ("37887", "Default Electricity Plan")
+    assert plan.name in ("Electricity PlanId 37887", "Default Electricity Plan")
     assert plan.daily_charge in (2.304945, 2.0)
     assert plan.nzd_per_kwh in (
         {"All inclusive": 0.18462291666666666},
@@ -55,7 +55,10 @@ def test_postcode_to_energy_plan():
     """
     plan = postcode_to_energy_plan("6012")
     assert plan.name in ("Plan for 6012", "Default Electricity Plan")
-    assert plan.electricity_plan.name in ("37887", "Default Electricity Plan")
+    assert plan.electricity_plan.name in (
+        "Electricity PlanId 37887",
+        "Default Electricity Plan",
+    )
     assert plan.electricity_plan.daily_charge in (2.304945, 2.0)
     assert plan.electricity_plan.nzd_per_kwh in (
         {"All inclusive": 0.18462291666666666},
