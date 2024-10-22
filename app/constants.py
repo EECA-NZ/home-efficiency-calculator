@@ -29,11 +29,12 @@ SOLAR_RESOURCE_KWH_PER_DAY = {
 }
 
 EMISSIONS_FACTORS = {
-    "electricity": 0.077,
-    "natural_gas": 0.195,
-    "lpg": 0.214,
-    "petrol": 2.41,
-    "diesel": 2.67,
+    "electricity_kg_co2e_per_kwh": 0.077,
+    "natural_gas_kg_co2e_per_kwh": 0.195,
+    "lpg_kg_co2e_per_kwh": 0.214,
+    "wood_kg_co2e_per_kwh": 0.05,
+    "petrol_kg_co2e_per_litre": 2.41,
+    "diesel_kg_co2e_per_litre": 2.67,
 }
 
 HEATING_DEGREE_DAYS = {
