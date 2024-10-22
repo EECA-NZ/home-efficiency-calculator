@@ -16,7 +16,7 @@ import pandas as pd
 import seaborn as sns
 
 from app.models.energy_plans import ElectricityPlan
-from data_analysis.energy_plans_available.edb_to_locations import edb_to_locations
+from data_analysis.electricity_plans_available.edb_to_locations import edb_to_locations
 from data_analysis.postcode_lookup_tables.geo_utils import load_and_transform_shapefile
 
 logging.basicConfig(level=logging.INFO)

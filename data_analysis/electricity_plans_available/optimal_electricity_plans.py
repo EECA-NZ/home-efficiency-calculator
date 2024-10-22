@@ -1,6 +1,6 @@
 """
 This script calculates the optimal electricity plan for a household by comparing
-different electricity plans against a household's yearly fuel usage profile.
+differt electricity plans against a household's yearly fuel usage profile.
 """
 
 import logging
@@ -10,7 +10,7 @@ import pandas as pd
 
 from app.constants import DAYS_IN_YEAR
 from app.models.usage_profiles import YearlyFuelUsageProfile
-from data_analysis.energy_plans_available.electricity_plans_analysis import (
+from data_analysis.electricity_plans_available.electricity_plans_analysis import (
     get_filtered_df,
     row_to_plan,
     show_plan,

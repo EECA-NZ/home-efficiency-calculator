@@ -6,14 +6,8 @@ import importlib.resources as pkg_resources
 
 import pandas as pd
 
-from data_analysis.energy_plans_available.electricity_plans_analysis import (
-    get_filtered_df,
-    row_to_plan,
-)
-
 from ..models.energy_plans import ElectricityPlan, HouseholdEnergyPlan
 from .configuration import get_default_plans
-from .helpers import add_gst
 
 filtered_plans_stub = pd.DataFrame(
     {"PlanId": [], "Daily charge": [], "nzd_per_kwh": []}
@@ -27,45 +21,51 @@ with postcode_to_edb_csv_path.open("r", encoding="utf-8") as csv_file:
     postcode_to_edb = pd.read_csv(csv_file, dtype=str)
 
 selected_plans_csv_path = (
-    pkg_resources.files("data_analysis.energy_plans_available.output")
-    / "selected_electricity_plans.csv"
+    pkg_resources.files("data_analysis.electricity_plans_available.output")
+    / "selected_electricity_plan_tariffs_by_edb.csv"
 )
 with selected_plans_csv_path.open("r", encoding="utf-8") as csv_file:
-    edb_to_plan_id = pd.read_csv(csv_file, dtype=str)
-
-try:
-    all_plans_csv_path = (
-        pkg_resources.files("data_analysis.supplementary_data.tariff_data")
-        / "tariffDataReport_240903.csv"
-    )
-    filtered_plans = get_filtered_df(path=all_plans_csv_path)
-except FileNotFoundError:
-    filtered_plans = filtered_plans_stub
-
-joined_df = pd.merge(
-    postcode_to_edb, edb_to_plan_id, how="inner", left_on="edb_region", right_on="EDB"
-)
-
-joined_df["PlanId"] = joined_df["PlanId"].astype(int)
-filtered_plans["PlanId"] = filtered_plans["PlanId"].astype(int)
-
-joined_df = pd.merge(
-    joined_df,
-    filtered_plans,
-    how="inner",
-    on="PlanId",
-)
-
-joined_df["electricity_plan"] = joined_df.apply(row_to_plan, axis=1)
-joined_df["electricity_plan"] = joined_df["electricity_plan"].apply(add_gst)
+    edb_to_plan_tariff = pd.read_csv(csv_file, dtype=str)
 
 postcode_to_edb_dict = postcode_to_edb.set_index("postcode").to_dict()["edb_region"]
-edb_to_electricity_plan_dict = joined_df.set_index("edb_region").to_dict()[
-    "electricity_plan"
-]
-postcode_to_electricity_plan_dict = joined_df.set_index("postcode").to_dict()[
-    "electricity_plan"
-]
+postcode_to_plan_tariff = pd.merge(
+    postcode_to_edb, edb_to_plan_tariff, how="inner", on="edb_region"
+)
+
+
+def create_nzd_per_kwh(row):
+    """
+    Construct a dictionary of nzd_per_kwh values from a row of the dataframe.
+
+    Nan values are excluded from the dictionary.
+
+    Parameters
+    ----------
+    row : pd.Series
+        A row of the dataframe.
+
+    Returns
+    -------
+    dict
+        A dictionary of nzd_per_kwh values.
+    """
+    keys = ["Uncontrolled", "Controlled", "All inclusive", "Day", "Night"]
+    return {
+        k: row[f"nzd_per_kwh.{k}"] for k in keys if pd.notna(row[f"nzd_per_kwh.{k}"])
+    }
+
+
+edb_to_electricity_plan_dict = {}
+postcode_to_electricity_plan_dict = {}
+for idx, current_row in postcode_to_plan_tariff.iterrows():
+    nzd_per_kwh = create_nzd_per_kwh(current_row)
+    electricity_plan = ElectricityPlan(
+        name=str(current_row["name"]),
+        daily_charge=current_row["daily_charge"],
+        nzd_per_kwh=nzd_per_kwh,
+    )
+    edb_to_electricity_plan_dict[current_row["edb_region"]] = electricity_plan
+    postcode_to_electricity_plan_dict[current_row["postcode"]] = electricity_plan
 
 default_plans = get_default_plans()
 

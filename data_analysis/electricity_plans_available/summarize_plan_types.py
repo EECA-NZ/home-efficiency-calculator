@@ -15,7 +15,7 @@ following distinct patterns of non-NaN columns:
 - {'Night', 'Uncontrolled'}
 """
 
-from data_analysis.energy_plans_available.electricity_plans_analysis import (
+from data_analysis.electricity_plans_available.electricity_plans_analysis import (
     get_filtered_df,
 )
 
