@@ -69,9 +69,9 @@ THERMAL_ENVELOPE_QUALITY = {
 }
 
 HEATING_PERIOD_FACTOR = {
-    "Morning (per day)": 0.050,
-    "Day (per day)": 0.074,
-    "Evening (per day)": 0.072,
+    "Morning (per day)": 0.04971,
+    "Day (per day)": 0.07398,
+    "Evening (per day)": 0.07201,
 }
 
 HEAT_PUMP_COP_BY_CLIMATE_ZONE = {
