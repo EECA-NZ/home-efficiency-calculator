@@ -1,5 +1,19 @@
 """
-Functions relating to spatial data. Map postcodes to climate zones and EDB zones.
+Functions relating to spatial data. Map postcodes to
+climate zones and EDB zones.
+
+Postcodes are mapped to EDB zones, which are then mapped
+to electricity plans. The mapping from EDB to electricity
+plan is based on a search for a plan available in the EDB
+zone that is favourable to an electrified household: see
+(data_analysis.electricity_plans_available.optimal_electricity_plans.py).
+
+Note that this is approximate as not all ICPs served by a
+given EDB are eligible for all plans. However, it provides
+a good starting point for selecting an electricity plan
+based on location, capturing regional variations in pricing.
+
+For other types of energy plans, a default plan is used.
 """
 
 import importlib.resources as pkg_resources
