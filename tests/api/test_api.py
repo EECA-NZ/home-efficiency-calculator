@@ -65,13 +65,11 @@ def test_household_energy_profile():
     assert response.status_code == 200
     response_data = response.json()
 
-    assert "heating_nzd_savings" in response_data
-    assert "hot_water_nzd_savings" in response_data
-    assert "cooktop_nzd_savings" in response_data
-    assert "driving_nzd_savings" in response_data
-    assert "overall_nzd_savings" in response_data
+    assert "overall" in response_data
+    assert "heating" in response_data
+    assert "hot_water" in response_data
+    assert "cooktop" in response_data
+    assert "driving" in response_data
 
-    assert isinstance(response_data["heating_nzd_savings"], float)
-    assert isinstance(response_data["overall_nzd_savings"], float)
-    assert "co2_emissions_percent_reduction" in response_data
-    assert isinstance(response_data["co2_emissions_percent_reduction"], float)
+    assert isinstance(response_data["heating"], dict)
+    assert isinstance(response_data["overall"], dict)

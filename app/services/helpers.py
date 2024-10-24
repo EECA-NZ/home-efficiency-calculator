@@ -1,7 +1,7 @@
 """
 Module for generic helper functions.
 """
-
+import numpy as np
 from pydantic import BaseModel
 
 from ..constants import HEATING_PERIOD_FACTOR
@@ -69,3 +69,13 @@ def round_floats_to_2_dp(dictionary):
         elif isinstance(value, dict):
             round_floats_to_2_dp(value)
     return dictionary
+
+
+def safe_percentage_reduction(current: float, alternative: float) -> float:
+    """
+    Safely calculate percentage reduction from current to alternative values.
+    Handles cases where current is zero to avoid division by zero errors.
+    """
+    if current == 0:
+        return np.nan if alternative != 0 else 0
+    return 100 * (current - alternative) / current

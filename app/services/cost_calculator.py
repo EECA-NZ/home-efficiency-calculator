@@ -2,10 +2,9 @@
 This module provides functions to optimize the cost of energy for a household.
 """
 
-import numpy as np
-
 from .energy_calculator import emissions_kg_co2e
 from .get_energy_plans import postcode_to_energy_plan
+from .helpers import safe_percentage_reduction
 
 
 def costs_and_emissions(answers, your_plan, your_home):
@@ -44,16 +43,9 @@ def calculate_savings_for_option(option, field, answers, your_plan, your_home):
     )
     # Calculate the savings and emissions reduction percentage
     variable_cost_savings = current_variable_costs - alternative_variable_costs
-    if current_emissions_kg_co2e == 0 and alternative_emissions_kg_co2e == 0:
-        emissions_reduction_percentage = 0
-    elif current_emissions_kg_co2e == 0:
-        emissions_reduction_percentage = np.nan
-    else:
-        emissions_reduction_percentage = (
-            100
-            * (current_emissions_kg_co2e - alternative_emissions_kg_co2e)
-            / current_emissions_kg_co2e
-        )
+    emissions_reduction_percentage = safe_percentage_reduction(
+        current_emissions_kg_co2e, alternative_emissions_kg_co2e
+    )
     return {
         "variable_cost_nzd": {
             "current": current_variable_costs,
@@ -125,19 +117,3 @@ def calculate_savings_for_option_provided(answers, your_home):
         raise ValueError("Invalid answers type")
     your_plan = postcode_to_energy_plan(your_home.postcode)
     return calculate_savings_for_option(option, field, answers, your_plan, your_home)
-
-
-# pylint: disable=unused-argument
-def calculate_emissions_reduction(answers, your_home):
-    """
-    Placeholder function to calculate percentage
-    emissions reduction based on user input.
-    """
-    return 20  # Placeholder for actual emissions reduction logic
-
-
-def calculate_savings(answers, your_home):
-    """
-    Placeholder function to calculate dollar savings based on user input.
-    """
-    return 10  # Placeholder for actual savings logic
