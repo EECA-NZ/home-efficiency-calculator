@@ -9,6 +9,15 @@ from app.main import app
 client = TestClient(app)
 
 
+def test_read_root():
+    """
+    Test the root endpoint to ensure it returns the correct response.
+    """
+    response = client.get("/")
+    assert response.status_code == 200
+    assert "<html>" in response.text
+
+
 def test_household_energy_profile():
     """
     Test the /household-energy-profile/ endpoint with valid input data.
