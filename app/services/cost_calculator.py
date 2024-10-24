@@ -38,27 +38,22 @@ def calculate_savings_for_option(option, field, answers, your_plan, your_home):
     """
     Calculate the savings and emissions reduction for a given option.
     """
-
     # Calculate the current energy use, costs, and emissions
     current_costs, current_emissions = calculate_usage_and_costs(
         answers, your_plan, your_home
     )
-
     # Create a copy of the answers and set the new option for the specified field
     alternative_answers = answers.model_copy()
     setattr(alternative_answers, field, option)
-
     # Calculate the energy use, costs, and emissions for the alternative option
     alternative_costs, alternative_emissions = calculate_usage_and_costs(
         alternative_answers, your_plan, your_home
     )
-
     # Calculate the savings and emissions reduction percentage
     savings = sum(current_costs) - sum(alternative_costs)
     emissions_reduction_percentage = (
         100 * (current_emissions - alternative_emissions) / current_emissions
     )
-
     return {
         "savings": savings,
         "emissions_reduction_percentage": emissions_reduction_percentage,
