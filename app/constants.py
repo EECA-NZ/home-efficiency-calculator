@@ -111,3 +111,8 @@ LPG_SPACE_HEATING_EFFICIENCY = 0.8
 ELECTRIC_HEATER_SPACE_HEATING_EFFICIENCY = 1.0
 
 LOG_BURNER_SPACE_HEATING_EFFICIENCY = 0.7
+
+DEFAULT_SAVINGS_AND_EMISSIONS_RESPONSE = {
+    "average_household_savings": 1000,
+    "average_household_emissions_percentage_reduction": 85,
+}

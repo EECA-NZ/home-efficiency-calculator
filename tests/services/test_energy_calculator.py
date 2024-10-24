@@ -1,6 +1,7 @@
 """
 Tests for the energy_calculator module.
 """
+
 import app.services.configuration as cfg
 from app.constants import DAYS_IN_YEAR
 from app.models.user_answers import HouseholdEnergyProfileAnswers

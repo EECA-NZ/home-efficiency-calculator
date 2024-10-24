@@ -56,3 +56,16 @@ def add_gst(plan: BaseModel) -> BaseModel:
             # Apply GST to flat rate fields
             setattr(plancopy, field, value * gst_rate)
     return plancopy
+
+
+def round_floats_to_2_dp(dictionary):
+    """
+    Round all floats in a dictionary to 2 decimal places.
+    Recursively rounds floats in nested dictionaries.
+    """
+    for key, value in dictionary.items():
+        if isinstance(value, float):
+            dictionary[key] = round(value, 2)
+        elif isinstance(value, dict):
+            round_floats_to_2_dp(value)
+    return dictionary

@@ -4,15 +4,21 @@ components of the home.
 """
 
 import logging
+
 from fastapi import FastAPI
+
 from ..models.user_answers import (
-    HeatingAnswers,
-    HotWaterAnswers,
     CooktopAnswers,
     DrivingAnswers,
+    HeatingAnswers,
+    HotWaterAnswers,
     YourHomeAnswers,
 )
-from ..services.cost_calculator import calculate_savings_options
+from ..services.cost_calculator import (
+    calculate_savings_for_option_provided,
+    generate_savings_options,
+)
+from ..services.helpers import round_floats_to_2_dp
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -28,11 +34,15 @@ async def heating_savings(heating_answers: HeatingAnswers, your_home: YourHomeAn
     """
     try:
         logger.info("Received heating answers: %s", heating_answers)
-        options = calculate_savings_options(
-            heating_answers, "main_heating_source", your_home
-        )
-        logger.info("Found heating options: %s", options)
-        return {"options": options}
+        if heating_answers.alternative_main_heating_source is None:
+            options = generate_savings_options(
+                heating_answers, "main_heating_source", your_home
+            )
+            logger.info("Found heating options: %s", options)
+            return round_floats_to_2_dp(options)
+        savings = calculate_savings_for_option_provided(heating_answers, your_home)
+        logger.info("Found heating savings: %s", savings)
+        return round_floats_to_2_dp(savings)
     except Exception as e:
         logger.error("Error calculating heating savings: %s", e)
         return {"error": "Error calculating heating savings"}
@@ -47,11 +57,15 @@ async def hot_water_savings(
     """
     try:
         logger.info("Received hot water answers: %s", hot_water_answers)
-        options = calculate_savings_options(
-            hot_water_answers, "hot_water_heating_source", your_home
-        )
-        logger.info("Found hot water options: %s", options)
-        return {"options": options}
+        if hot_water_answers.alternative_hot_water_heating_source is None:
+            options = generate_savings_options(
+                hot_water_answers, "hot_water_heating_source", your_home
+            )
+            logger.info("Found hot water options: %s", options)
+            return round_floats_to_2_dp(options)
+        savings = calculate_savings_for_option_provided(hot_water_answers, your_home)
+        logger.info("Found hot water savings: %s", savings)
+        return round_floats_to_2_dp(savings)
     except Exception as e:
         logger.error("Error calculating hot water savings: %s", e)
         return {"error": "Error calculating hot water savings"}
@@ -64,9 +78,13 @@ async def cooktop_savings(cooktop_answers: CooktopAnswers, your_home: YourHomeAn
     """
     try:
         logger.info("Received cooktop answers: %s", cooktop_answers)
-        options = calculate_savings_options(cooktop_answers, "cooktop", your_home)
-        logger.info("Found cooktop options: %s", options)
-        return {"options": options}
+        if cooktop_answers.alternative_cooktop is None:
+            options = generate_savings_options(cooktop_answers, "cooktop", your_home)
+            logger.info("Found cooktop options: %s", options)
+            return round_floats_to_2_dp(options)
+        savings = calculate_savings_for_option_provided(cooktop_answers, your_home)
+        logger.info("Found cooktop savings: %s", savings)
+        return round_floats_to_2_dp(savings)
     except Exception as e:
         logger.error("Error calculating cooktop savings: %s", e)
         return {"error": "Error calculating cooktop savings"}
@@ -79,9 +97,15 @@ async def driving_savings(driving_answers: DrivingAnswers, your_home: YourHomeAn
     """
     try:
         logger.info("Received driving answers: %s", driving_answers)
-        options = calculate_savings_options(driving_answers, "vehicle_type", your_home)
-        logger.info("Found driving options: %s", options)
-        return {"options": options}
+        if driving_answers.alternative_driving is None:
+            options = generate_savings_options(
+                driving_answers, "vehicle_type", your_home
+            )
+            logger.info("Found driving options: %s", options)
+            return round_floats_to_2_dp(options)
+        savings = calculate_savings_for_option_provided(driving_answers, your_home)
+        logger.info("Found driving savings: %s", savings)
+        return round_floats_to_2_dp(savings)
     except Exception as e:
         logger.error("Error calculating driving savings: %s", e)
         return {"error": "Error calculating driving savings"}

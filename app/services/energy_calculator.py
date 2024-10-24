@@ -130,6 +130,7 @@ def emissions_kg_co2e(usage_profile: YearlyFuelUsageProfile) -> float:
         (usage_profile.flexible_kwh, "electricity_kg_co2e_per_kwh"),
         (usage_profile.natural_gas_kwh, "natural_gas_kg_co2e_per_kwh"),
         (usage_profile.lpg_kwh, "lpg_kg_co2e_per_kwh"),
+        (usage_profile.wood_kwh, "wood_kg_co2e_per_kwh"),
         (usage_profile.petrol_litres, "petrol_kg_co2e_per_litre"),
         (usage_profile.diesel_litres, "diesel_kg_co2e_per_litre"),
     ]
