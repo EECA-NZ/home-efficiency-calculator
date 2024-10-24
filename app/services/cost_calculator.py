@@ -2,33 +2,8 @@
 This module provides functions to optimize the cost of energy for a household.
 """
 
-from .energy_calculator import emissions_kg_co2e, estimate_usage_from_profile
+from .energy_calculator import emissions_kg_co2e
 from .get_energy_plans import postcode_to_energy_plan
-
-
-def find_lowest_cost(profiles, pricing_structures):
-    """
-    Find the lowest cost energy plan for a household
-
-    Args:
-    profiles: list of HouseholdEnergyProfileAnswers objects
-    pricing_structures: list of HouseholdEnergyPlan objects
-
-    Returns:
-    min_cost: float, the lowest cost found
-    """
-    min_cost = float("inf")
-    best_plan = None
-    best_profile = None
-    for plan in pricing_structures:
-        for profile in profiles:
-            usage_profile = estimate_usage_from_profile(profile)
-            cost = plan.calculate_cost(usage_profile)
-            if cost < min_cost:
-                min_cost = cost
-                best_plan = plan
-                best_profile = profile
-    return min_cost, best_plan, best_profile
 
 
 def calculate_savings_options(answers, field, your_home):
@@ -49,7 +24,7 @@ def calculate_savings_options(answers, field, your_home):
     return result
 
 
-def calculate_current_usage_and_costs(answers, your_plan, your_home):
+def calculate_usage_and_costs(answers, your_plan, your_home):
     """
     Calculate the current household energy costs and emissions.
     """
@@ -65,7 +40,7 @@ def calculate_savings_for_option(option, field, answers, your_plan, your_home):
     """
 
     # Calculate the current energy use, costs, and emissions
-    current_costs, current_emissions = calculate_current_usage_and_costs(
+    current_costs, current_emissions = calculate_usage_and_costs(
         answers, your_plan, your_home
     )
 
@@ -74,9 +49,9 @@ def calculate_savings_for_option(option, field, answers, your_plan, your_home):
     setattr(alternative_answers, field, option)
 
     # Calculate the energy use, costs, and emissions for the alternative option
-    alternative_use = alternative_answers.energy_usage_pattern(your_home)
-    alternative_costs = your_plan.calculate_cost(alternative_use)
-    alternative_emissions = emissions_kg_co2e(alternative_use)
+    alternative_costs, alternative_emissions = calculate_usage_and_costs(
+        alternative_answers, your_plan, your_home
+    )
 
     # Calculate the savings and emissions reduction percentage
     savings = sum(current_costs) - sum(alternative_costs)

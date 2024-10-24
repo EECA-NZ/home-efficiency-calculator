@@ -244,7 +244,3 @@ class TestElectricityPlan(unittest.TestCase):
         self.electricity_plan_night_uncontrolled.nzd_per_kwh = {"Unexpected": 0.30}
         with self.assertRaises(ValueError):
             self.electricity_plan_night_uncontrolled.calculate_cost(self.profile)
-
-
-if __name__ == "__main__":
-    unittest.main()
