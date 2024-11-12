@@ -12,10 +12,10 @@ DEFAULT_SAVINGS_AND_EMISSIONS_RESPONSE = {
 }
 
 EMISSIONS_FACTORS = {
-    "electricity_kg_co2e_per_kwh": 0.077,
+    "electricity_kg_co2e_per_kwh": 0.1072,
     "natural_gas_kg_co2e_per_kwh": 0.195,
     "lpg_kg_co2e_per_kwh": 0.214,
-    "wood_kg_co2e_per_kwh": 0.05,
+    "wood_kg_co2e_per_kwh": 0.005,
     "petrol_kg_co2e_per_litre": 2.41,
     "diesel_kg_co2e_per_litre": 2.67,
 }
