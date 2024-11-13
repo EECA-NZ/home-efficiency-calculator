@@ -45,7 +45,7 @@ def test_cooking_energy_usage():
     expected_energy_use = {
         "Electric induction": [159, 239, 319, 398, 478, 558],
         "Piped gas": [412, 618, 824, 1030, 1236, 1442],
-        "Bottled gas": [412, 618, 824, 1030, 1236, 1442, 1648],
+        "Bottled gas": [412, 618, 824, 1030, 1236, 1442],
         "Electric (coil or ceramic)": [176, 264, 352, 440, 528, 617],
     }
 
