@@ -101,65 +101,81 @@ class TestElectricityPlan(unittest.TestCase):
             thousand_km_electric=0,
         )
 
-        day = 0.25
-        night = 0.15
-        controlled = 0.20
-        uncontrolled = 0.22
-        all_inclusive = 0.18
+        self.day = 0.25
+        self.night = 0.15
+        self.controlled = 0.20
+        self.uncontrolled = 0.22
+        self.all_inclusive = 0.18
+        self.high_daily_charge = 1.5
+        self.daily_charge = 1.0
 
         self.electricity_plan = ElectricityPlan(
             name="TestPlan",
-            daily_charge=1.5,
-            nzd_per_kwh={"Day": 0.25, "Night": 0.15, "Controlled": 0.20},
+            daily_charge=self.high_daily_charge,
+            nzd_per_kwh={
+                "Day": self.day,
+                "Night": self.night,
+                "Controlled": self.controlled,
+            },
         )
         self.electricity_plan_all_inclusive = ElectricityPlan(
             name="AllInclusivePlan",
-            daily_charge=1.0,
-            nzd_per_kwh={"All inclusive": all_inclusive},
+            daily_charge=self.daily_charge,
+            nzd_per_kwh={"All inclusive": self.all_inclusive},
         )
         self.electricity_plan_day_night = ElectricityPlan(
             name="AllInclusivePlan",
-            daily_charge=1.0,
-            nzd_per_kwh={"Day": day, "Night": night},
+            daily_charge=self.daily_charge,
+            nzd_per_kwh={"Day": self.day, "Night": self.night},
         )
         self.electricity_plan_uncontrolled = ElectricityPlan(
             name="UncontrolledPlan",
-            daily_charge=1.0,
-            nzd_per_kwh={"Uncontrolled": uncontrolled},
+            daily_charge=self.daily_charge,
+            nzd_per_kwh={"Uncontrolled": self.uncontrolled},
         )
         self.electricity_plan_uncontrolled_controlled = ElectricityPlan(
             name="UncontrolledPlan",
-            daily_charge=1.0,
-            nzd_per_kwh={"Uncontrolled": uncontrolled, "Controlled": controlled},
+            daily_charge=self.daily_charge,
+            nzd_per_kwh={
+                "Uncontrolled": self.uncontrolled,
+                "Controlled": self.controlled,
+            },
         )
         self.electricity_plan_uncontrolled_all_inclusive = ElectricityPlan(
             name="UncontrolledPlan",
-            daily_charge=1.0,
-            nzd_per_kwh={"Uncontrolled": uncontrolled, "All inclusive": all_inclusive},
+            daily_charge=self.daily_charge,
+            nzd_per_kwh={
+                "Uncontrolled": self.uncontrolled,
+                "All inclusive": self.all_inclusive,
+            },
         )
         self.electricity_plan_night_controlled_day = ElectricityPlan(
             name="UncontrolledPlan",
-            daily_charge=1.0,
-            nzd_per_kwh={"Night": night, "Controlled": controlled, "Day": day},
+            daily_charge=self.daily_charge,
+            nzd_per_kwh={
+                "Night": self.night,
+                "Controlled": self.controlled,
+                "Day": self.day,
+            },
         )
         self.electricity_plan_night_all_inclusive = ElectricityPlan(
             name="UncontrolledPlan",
-            daily_charge=1.0,
-            nzd_per_kwh={"Night": night, "All inclusive": all_inclusive},
+            daily_charge=self.daily_charge,
+            nzd_per_kwh={"Night": self.night, "All inclusive": self.all_inclusive},
         )
         self.electricity_plan_night_uncontrolled_controlled = ElectricityPlan(
             name="UncontrolledPlan",
-            daily_charge=1.0,
+            daily_charge=self.daily_charge,
             nzd_per_kwh={
-                "Night": night,
-                "Uncontrolled": uncontrolled,
-                "Controlled": controlled,
+                "Night": self.night,
+                "Uncontrolled": self.uncontrolled,
+                "Controlled": self.controlled,
             },
         )
         self.electricity_plan_night_uncontrolled = ElectricityPlan(
             name="UncontrolledPlan",
-            daily_charge=1.0,
-            nzd_per_kwh={"Night": night, "Uncontrolled": uncontrolled},
+            daily_charge=self.daily_charge,
+            nzd_per_kwh={"Night": self.night, "Uncontrolled": self.uncontrolled},
         )
 
     def test_all_inclusive_plan(self):
@@ -168,7 +184,9 @@ class TestElectricityPlan(unittest.TestCase):
         {"All inclusive"}.
         """
         cost = self.electricity_plan_all_inclusive.calculate_cost(self.profile)
-        self.assertEqual(cost, (1.0 * DAYS_IN_YEAR, (300 + 100) * 0.18))
+        self.assertEqual(
+            cost, (self.daily_charge * DAYS_IN_YEAR, (300 + 100) * self.all_inclusive)
+        )
 
     def test_day_night_plan(self):
         """
@@ -176,7 +194,9 @@ class TestElectricityPlan(unittest.TestCase):
         {"Day", "Night"}.
         """
         cost = self.electricity_plan_day_night.calculate_cost(self.profile)
-        self.assertEqual(cost, (1.0 * DAYS_IN_YEAR, 300 * 0.25 + 100 * 0.15))
+        self.assertEqual(
+            cost, (self.daily_charge * DAYS_IN_YEAR, 300 * self.day + 100 * self.night)
+        )
 
     def test_uncontrolled(self):
         """
@@ -184,7 +204,9 @@ class TestElectricityPlan(unittest.TestCase):
         {"Uncontrolled"}.
         """
         cost = self.electricity_plan_uncontrolled.calculate_cost(self.profile)
-        self.assertEqual(cost, (1.0 * DAYS_IN_YEAR, (300 + 100) * 0.22))
+        self.assertEqual(
+            cost, (self.daily_charge * DAYS_IN_YEAR, (300 + 100) * self.uncontrolled)
+        )
 
     def test_uncontrolled_controlled(self):
         """
@@ -194,7 +216,13 @@ class TestElectricityPlan(unittest.TestCase):
         cost = self.electricity_plan_uncontrolled_controlled.calculate_cost(
             self.profile
         )
-        self.assertEqual(cost, (1.0 * DAYS_IN_YEAR, 300 * 0.22 + 100 * 0.20))
+        self.assertEqual(
+            cost,
+            (
+                self.daily_charge * DAYS_IN_YEAR,
+                300 * self.uncontrolled + 100 * self.controlled,
+            ),
+        )
 
     def test_uncontrolled_all_inclusive(self):
         """
@@ -204,7 +232,9 @@ class TestElectricityPlan(unittest.TestCase):
         cost = self.electricity_plan_uncontrolled_all_inclusive.calculate_cost(
             self.profile
         )
-        self.assertEqual(cost, (1.0 * DAYS_IN_YEAR, (300 + 100) * 0.18))
+        self.assertEqual(
+            cost, (self.daily_charge * DAYS_IN_YEAR, (300 + 100) * self.all_inclusive)
+        )
 
     def test_night_controlled_day(self):
         """
@@ -212,7 +242,9 @@ class TestElectricityPlan(unittest.TestCase):
         {"Night", "Controlled", "Day"}.
         """
         cost = self.electricity_plan_night_controlled_day.calculate_cost(self.profile)
-        self.assertEqual(cost, (1.0 * DAYS_IN_YEAR, 300 * 0.25 + 100 * 0.15))
+        self.assertEqual(
+            cost, (self.daily_charge * DAYS_IN_YEAR, 300 * self.day + 100 * self.night)
+        )
 
     def test_night_all_inclusive(self):
         """
@@ -220,7 +252,13 @@ class TestElectricityPlan(unittest.TestCase):
         {"Night", "All inclusive"}.
         """
         cost = self.electricity_plan_night_all_inclusive.calculate_cost(self.profile)
-        self.assertEqual(cost, (1.0 * DAYS_IN_YEAR, 300 * 0.18 + 100 * 0.15))
+        self.assertEqual(
+            cost,
+            (
+                self.daily_charge * DAYS_IN_YEAR,
+                300 * self.all_inclusive + 100 * self.night,
+            ),
+        )
 
     def test_night_uncontrolled_controlled(self):
         """
@@ -230,7 +268,13 @@ class TestElectricityPlan(unittest.TestCase):
         cost = self.electricity_plan_night_uncontrolled_controlled.calculate_cost(
             self.profile
         )
-        self.assertEqual(cost, (1.0 * DAYS_IN_YEAR, 300 * 0.22 + 100 * 0.15))
+        self.assertEqual(
+            cost,
+            (
+                self.daily_charge * DAYS_IN_YEAR,
+                300 * self.uncontrolled + 100 * self.night,
+            ),
+        )
 
     def test_night_uncontrolled(self):
         """
@@ -238,7 +282,13 @@ class TestElectricityPlan(unittest.TestCase):
         {"Night", "Uncontrolled"}.
         """
         cost = self.electricity_plan_night_uncontrolled.calculate_cost(self.profile)
-        self.assertEqual(cost, (1.0 * DAYS_IN_YEAR, 300 * 0.22 + 100 * 0.15))
+        self.assertEqual(
+            cost,
+            (
+                self.daily_charge * DAYS_IN_YEAR,
+                300 * self.uncontrolled + 100 * self.night,
+            ),
+        )
 
     def test_unexpected_keys(self):
         """
