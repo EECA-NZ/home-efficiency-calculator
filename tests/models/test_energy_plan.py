@@ -264,6 +264,8 @@ class TestElectricityPlan(unittest.TestCase):
         """
         Test electricity plan with variable pricing pattern
         {"Night", "Uncontrolled", "Controlled"}.
+        Since the Controlled rate is more expensive than the Night rate,
+        the Controlled rate is used for the flexible kwh.
         """
         cost = self.electricity_plan_night_uncontrolled_controlled.calculate_cost(
             self.profile
