@@ -25,9 +25,9 @@ energy-statistics/oil-statistics
 Wood pricing:
     Figures justified by:
 
-        Typical price per m³ (cubic meter) from Consumer NZ:
-        $140 (hot mix price) and average of soft and
-        hardwood prices ($120 and $160 respectively).
+        Typical price per m³ from Consumer NZ:
+        NZ$140 (hot mix price) and average of soft and
+        hardwood prices (NZ$120 and NZ$160 respectively).
 
         Density for thrown volume and energy content from:
         Bittermann, W., & Suvorov, M. (2012, May 29).
@@ -100,9 +100,9 @@ def get_default_wood_price():
     """
     Figures justified by:
 
-        Typical price per m³ (cubic meter) from Consumer NZ:
-        $140 (hot mix price) and average of soft and
-        hardwood prices ($120 and $160 respectively).
+        Typical price per m³ from Consumer NZ:
+        NZ$140 (hot mix price) and average of soft and
+        hardwood prices (NZ$120 and NZ$160 respectively).
 
         Density for thrown volume and energy content from:
         Bittermann, W., & Suvorov, M. (2012, May 29).
