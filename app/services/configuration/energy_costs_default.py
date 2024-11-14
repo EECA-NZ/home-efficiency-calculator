@@ -23,30 +23,19 @@ energy-and-natural-resources/energy-statistics-and-modelling/
 energy-statistics/oil-statistics
 
 Wood pricing:
+    Figures justified by:
 
-Base this on:
-    • Price per cord: NZD $375
-    • Volume of a Cord = 128 cubic feet = 3.62m^3
-    • Density of dry pine = 480 kg/m^3
-    • Energy content of dry pine = 15 MJ / tonne
-        = 15E6 / 3.6 / 1E6 = 4.17 kWh / kg
+        Typical price per m³ from Consumer NZ:
+        NZ$140 (hot mix price) and average of soft and
+        hardwood prices (NZ$120 and NZ$160 respectively).
 
-Exclude the following factor:
-    • Efficiency of modern wood stove = 70%
-We calculate the price per kWh of heat content in the wood and
-account for the efficiency of a modern wood stove separately.
-
-kWh per dollar = (
-    Volume of a Cord *
-    Density of dry pine *
-    Energy content of dry pine *
-    Efficiency of modern wood stove) / Price per cord
- = (3.62 * 480 * 4.17) / 375
- = 19.32 kWh per dollar
-
-Inverting this gives $0.052 per kWh of heat in the wood.
-
-This works out to $0.074 per kWh of heat output from a modern wood stove.
+        Density for thrown volume and energy content from:
+        Bittermann, W., & Suvorov, M. (2012, May 29).
+        Quality standard for statistics on wood fuel
+        consumption of households (taking into account
+        the relative importance for the 20-20-20 goals):
+        Working Group 2: Methodology. Statistics Austria;
+        Statistical Office of the Republic of Slovenia.
 """
 
 from ...models.energy_plans import (
@@ -109,35 +98,33 @@ def get_default_lpg_plan():
 
 def get_default_wood_price():
     """
-    Return a default wood plan.
+    Figures justified by:
 
-    Wood price: $0.074 per kWh for a modern wood stove with 70% efficiency.
+        Typical price per m³ from Consumer NZ:
+        NZ$140 (hot mix price) and average of soft and
+        hardwood prices (NZ$120 and NZ$160 respectively).
 
-    This is based on:
-        • Price per cord: NZD $375
-        • Volume of a Cord = 128 cubic feet = 3.62m^3
-        • Density of dry pine = 480 kg/m^3
-        • Energy content of dry pine = 15 MJ / tonne = 15E6 / 3.6E6 = 4.17 kWh / kg
+        Density for thrown volume and energy content from:
+        Bittermann, W., & Suvorov, M. (2012, May 29).
+        Quality standard for statistics on wood fuel
+        consumption of households (taking into account
+        the relative importance for the 20-20-20 goals):
+        Working Group 2: Methodology. Statistics Austria;
+        Statistical Office of the Republic of Slovenia.
 
-    Exclude the following factor:
-        • Efficiency of modern wood stove = 70%
-    We calculate the price per kWh of heat content in the wood and
-    account for the efficiency of a modern wood stove separately.
-
-    kWh per dollar = (
-        Volume of a Cord *
-        Density of dry pine *
-        Energy content of dry pine) / Price per cord
-
-    = (3.62 * 480 * 4.17) / 375
-    = 19.32 kWh per dollar
-
-    Inverting this gives $0.052 per kWh of heat in the wood.
-    This works out to $0.074 per kWh of heat output from a modern wood stove.
+        ($/m3)(m3/kg)(kg/MJ)(MJ/kWh) = ($/kWh)
     """
+    price_per_cubic_metre = 140
+    thrown_density_kg_per_m3 = 300
+    net_calorific_value_mj_per_kg = 16
+    conversion_factor_mj_per_kwh = 3.6
+
     return WoodPrice(
         name="Default Wood Price",
-        per_wood_kwh=0.052,
+        per_wood_kwh=price_per_cubic_metre
+        / thrown_density_kg_per_m3
+        / net_calorific_value_mj_per_kg
+        * conversion_factor_mj_per_kwh,
     )
 
 
