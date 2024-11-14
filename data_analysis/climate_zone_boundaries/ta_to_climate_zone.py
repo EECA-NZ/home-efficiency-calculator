@@ -1,3 +1,9 @@
+"""
+A mapping from territorial authorities to climate zones.
+Note that there are two territorial authorities that are split
+between climate zones.
+"""
+
 ta_to_climate_zone = {
     "Far North District": "Northland",
     "Whangarei District": "Northland",
