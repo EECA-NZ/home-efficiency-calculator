@@ -68,7 +68,7 @@ def test_get_energy_plan():
     assert plan.lpg_plan.per_lpg_kwh == 0.244
     assert plan.lpg_plan.daily_charge == 0.37782340862423
     assert plan.wood_price.name == "Default Wood Price"
-    assert plan.wood_price.per_wood_kwh == 0.061
+    assert plan.wood_price.per_wood_kwh == 0.1125
     assert plan.petrol_price.name == "Default Petrol Price"
     assert plan.petrol_price.per_petrol_litre == 2.78
     assert plan.diesel_price.name == "Default Diesel Price"

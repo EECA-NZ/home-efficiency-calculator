@@ -23,12 +23,19 @@ energy-and-natural-resources/energy-statistics-and-modelling/
 energy-statistics/oil-statistics
 
 Wood pricing:
-    Base this on:
-        Buying firewood: how to get a hot deal - Consumer NZ
-        https://www.consumer.org.nz/articles/firewood
-        Price per m³ (cubic meter) of Pine, Gum, Macrocarpa, and Hot mix wood
-        Density for each type of wood and energy content based on 4.17 kWh/kg
-        Take a simple average of the cost per kWh for each type of wood.
+    Figures justified by:
+
+        Typical price per m³ (cubic meter) from Consumer NZ:
+        $140 (hot mix price) and average of soft and
+        hardwood prices ($120 and $160 respectively).
+
+        Density for thrown volume and energy content from:
+        Bittermann, W., & Suvorov, M. (2012, May 29).
+        Quality standard for statistics on wood fuel
+        consumption of households (taking into account
+        the relative importance for the 20-20-20 goals):
+        Working Group 2: Methodology. Statistics Austria;
+        Statistical Office of the Republic of Slovenia.
 """
 
 from ...models.energy_plans import (
@@ -91,37 +98,33 @@ def get_default_lpg_plan():
 
 def get_default_wood_price():
     """
-    Base this on:
-        Buying firewood: how to get a hot deal - Consumer NZ
-        https://www.consumer.org.nz/articles/firewood
+    Figures justified by:
 
-        Price per m³ (cubic meter) of each type of wood:
+        Typical price per m³ (cubic meter) from Consumer NZ:
+        $140 (hot mix price) and average of soft and
+        hardwood prices ($120 and $160 respectively).
 
-        Pine (softwood): NZD $120/m³
-        Gum (hardwood): NZD $160/m³
-        Macrocarpa (medium-density wood): NZD $152/m³
-        Hot mix: NZD $140/m³
-        Densities and energy content for each type of wood:
+        Density for thrown volume and energy content from:
+        Bittermann, W., & Suvorov, M. (2012, May 29).
+        Quality standard for statistics on wood fuel
+        consumption of households (taking into account
+        the relative importance for the 20-20-20 goals):
+        Working Group 2: Methodology. Statistics Austria;
+        Statistical Office of the Republic of Slovenia.
 
-        Density of pine (softwood): 480 kg/m³
-        Density of gum (hardwood): 700 kg/m³
-        Density of macrocarpa (medium-density wood): 540 kg/m³
-        Density of hot mix: 560 kg/m³
-        Energy content of dry wood: 4.17 kWh/kg
-
-        Exclude the following factor:
-        Efficiency of modern wood stove = 70%
-
-        Pine: 120/480/4.17 $/kWh = $0.05995 per kWh
-        Gum: 160/700/4.17 $/kWh = $0.05481 per kWh
-        Macrocarpa: 152/540/4.17 $/kWh = $0.0675 per kWh
-        Hot mix: 140/560/4.17 $/kWh = $0.05995 per kWh
-
-        Average: $0.06055 per kWh
+        ($/m3)(m3/kg)(kg/MJ)(MJ/kWh) = ($/kWh)
     """
+    price_per_cubic_metre = 150
+    thrown_density_kg_per_m3 = 300
+    net_calorific_value_mj_per_kg = 16
+    conversion_factor_mj_per_kwh = 3.6
+
     return WoodPrice(
         name="Default Wood Price",
-        per_wood_kwh=0.061,
+        per_wood_kwh=price_per_cubic_metre
+        / thrown_density_kg_per_m3
+        / net_calorific_value_mj_per_kg
+        * conversion_factor_mj_per_kwh,
     )
 
 
