@@ -20,7 +20,8 @@ import importlib.resources as pkg_resources
 
 import pandas as pd
 
-from ..models.energy_plans import ElectricityPlan, HouseholdEnergyPlan
+from ..constants import DAILY_DUAL_FUEL_DISCOUNT
+from ..models.energy_plans import ElectricityPlan, HouseholdEnergyPlan, NaturalGasPlan
 from .configuration import get_default_plans
 
 filtered_plans_stub = pd.DataFrame(
@@ -46,7 +47,7 @@ with postcode_to_edb_csv_path.open("r", encoding="utf-8") as csv_file:
 try:
     selected_plans_csv_path = (
         pkg_resources.files("data_analysis.electricity_plans_available.output")
-        / "selected_electricity_plan_tariffs_by_edb.csv"
+        / "selected_electricity_plan_tariffs_by_edb_gst_inclusive.csv"
     )
     with selected_plans_csv_path.open("r", encoding="utf-8") as csv_file:
         edb_to_plan_tariff = pd.read_csv(csv_file, dtype=str)
@@ -60,6 +61,31 @@ postcode_to_edb_dict = postcode_to_edb.set_index("postcode").to_dict()["edb_regi
 postcode_to_plan_tariff = pd.merge(
     postcode_to_edb, edb_to_plan_tariff, how="inner", on="edb_region"
 )
+
+try:
+    average_gas_tariff_csv_path = (
+        pkg_resources.files("data_analysis.natural_gas_plans.output")
+        / "average_charges_gst_inclusive.csv"
+    )
+    with average_gas_tariff_csv_path.open("r", encoding="utf-8") as csv_file:
+        # Apply a discount to the daily charge for dual fuel households.
+        # It is assumed that all households have electricity so the discount
+        # is applied to the natural gas daily charge.
+        average_gas_tariff = pd.read_csv(csv_file, dtype=str)
+        per_natural_gas_kwh = (
+            average_gas_tariff["nzd_per_kwh.Uncontrolled"].astype("float").loc[0]
+        )
+        daily_charge = (
+            average_gas_tariff["daily_charge"].astype("float").loc[0]
+            - DAILY_DUAL_FUEL_DISCOUNT
+        )
+        NATURAL_GAS_PLAN = NaturalGasPlan(
+            name="Average Natural Gas Tariff",
+            per_natural_gas_kwh=per_natural_gas_kwh,
+            daily_charge=daily_charge,
+        )
+except (FileNotFoundError, ModuleNotFoundError) as e:
+    NATURAL_GAS_PLAN = None
 
 
 def create_nzd_per_kwh(row):
@@ -171,4 +197,7 @@ def get_energy_plan(postcode: str, vehicle_type: str) -> HouseholdEnergyPlan:
     plans["electricity_plan"] = postcode_to_electricity_plan_dict.get(
         postcode, plans["electricity_plan"]
     )
+    if NATURAL_GAS_PLAN is not None:
+        plans["natural_gas_plan"] = NATURAL_GAS_PLAN
+
     return HouseholdEnergyPlan(name=f"Plan for {postcode}", **plans)

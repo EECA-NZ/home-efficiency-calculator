@@ -7,6 +7,10 @@ from typing import Optional
 from pydantic import BaseModel
 
 from .cooktop import CooktopAnswers
+from .driving import DrivingAnswers
+from .heating import HeatingAnswers
+from .hot_water import HotWaterAnswers
+from .solar import SolarAnswers
 from .your_home import YourHomeAnswers
 
 
@@ -21,4 +25,8 @@ class HouseholdAnswers(BaseModel):
     """
 
     your_home: YourHomeAnswers
+    heating: Optional[HeatingAnswers] = None
+    hot_water: Optional[HotWaterAnswers] = None
     cooktop: Optional[CooktopAnswers] = None
+    driving: Optional[DrivingAnswers] = None
+    solar: Optional[SolarAnswers] = None

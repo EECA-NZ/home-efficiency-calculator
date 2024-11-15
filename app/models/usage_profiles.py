@@ -64,7 +64,43 @@ class YearlyFuelUsageProfile(BaseModel):
     model_config = ConfigDict(validate_assignment=True, extra="ignore")
 
 
+class HeatingYearlyFuelUsageProfile(YearlyFuelUsageProfile):
+    """
+    Space heating yearly fuel usage profile.
+    """
+
+
+class HotWaterYearlyFuelUsageProfile(YearlyFuelUsageProfile):
+    """
+    Hot water yearly fuel usage profile.
+    """
+
+
 class CooktopYearlyFuelUsageProfile(YearlyFuelUsageProfile):
     """
     Cooktop yearly fuel usage profile.
+    """
+
+
+class DrivingYearlyFuelUsageProfile(YearlyFuelUsageProfile):
+    """
+    Driving yearly fuel usage profile.
+    """
+
+
+class SolarYearlyFuelGenerationProfile(YearlyFuelUsageProfile):
+    """
+    Yearly solar energy generation profile.
+    """
+
+
+class HouseholdOtherElectricityUsageProfile(YearlyFuelUsageProfile):
+    """
+    Overall household yearly fuel usage profile.
+    """
+
+
+class HouseholdYearlyFuelUsageProfile(YearlyFuelUsageProfile):
+    """
+    Overall household yearly fuel usage profile.
     """

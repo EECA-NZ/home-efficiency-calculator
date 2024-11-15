@@ -2,15 +2,21 @@
 Configuration functions including default values for
 energy plans, usage profiles, and answers.
 
-Rewiring Aotearoa:
+The Rewiring Aotearoa analysis used the following:
     • Electricity variable cost: 24.2c/kWh or 18c/kWh off-peak/ripple.
     • Electricity connection cost: Not included in any calculations.
         (Homes are assumed on-grid in all cases.)
-    • Piped gas variable cost: 11c/kWh.
-    • Piped gas connection cost: $1.60 per day ($587 per year).
     • LPG variable cost: 24.4c/kWh.
     • LPG bottle rental (2 x 45kg bottles):
         $5.75 per bottle per month ($138 per year for two bottles).
+    • Piped gas variable cost: 11c/kWh.
+    • Piped gas connection cost: $1.60 per day ($587 per year).
+
+We use average gst-inclusive costs for natural gas
+in a dataset obtained from Powerswitch.
+
+We use postcode -> EDB -> Electricity Plan mapping to determine
+electricity plans for a given location using the Powerswitch data.
 
 Petrol and Diesel pricing:
 
@@ -73,12 +79,16 @@ def get_default_natural_gas_plan():
     """
     Return a default natural gas plan.
 
+    If available, use mean values obtained from Powerswitch dataset.
+
     Rewiring Aotearoa:
     • Piped gas variable cost: 11c/kWh.
     • Piped gas connection cost: $1.60 per day ($587 per year).
     """
     return NaturalGasPlan(
-        name="Default Natural Gas Plan", per_natural_gas_kwh=0.11, daily_charge=1.6
+        name="Default Natural Gas Plan",
+        per_natural_gas_kwh=0.11,
+        daily_charge=1.60,
     )
 
 

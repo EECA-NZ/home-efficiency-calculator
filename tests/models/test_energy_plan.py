@@ -2,13 +2,14 @@
 Test the energy plan service
 """
 
+import re
 import unittest
 
 from pytest import approx
 
 from app.constants import DAYS_IN_YEAR
 from app.models.energy_plans import ElectricityPlan
-from app.models.usage_profiles import YearlyFuelUsageProfile
+from app.models.usage_profiles import HouseholdYearlyFuelUsageProfile
 from app.services.get_energy_plans import (
     edb_zone_to_electricity_plan,
     get_energy_plan,
@@ -30,10 +31,10 @@ def test_edb_zone_to_electricity_plan():
     Test the edb_zone_to_electricity_plan function.
     """
     plan = edb_zone_to_electricity_plan("Wellington Electricity")
-    assert plan.name == "Electricity PlanId 172954"
-    assert plan.daily_charge in (1.787445, 2.0)
+    assert re.match(r"Electricity PlanId [0-9]+|Default Electricity Plan", plan.name)
+    assert plan.daily_charge in (2.304945, 2.0)
     assert plan.nzd_per_kwh in (
-        {"Day": 0.29324999999999996, "Night": 0.14662499999999998},
+        {"All inclusive": 0.18462291666666666},
         {"Day": 0.242, "Night": 0.18},
     )
 
@@ -43,10 +44,10 @@ def test_postcode_to_electricity_plan():
     Test the postcode_to_electricity_plan function.
     """
     plan = postcode_to_electricity_plan("6012")
-    assert plan.name == "Electricity PlanId 172954"
-    assert plan.daily_charge in (1.787445, 2.0)
+    assert re.match(r"Electricity PlanId [0-9]+|Default Electricity Plan", plan.name)
+    assert plan.daily_charge in (2.304945, 2.0)
     assert plan.nzd_per_kwh in (
-        {"Day": 0.29324999999999996, "Night": 0.14662499999999998},
+        {"All inclusive": 0.18462291666666666},
         {"Day": 0.242, "Night": 0.18},
     )
 
@@ -56,16 +57,24 @@ def test_get_energy_plan():
     Test the get_energy_plan function.
     """
     plan = get_energy_plan("6012", "None")
-    assert plan.name == "Plan for 6012"
-    assert plan.electricity_plan.name == "Electricity PlanId 172954"
-    assert plan.electricity_plan.daily_charge in (1.787445, 2.0)
+    assert plan.name in ("Plan for 6012", "Default Electricity Plan")
+    assert re.match(
+        r"Electricity PlanId [0-9]+|Default Electricity Plan",
+        plan.electricity_plan.name,
+    )
+    assert plan.electricity_plan.daily_charge in (2.304945, 2.0)
     assert plan.electricity_plan.nzd_per_kwh in (
-        {"Day": 0.29324999999999996, "Night": 0.14662499999999998},
+        {"All inclusive": 0.18462291666666666},
         {"Day": 0.242, "Night": 0.18},
     )
-    assert plan.natural_gas_plan.name == "Default Natural Gas Plan"
-    assert plan.natural_gas_plan.per_natural_gas_kwh == 0.11
-    assert plan.natural_gas_plan.daily_charge == 1.6
+    assert "Natural Gas" in plan.natural_gas_plan.name
+    # Plan tariffs are either RA numbers or averages from Powerswitch dataset
+    assert plan.natural_gas_plan.per_natural_gas_kwh == approx(
+        0.11
+    ) or plan.natural_gas_plan.per_natural_gas_kwh == approx(0.13769208038869257)
+    assert plan.natural_gas_plan.daily_charge == approx(
+        1.6
+    ) or plan.natural_gas_plan.daily_charge == approx(1.8648264743816259)
     assert plan.lpg_plan.name == "Default LPG Plan"
     assert plan.lpg_plan.per_lpg_kwh == 0.244
     assert plan.lpg_plan.daily_charge == 0.37782340862423
@@ -84,7 +93,7 @@ class TestElectricityPlan(unittest.TestCase):
     """
 
     def setUp(self):
-        self.profile = YearlyFuelUsageProfile(
+        self.profile = HouseholdYearlyFuelUsageProfile(
             elx_connection_days=DAYS_IN_YEAR,
             inflexible_day_kwh=300,
             flexible_kwh=100,
@@ -143,36 +152,10 @@ class TestElectricityPlan(unittest.TestCase):
                 "Controlled": self.controlled,
             },
         )
-        self.electricity_plan_uncontrolled_all_inclusive = ElectricityPlan(
-            name="UncontrolledPlan",
-            daily_charge=self.daily_charge,
-            nzd_per_kwh={
-                "Uncontrolled": self.uncontrolled,
-                "All inclusive": self.all_inclusive,
-            },
-        )
-        self.electricity_plan_night_controlled_day = ElectricityPlan(
-            name="UncontrolledPlan",
-            daily_charge=self.daily_charge,
-            nzd_per_kwh={
-                "Night": self.night,
-                "Controlled": self.controlled,
-                "Day": self.day,
-            },
-        )
         self.electricity_plan_night_all_inclusive = ElectricityPlan(
             name="UncontrolledPlan",
             daily_charge=self.daily_charge,
             nzd_per_kwh={"Night": self.night, "All inclusive": self.all_inclusive},
-        )
-        self.electricity_plan_night_uncontrolled_controlled = ElectricityPlan(
-            name="UncontrolledPlan",
-            daily_charge=self.daily_charge,
-            nzd_per_kwh={
-                "Night": self.night,
-                "Uncontrolled": self.uncontrolled,
-                "Controlled": self.controlled,
-            },
         )
         self.electricity_plan_night_uncontrolled = ElectricityPlan(
             name="UncontrolledPlan",
@@ -226,28 +209,6 @@ class TestElectricityPlan(unittest.TestCase):
             ),
         )
 
-    def test_uncontrolled_all_inclusive(self):
-        """
-        Test electricity plan with variable pricing pattern
-        {"Uncontrolled", "All inclusive"}.
-        """
-        cost = self.electricity_plan_uncontrolled_all_inclusive.calculate_cost(
-            self.profile
-        )
-        self.assertEqual(
-            cost, (self.daily_charge * DAYS_IN_YEAR, (300 + 100) * self.all_inclusive)
-        )
-
-    def test_night_controlled_day(self):
-        """
-        Test electricity plan with variable pricing pattern
-        {"Night", "Controlled", "Day"}.
-        """
-        cost = self.electricity_plan_night_controlled_day.calculate_cost(self.profile)
-        self.assertEqual(
-            cost, (self.daily_charge * DAYS_IN_YEAR, 300 * self.day + 100 * self.night)
-        )
-
     def test_night_all_inclusive(self):
         """
         Test electricity plan with variable pricing pattern
@@ -259,24 +220,6 @@ class TestElectricityPlan(unittest.TestCase):
             (
                 self.daily_charge * DAYS_IN_YEAR,
                 300 * self.all_inclusive + 100 * self.night,
-            ),
-        )
-
-    def test_night_uncontrolled_controlled(self):
-        """
-        Test electricity plan with variable pricing pattern
-        {"Night", "Uncontrolled", "Controlled"}.
-        Since the Controlled rate is more expensive than the Night rate,
-        the Controlled rate is used for the flexible kwh.
-        """
-        cost = self.electricity_plan_night_uncontrolled_controlled.calculate_cost(
-            self.profile
-        )
-        self.assertEqual(
-            cost,
-            (
-                self.daily_charge * DAYS_IN_YEAR,
-                300 * self.uncontrolled + 100 * self.night,
             ),
         )
 

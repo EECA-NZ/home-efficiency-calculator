@@ -1,5 +1,9 @@
 """
 General constants used in the calculations
+
+Sources for emissions factors as follows:
+# Electricity grid emission factor:
+#   a five-year average (2019-2023) of MBIE numbers
 """
 
 DAYS_IN_YEAR = 365.25
@@ -19,3 +23,5 @@ EMISSIONS_FACTORS = {
     "petrol_kg_co2e_per_litre": 2.41,
     "diesel_kg_co2e_per_litre": 2.67,
 }
+
+DAILY_DUAL_FUEL_DISCOUNT = 0.15

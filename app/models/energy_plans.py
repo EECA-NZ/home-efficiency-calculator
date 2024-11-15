@@ -48,26 +48,10 @@ class ElectricityPlan(BaseModel):
                 profile.inflexible_day_kwh * self.nzd_per_kwh["Uncontrolled"]
             )
             variable_cost_nzd += profile.flexible_kwh * self.nzd_per_kwh["Controlled"]
-        elif keys == {"Uncontrolled", "All inclusive"}:  # this pattern is a bit weird
-            variable_cost_nzd += (
-                profile.inflexible_day_kwh + profile.flexible_kwh
-            ) * min(self.nzd_per_kwh["All inclusive"], self.nzd_per_kwh["Uncontrolled"])
-        elif keys == {"Night", "Controlled", "Day"}:
-            variable_cost_nzd += profile.inflexible_day_kwh * self.nzd_per_kwh["Day"]
-            variable_cost_nzd += profile.flexible_kwh * min(
-                self.nzd_per_kwh["Controlled"], self.nzd_per_kwh["Night"]
-            )
         elif keys == {"Night", "All inclusive"}:
             variable_cost_nzd += profile.flexible_kwh * self.nzd_per_kwh["Night"]
             variable_cost_nzd += (
                 profile.inflexible_day_kwh * self.nzd_per_kwh["All inclusive"]
-            )
-        elif keys == {"Night", "Uncontrolled", "Controlled"}:
-            variable_cost_nzd += (
-                profile.inflexible_day_kwh * self.nzd_per_kwh["Uncontrolled"]
-            )
-            variable_cost_nzd += profile.flexible_kwh * min(
-                self.nzd_per_kwh["Night"], self.nzd_per_kwh["Controlled"]
             )
         elif keys == {"Night", "Uncontrolled"}:
             variable_cost_nzd += profile.flexible_kwh * self.nzd_per_kwh["Night"]
@@ -267,7 +251,7 @@ class HouseholdEnergyPlan(BaseModel):
     public_charging_price: PublicChargingPrice
     other_vehicle_costs: NonEnergyVehicleCosts
 
-    def calculate_cost(self, profile):
+    def calculate_cost(self, profile, verbose=False):
         """
         Calculate the total cost of energy for a household.
 
@@ -291,6 +275,9 @@ class HouseholdEnergyPlan(BaseModel):
             self.other_vehicle_costs,
         ]:
             fixed, variable = plan.calculate_cost(profile)
+            if verbose:
+                print(f"{plan.name} fixed cost: {fixed}")
+                print(f"{plan.name} variable cost: {variable}")
             fixed_cost_nzd += fixed
             variable_cost_nzd += variable
 

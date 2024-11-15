@@ -14,7 +14,13 @@ from ..models.response_models import (
     SavingsResponse,
     UserGeography,
 )
-from ..models.user_answers import CooktopAnswers, YourHomeAnswers
+from ..models.user_answers import (
+    CooktopAnswers,
+    DrivingAnswers,
+    HeatingAnswers,
+    HotWaterAnswers,
+    YourHomeAnswers,
+)
 from ..services.cost_calculator import generate_savings_options
 from ..services.get_climate_zone import climate_zone
 from ..services.get_energy_plans import postcode_to_edb_zone
@@ -50,9 +56,10 @@ async def calculate_component_savings(
         The savings for the component.
     """
     try:
-        options_dict = generate_savings_options(
+        options_dict, current_fuel_use = generate_savings_options(
             component_answers, component_name, your_home
         )
+        current_fuel_use = component_answers.energy_usage_pattern(your_home)
         options_dict = round_floats_to_2_dp(options_dict)
         if getattr(component_answers, f"alternative_{component_name}", None):
             specific_alternative = getattr(
@@ -63,11 +70,16 @@ async def calculate_component_savings(
                 for key, val in options_dict.items()
                 if key == specific_alternative
             }
+            alternative_fuel_use = component_answers.energy_usage_pattern(
+                your_home, use_alternative=True
+            )
+        else:
+            alternative_fuel_use = None
         user_geography = {
             "edb_region": postcode_to_edb_zone(your_home.postcode),
             "climate_zone": climate_zone(your_home.postcode),
         }
-        return options_dict, user_geography
+        return options_dict, user_geography, current_fuel_use, alternative_fuel_use
     except Exception as e:
         logger.error("Error calculating %s savings: %s", component_name, e)
         return {"error": f"Error calculating {component_name} savings: {e}"}
@@ -91,7 +103,7 @@ async def create_response(data, component_name):
     ComponentSavingsResponse
         The response for the household component.
     """
-    (options_dict, user_geography) = data
+    (options_dict, user_geography, current_fuel_use, alternative_fuel_use) = data
     if "error" in options_dict:
         logger.error("Error calculating %s savings: %s", component_name, data["error"])
         raise HTTPException(status_code=500, detail=data["error"])
@@ -104,8 +116,73 @@ async def create_response(data, component_name):
     }
     user_geography = UserGeography(**user_geography)
     return ComponentSavingsResponse(
-        alternatives=options_response, user_geography=user_geography
+        alternatives=options_response,
+        user_geography=user_geography,
+        current_fuel_use=current_fuel_use,
+        alternative_fuel_use=alternative_fuel_use,
     )
+
+
+# Endpoint example using the common function
+@app.post("/heating/savings", response_model=ComponentSavingsResponse)
+async def heating_savings(heating_answers: HeatingAnswers, your_home: YourHomeAnswers):
+    """
+    Endpoint to calculate savings for heating.
+
+    If an alternative heating source is provided,
+    calculate the savings for that source. Otherwise,
+    generate savings options for all possible heating
+    sources.
+
+    Parameters
+    ----------
+    heating_answers : HeatingAnswers
+        The user's answers for heating.
+
+    your_home : YourHomeAnswers
+        The user's answers for their home.
+
+    Returns
+    -------
+    SavingsResponse
+        The savings for the heating component.
+    """
+    data = await calculate_component_savings(
+        heating_answers, "main_heating_source", your_home
+    )
+    return await create_response(data, "heating")
+
+
+# Apply similar changes to other endpoints
+@app.post("/hot_water/savings", response_model=ComponentSavingsResponse)
+async def hot_water_savings(
+    hot_water_answers: HotWaterAnswers, your_home: YourHomeAnswers
+):
+    """
+    Endpoint to calculate savings for hot water.
+
+    If an alternative hot water source is provided,
+    calculate the savings for that source. Otherwise,
+    generate savings options for all possible hot
+    water sources.
+
+    Parameters
+    ----------
+    hot_water_answers : HotWaterAnswers
+        The user's answers for hot water.
+
+    your_home : YourHomeAnswers
+        The user's answers for their home.
+
+    Returns
+    -------
+    SavingsResponse
+        The savings for the hot water component.
+    """
+    data = await calculate_component_savings(
+        hot_water_answers, "hot_water_heating_source", your_home
+    )
+    return await create_response(data, "hot_water")
 
 
 @app.post("/cooktop/savings", response_model=ComponentSavingsResponse)
@@ -133,3 +210,30 @@ async def cooktop_savings(cooktop_answers: CooktopAnswers, your_home: YourHomeAn
     """
     data = await calculate_component_savings(cooktop_answers, "cooktop", your_home)
     return await create_response(data, "cooktop")
+
+
+@app.post("/driving/savings", response_model=ComponentSavingsResponse)
+async def driving_savings(driving_answers: DrivingAnswers, your_home: YourHomeAnswers):
+    """
+    Endpoint to calculate savings for driving.
+
+    If an alternative vehicle type is provided,
+    calculate the savings for that vehicle type.
+    Otherwise, generate savings options for all
+    possible vehicle types.
+
+    Parameters
+    ----------
+    driving_answers : DrivingAnswers
+        The user's answers for driving.
+
+    your_home : YourHomeAnswers
+        The user's answers for their home.
+
+    Returns
+    -------
+    SavingsResponse
+        The savings for the driving component.
+    """
+    data = await calculate_component_savings(driving_answers, "vehicle_type", your_home)
+    return await create_response(data, "driving")

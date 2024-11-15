@@ -10,6 +10,21 @@ from app.services.configuration import (
     get_default_cooktop_answers,
     get_default_your_home_answers,
 )
+from app.services.cost_calculator import calculate_savings_for_option
+from app.services.get_energy_plans import get_energy_plan
+
+MY_ENERGY_PLAN = get_energy_plan("6012", "None")
+
+YOUR_HOME = YourHomeAnswers(
+    people_in_house=4,
+    postcode="6012",
+    disconnect_gas=True,
+)
+
+COOKTOP = CooktopAnswers(
+    cooktop="Piped gas",
+    alternative_cooktop="Electric induction",
+)
 
 
 def test_invalid_cooktop_type():
@@ -107,3 +122,57 @@ def test_cooking_energy_usage():
                 assert (
                     getattr(cooktop_energy_use, field) == expected_value
                 ), f"{field} failed for {cooktop_type}"
+
+
+def manual_cost_calculation_natural_gas():
+    """
+    A manual calculation of the annual running
+    cost for a natural gas cooktop
+    """
+    energy_plan = get_energy_plan("6012", "None")
+    natural_gas_kwh = COOKTOP.energy_usage_pattern(YOUR_HOME).natural_gas_kwh
+    natural_gas_cost_per_kwh = energy_plan.natural_gas_plan.per_natural_gas_kwh
+    annual_running_cost = natural_gas_kwh * natural_gas_cost_per_kwh
+    return annual_running_cost
+
+
+def manual_cost_calculation_electric_induction():
+    """
+    A manual calculation of the annual running
+    cost for an electric induction cooktop
+    """
+    energy_plan = get_energy_plan("6012", "None")
+    inflexible_day_kwh = COOKTOP.energy_usage_pattern(
+        YOUR_HOME, use_alternative=True
+    ).inflexible_day_kwh
+    inflexible_kwh_cost_per_kwh = energy_plan.electricity_plan.nzd_per_kwh[
+        "All inclusive"
+    ]
+    annual_running_cost = inflexible_day_kwh * inflexible_kwh_cost_per_kwh
+    return annual_running_cost
+
+
+def test_cost_savings_calculations():
+    """
+    Test the savings calculations for a small petrol car
+    and a small electric car, comparing with a manual calculation.
+    """
+    gas_energy_costs = MY_ENERGY_PLAN.calculate_cost(
+        COOKTOP.energy_usage_pattern(YOUR_HOME)
+    )
+    induction_energy_costs = MY_ENERGY_PLAN.calculate_cost(
+        COOKTOP.energy_usage_pattern(YOUR_HOME, use_alternative=True)
+    )
+    calculated_savings = calculate_savings_for_option(
+        "Electric induction", "cooktop", COOKTOP, YOUR_HOME
+    )
+    assert gas_energy_costs[1] == approx(
+        calculated_savings["variable_cost_nzd"]["current"]
+    )
+    assert gas_energy_costs[1] == approx(manual_cost_calculation_natural_gas())
+    assert induction_energy_costs[1] == approx(
+        calculated_savings["variable_cost_nzd"]["alternative"]
+    )
+    assert induction_energy_costs[1] == approx(
+        manual_cost_calculation_electric_induction()
+    )
