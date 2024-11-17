@@ -1,6 +1,10 @@
 """
 General constants used in the calculations
 
+Note: a 'documentation' excel workbook is to be created, and we
+intend to add it into the repository and link to it from this
+docstring. Links to supporting literature will be added here.
+
 Sources for emissions factors as follows:
 # Electricity grid emission factor:
 #   a five-year average (2019-2023) of MBIE numbers

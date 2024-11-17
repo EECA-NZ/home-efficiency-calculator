@@ -1,5 +1,5 @@
 """
-Constants for electricity use for appliances other than those on other tabs
+Constants for electricity use for appliances other than those modelled here.
 
 This information is not displayed in the tool at any point, but is used in
 the calculation of optimal electricity plans.
@@ -10,6 +10,10 @@ Night rate assumed to apply for 8 hours per day. Refrigeration use likely
 higher during day due to temperature and frequency of opening door, but some
 "other" use likely to be at night (e.g. standby on electronics including
 ONT/router) so unders and overs should cancel to some degree.
+
+Note: a 'documentation' excel workbook is to be created, and we
+intend to add it into the repository and link to it from this
+docstring. Links to supporting literature will be added here.
 
 Refer to the 'Other electricity use' spreadsheet tab for more information.
 """

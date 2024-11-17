@@ -1,5 +1,10 @@
 """
 Constants for hot water energy calculations
+
+Note: a 'documentation' excel workbook is to be created, and we
+intend to add it into the repository and link to it from this
+docstring. Links to supporting literature will be added here.
+
 """
 
 WATER_SPECIFIC_HEAT_CAPACITY_KWH_PER_KG_K = 0.001162
