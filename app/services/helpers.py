@@ -19,6 +19,7 @@ from ..constants import (
     HEATING_PERIOD_FACTOR,
     HOT_WATER_HEAT_PUMP_COP_BY_CLIMATE_ZONE,
     INLET_WATER_TEMPERATURE_BY_CLIMATE_ZONE,
+    KNOWN_TANK_SIZE_LOSSES_KWH_PER_DAY,
     OTHER_ELX_KWH_PER_DAY,
     OTHER_WATER_USAGE_QUANTITIES,
     SHOWER_WATER_USAGE_QUANTITIES,
@@ -262,12 +263,11 @@ def hot_water_cylinder_heat_loss_kwh_per_day(tank_size):
     - tank_size: The size of the hot water cylinder in litres.
 
     Returns:
-    - The heat loss in kWh/year.
+    - The heat loss in kWh/day.
     """
-    known_tank_losses = {130: 1.56, 180: 1.76, 250: 2.16}
-    if tank_size not in known_tank_losses:
+    if tank_size not in KNOWN_TANK_SIZE_LOSSES_KWH_PER_DAY:
         raise ValueError(f"Unknown tank size: {tank_size}")
-    return known_tank_losses.get(tank_size)
+    return KNOWN_TANK_SIZE_LOSSES_KWH_PER_DAY.get(tank_size)
 
 
 def gas_storage_heat_loss_kwh_per_day(tank_size):
