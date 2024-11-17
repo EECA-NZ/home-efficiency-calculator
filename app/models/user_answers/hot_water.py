@@ -107,31 +107,4 @@ class HotWaterAnswers(BaseModel):
                 "lpg_kwh": total_kwh,
             },
         }
-        return HotWaterYearlyFuelUsageProfile(
-            elx_connection_days=fuel_usage[hot_water_heating_source].get(
-                "elx_connection_days", 0
-            ),
-            inflexible_day_kwh=fuel_usage[hot_water_heating_source].get(
-                "inflexible_day_kwh", 0
-            ),
-            flexible_kwh=fuel_usage[hot_water_heating_source].get("flexible_kwh", 0),
-            natural_gas_connection_days=fuel_usage[hot_water_heating_source].get(
-                "natural_gas_connection_days", 0
-            ),
-            natural_gas_kwh=fuel_usage[hot_water_heating_source].get(
-                "natural_gas_kwh", 0
-            ),
-            lpg_tanks_rental_days=fuel_usage[hot_water_heating_source].get(
-                "lpg_tanks_rental_days", 0
-            ),
-            lpg_kwh=fuel_usage[hot_water_heating_source].get("lpg_kwh", 0),
-            wood_kwh=0,
-            petrol_litres=0,
-            diesel_litres=0,
-            public_ev_charger_kwh=0,
-            thousand_km_petrol=0,
-            thousand_km_diesel=0,
-            thousand_km_hybrid=0,
-            thousand_km_plug_in_hybrid=0,
-            thousand_km_electric=0,
-        )
+        return HotWaterYearlyFuelUsageProfile(**fuel_usage[hot_water_heating_source])

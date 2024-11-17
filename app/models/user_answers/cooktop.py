@@ -79,26 +79,12 @@ class CooktopAnswers(BaseModel):
 
         factor = usage_factors[cooktop_type]
         total_kwh = (
-            factor["standard_household_kwh"]
+            factor.pop("standard_household_kwh")
             * (1 + your_home.people_in_house)
             / (1 + AVERAGE_HOUSEHOLD_SIZE)
         )
+        factor["inflexible_day_kwh"] = total_kwh if "Electric" in cooktop_type else 0
+        factor["natural_gas_kwh"] = total_kwh if cooktop_type == "Piped gas" else 0
+        factor["lpg_kwh"] = total_kwh if cooktop_type == "Bottled gas" else 0
 
-        return CooktopYearlyFuelUsageProfile(
-            elx_connection_days=factor.get("elx_connection_days", 0),
-            inflexible_day_kwh=total_kwh if "Electric" in cooktop_type else 0,
-            flexible_kwh=0,
-            natural_gas_connection_days=factor.get("natural_gas_connection_days", 0),
-            natural_gas_kwh=total_kwh if cooktop_type == "Piped gas" else 0,
-            lpg_tanks_rental_days=factor.get("lpg_tanks_rental_days", 0),
-            lpg_kwh=total_kwh if cooktop_type == "Bottled gas" else 0,
-            wood_kwh=0,
-            petrol_litres=0,
-            diesel_litres=0,
-            public_ev_charger_kwh=0,
-            thousand_km_petrol=0,
-            thousand_km_diesel=0,
-            thousand_km_hybrid=0,
-            thousand_km_plug_in_hybrid=0,
-            thousand_km_electric=0,
-        )
+        return CooktopYearlyFuelUsageProfile(**factor)

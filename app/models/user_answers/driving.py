@@ -73,13 +73,7 @@ class DrivingAnswers(BaseModel):
 
         return DrivingYearlyFuelUsageProfile(
             elx_connection_days=DAYS_IN_YEAR,
-            inflexible_day_kwh=0,
             flexible_kwh=home_charging_kwh,
-            natural_gas_connection_days=0,
-            natural_gas_kwh=0,
-            lpg_tanks_rental_days=0,
-            lpg_kwh=0,
-            wood_kwh=0,
             petrol_litres=yearly_fuel_litres if liquid_fuel == "Petrol" else 0,
             diesel_litres=yearly_fuel_litres if liquid_fuel == "Diesel" else 0,
             public_ev_charger_kwh=public_charging_kwh,

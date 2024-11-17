@@ -43,20 +43,5 @@ class SolarAnswers(BaseModel):
             )
 
         return SolarYearlyFuelGenerationProfile(
-            elx_connection_days=0,
             inflexible_day_kwh=-annual_generation_kwh,
-            flexible_kwh=0,
-            natural_gas_connection_days=0,
-            natural_gas_kwh=0,
-            lpg_tanks_rental_days=0,
-            lpg_kwh=0,
-            wood_kwh=0,
-            petrol_litres=0,
-            diesel_litres=0,
-            public_ev_charger_kwh=0,
-            thousand_km_petrol=0,
-            thousand_km_diesel=0,
-            thousand_km_hybrid=0,
-            thousand_km_plug_in_hybrid=0,
-            thousand_km_electric=0,
         )
