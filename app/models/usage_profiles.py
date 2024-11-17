@@ -64,7 +64,84 @@ class YearlyFuelUsageProfile(BaseModel):
     model_config = ConfigDict(validate_assignment=True, extra="ignore")
 
 
+class HeatingYearlyFuelUsageProfile(YearlyFuelUsageProfile):
+    """
+    Space heating yearly fuel usage profile.
+
+    Derived from YearlyFuelUsageProfile with the same attributes.
+
+    Keeping this class distinct allows us to be specific about
+    the household function (here, space heating) whose energy
+    use is being referred to.
+    """
+
+
+class HotWaterYearlyFuelUsageProfile(YearlyFuelUsageProfile):
+    """
+    Hot water yearly fuel usage profile.
+
+    Derived from YearlyFuelUsageProfile with the same attributes.
+
+    Keeping this class distinct allows us to be specific about
+    the household function (here, hot water heating) whose energy
+    use is being referred to.
+    """
+
+
 class CooktopYearlyFuelUsageProfile(YearlyFuelUsageProfile):
     """
     Cooktop yearly fuel usage profile.
+
+    Derived from YearlyFuelUsageProfile with the same attributes.
+
+    Keeping this class distinct allows us to be specific about
+    the household function (here, stovetop cooking) whose energy
+    use is being referred to.
+    """
+
+
+class DrivingYearlyFuelUsageProfile(YearlyFuelUsageProfile):
+    """
+    Driving yearly fuel usage profile.
+
+    Derived from YearlyFuelUsageProfile with the same attributes.
+
+    Keeping this class distinct allows us to be specific about
+    the household function (here, vehicle driving) whose energy
+    use is being referred to.
+    """
+
+
+class SolarYearlyFuelGenerationProfile(YearlyFuelUsageProfile):
+    """
+    Yearly solar energy generation profile.
+
+    Derived from YearlyFuelUsageProfile with the same attributes.
+
+    Keeping this class distinct allows us to be specific about the
+    part of the household whose energy action (here, rooftop solar
+    electricity generation) is being referred to.
+    """
+
+
+class HouseholdOtherElectricityUsageProfile(YearlyFuelUsageProfile):
+    """
+    'Other household electricity' yearly fuel usage profile.
+
+    Derived from YearlyFuelUsageProfile with the same attributes.
+
+    Keeping this class distinct allows us to be specific about the
+    part of the household (here, everything except the components
+    that we model separately) whose energy use is being referred to.
+    """
+
+
+class HouseholdYearlyFuelUsageProfile(YearlyFuelUsageProfile):
+    """
+    Overall household yearly fuel usage profile.
+
+    Derived from YearlyFuelUsageProfile with the same attributes.
+
+    Keeping this class distinct class allows us to be specific that
+    we are considering the overall household energy use.
     """
