@@ -79,8 +79,6 @@ def get_default_natural_gas_plan():
     """
     Return a default natural gas plan.
 
-    If available, use mean values obtained from Powerswitch dataset.
-
     Rewiring Aotearoa:
     • Piped gas variable cost: 11c/kWh.
     • Piped gas connection cost: $1.60 per day ($587 per year).
