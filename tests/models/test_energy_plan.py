@@ -69,8 +69,8 @@ def test_get_energy_plan():
     )
     assert "Natural Gas" in plan.natural_gas_plan.name
     # Plan tariffs are either RA numbers or averages from Powerswitch dataset
-    assert plan.natural_gas_plan.per_natural_gas_kwh == approx(0.13769208038869257)
-    assert plan.natural_gas_plan.daily_charge == approx(1.8648264743816259)
+    assert plan.natural_gas_plan.per_natural_gas_kwh == approx(0.11)
+    assert plan.natural_gas_plan.daily_charge == approx(1.6)
     assert plan.lpg_plan.name == "Default LPG Plan"
     assert plan.lpg_plan.per_lpg_kwh == 0.244
     assert plan.lpg_plan.daily_charge == 0.37782340862423

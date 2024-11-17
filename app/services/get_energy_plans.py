@@ -197,7 +197,4 @@ def get_energy_plan(postcode: str, vehicle_type: str) -> HouseholdEnergyPlan:
     plans["electricity_plan"] = postcode_to_electricity_plan_dict.get(
         postcode, plans["electricity_plan"]
     )
-    if NATURAL_GAS_PLAN is not None:
-        plans["natural_gas_plan"] = NATURAL_GAS_PLAN
-
     return HouseholdEnergyPlan(name=f"Plan for {postcode}", **plans)
