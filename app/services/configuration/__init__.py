@@ -1,5 +1,5 @@
 """
-This module contains the methods used to instantiate 
+This module contains the methods used to instantiate
 classes for household components and energy plans.
 """
 
