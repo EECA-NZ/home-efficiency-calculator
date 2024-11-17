@@ -36,7 +36,9 @@ def household_energy_profile(profile: HouseholdAnswers):
         gas_connection_savings = calculate_fixed_cost_savings(profile)
         total_fuel_savings = assemble_fuel_savings(totals)
         total_savings = assemble_total_savings(totals, gas_connection_savings)
-        fuel_use_profile = estimate_usage_from_profile(profile, round_to_2dp=True)
+        current_fuel_use_profile = estimate_usage_from_profile(
+            profile, round_to_2dp=True
+        )
         alternative_fuel_use_profile = estimate_usage_from_profile(
             profile, use_alternatives=True, round_to_2dp=True
         )
@@ -49,7 +51,7 @@ def household_energy_profile(profile: HouseholdAnswers):
             gas_connection_savings=gas_connection_savings,
             total_savings=total_savings,
             user_geography=user_geography,
-            current_fuel_use=fuel_use_profile,
+            current_fuel_use=current_fuel_use_profile,
             alternative_fuel_use=alternative_fuel_use_profile,
         )
     except Exception as e:
