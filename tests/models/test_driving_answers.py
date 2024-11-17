@@ -36,12 +36,7 @@ def test_small_electric_car():
         vehicle_size="Small",
         km_per_week="200",
     )
-    your_home = YourHomeAnswers(
-        people_in_house=3,
-        postcode="6012",
-        disconnect_gas=False,
-    )
-    my_driving_energy_usage = my_driving_answers.energy_usage_pattern(your_home)
+    my_driving_energy_usage = my_driving_answers.energy_usage_pattern(YOUR_HOME)
 
     assert (
         my_driving_energy_usage.flexible_kwh
