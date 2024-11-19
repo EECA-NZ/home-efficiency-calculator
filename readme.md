@@ -66,15 +66,25 @@ It is assumed that the user is working in a powershell environment on a windows 
     Point your browser at `http://localhost:8000` or `http://localhost:8000/docs` to see the Swagger UI.
 
 1. **Post a request to the API:**
-    ```bash
+    ```
     curl -Method 'POST' `
-     -Uri 'http://localhost:8000/water-heating/' `
-     -Headers @{ "Accept"="application/json"; "Content-Type"="application/json" } `
-     -Body '{
-        "volume_litres": 100,
-        "temp_increase_celsius": 50,
-        "efficiency": 0.8
-     }'
+        -Uri 'http://localhost:8000/water-heating/' `
+        -Headers @{
+            "Accept"="application/json"
+            "Content-Type"="application/json"
+        } `
+        -Body '{
+            "cooktop_answers": {
+                "cooktop": "Piped gas",
+                "alternative_cooktop": "Electric induction"
+            },
+            "your_home": {
+                "people_in_house": 4,
+                "postcode": "9016",
+                "disconnect_gas": true
+            }
+        }' `
+        -OutFile 'response.json'
     ```
 
 ## Docker Setup

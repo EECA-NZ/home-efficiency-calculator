@@ -78,7 +78,7 @@ def manual_calculation_ev():
     assumed_distance_km_per_week = 200
     ev_public_charging_fraction = 0.2
     public_elx_cost_per_kwh = 0.80
-    home_elx_cost_per_kwh = 0.18462291666666666
+    home_elx_cost_per_kwh = 0.20239999999999997
     annual_distance_km = assumed_distance_km_per_week / 7 * DAYS_IN_YEAR
     annual_elx_consumption_kwh = (
         annual_distance_km / 100 * battery_economy_kwh_per_100km

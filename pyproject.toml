@@ -25,7 +25,8 @@ Homepage = "https://github.com/EECA-NZ/home-efficiency-calculator"
 packages = { find = { exclude = ["build*", "dist*", "*egg-info*", "__pycache__*", "*__pycache__*", "lookup", "lookup.*"] } }
 include-package-data = true
 package-data = { "data_analysis" = ["postcode_lookup_tables/output/*.csv",
-                                    "electricity_plans_available/output/*.csv",
+                                    "electricity_plans/output/*.csv",
+                                    "methane_plans/output/*.csv",
                                     "supplementary_data/tariff_data/*.csv"] }
 
 [tool.black]

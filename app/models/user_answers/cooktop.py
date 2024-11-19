@@ -77,6 +77,10 @@ class CooktopAnswers(BaseModel):
         if cooktop_type not in usage_factors:
             raise ValueError(f"Unknown cooktop type: {cooktop_type}")
 
+        # Modeled energy use in kWh for each cooktop type. This is a
+        # linearized energy use model that preserves the average household
+        # energy use for cooking, by the linearity of expectation.
+        # (See 'Cooking' sheet of supporting workbook.)
         factor = usage_factors[cooktop_type]
         total_kwh = (
             factor.pop("standard_household_kwh")

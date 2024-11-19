@@ -30,5 +30,6 @@ def climate_zone(postcode: str) -> str:
     -------
     str
         The climate zone for the given postcode.
+        If the postcode is not found, return "Wellington".
     """
     return postcode_dict.get(postcode, "Wellington")
