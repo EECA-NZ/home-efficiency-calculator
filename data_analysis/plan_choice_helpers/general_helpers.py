@@ -86,7 +86,7 @@ def save_results_to_csv(results, output_file):
     logger.info("Results saved to %s", output_file)
 
 
-def plot_subset(df, edb=None, hue_column=None, output_dir="scatterplots"):
+def plot_subset(tariff_df, edb=None, hue_column=None, output_dir="scatterplots"):
     """
     Plot an EDB-specific subset of the DataFrame.
 
@@ -111,7 +111,7 @@ def plot_subset(df, edb=None, hue_column=None, output_dir="scatterplots"):
     -------
     None
     """
-    subset = df.copy()
+    subset = tariff_df.copy()
     if edb is not None:
         subset = subset[subset["EDB"] == edb]
     subset["1/10 x Daily charge"] = subset["Daily charge"] / 10
@@ -130,7 +130,7 @@ def plot_subset(df, edb=None, hue_column=None, output_dir="scatterplots"):
         and hue_column in subset.columns
         and subset[hue_column].notnull().any()
     ):
-        g = sns.pairplot(
+        scatterplot_matrix = sns.pairplot(
             subset,
             vars=scatterplot_vars,
             hue=hue_column,
@@ -140,18 +140,18 @@ def plot_subset(df, edb=None, hue_column=None, output_dir="scatterplots"):
             aspect=plot_aspect,
         )
     else:
-        g = sns.pairplot(
+        scatterplot_matrix = sns.pairplot(
             subset,
             vars=scatterplot_vars,
             plot_kws={"alpha": 0.6},
             height=plot_height,
             aspect=plot_aspect,
         )
-    for ax in g.axes.flatten():
-        if ax is not None:
-            ax.set_xlim(0, 0.5)
-            ax.set_ylim(0, 0.5)
-    g.fig.suptitle(edb if edb else "All EDBs", fontsize=16, y=0.98)
+    for axis in scatterplot_matrix.axes.flatten():
+        if axis is not None:
+            axis.set_xlim(0, 0.5)
+            axis.set_ylim(0, 0.5)
+    scatterplot_matrix.fig.suptitle(edb if edb else "All EDBs", fontsize=16, y=0.98)
     os.makedirs(output_dir, exist_ok=True)
     filename = f"{output_dir}/{edb.replace(' ', '_') if edb else 'all'}.png"
     plt.savefig(filename)
