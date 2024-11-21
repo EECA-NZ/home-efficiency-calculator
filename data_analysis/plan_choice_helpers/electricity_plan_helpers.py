@@ -163,9 +163,10 @@ def filter_electricity_plans(full_df):
 
 def load_electrified_household_energy_usage_profile():
     """
-    Load household fuel usage profile reflecting the 'default'
-    answers. These correspond to a typical but highly electrified
-    household.
+    Load household fuel usage profile reflecting a typical
+    *electrified household*. This energy profile is
+    used to select a representative electricity plan available
+    in each EDB region.
 
     Returns:
     YearlyFuelUsageProfile object representing the household's

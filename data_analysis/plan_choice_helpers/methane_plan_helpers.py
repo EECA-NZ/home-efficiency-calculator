@@ -142,8 +142,10 @@ def filter_methane_plans(full_df):
 
 def load_gas_using_household_energy_usage_profile():
     """
-    Load household fuel usage profile reflecting the 'default'
-    answers. These correspond to a typical gas using household.
+    Load household fuel usage profile reflecting a typical
+    *gas-using household*. This energy profile is used to
+    select a representative natural gas plan available in each
+    EDB region.
 
     Returns:
     YearlyFuelUsageProfile object representing the household's
