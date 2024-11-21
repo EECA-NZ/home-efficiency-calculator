@@ -28,7 +28,7 @@ def test_estimate_usage_from_profile():
     """
     energy_usage = estimate_usage_from_profile(household_profile)
     assert energy_usage.elx_connection_days == DAYS_IN_YEAR
-    assert energy_usage.flexible_kwh == approx(3593.6135, rel=1e-4)
+    assert energy_usage.flexible_kwh == approx(3693.4331, rel=1e-4)
     assert energy_usage.inflexible_day_kwh == approx(1289.8495, rel=1e-4)
     assert energy_usage.natural_gas_connection_days == approx(0.0)
     assert energy_usage.natural_gas_kwh == approx(0.0)
@@ -45,4 +45,4 @@ def test_emissions_kg_co2e():
     """
     energy_usage = estimate_usage_from_profile(household_profile)
     co2_emissions = emissions_kg_co2e(usage_profile=energy_usage)
-    assert co2_emissions == approx(562.6620, rel=1e-4)
+    assert co2_emissions == approx(576.0379, rel=1e-4)

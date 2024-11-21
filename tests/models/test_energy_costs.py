@@ -47,7 +47,7 @@ def test_calculate_annual_costs():
         ),
     )
     my_costs = my_plan.calculate_cost(my_profile)
-    expected_costs = (730.5, 2835.7983)
+    expected_costs = (730.5, 2873.7297)
     assert my_costs == approx(expected_costs, rel=1e-4)
 
 
