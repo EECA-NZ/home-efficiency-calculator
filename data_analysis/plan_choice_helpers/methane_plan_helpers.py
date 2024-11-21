@@ -94,6 +94,10 @@ def filter_methane_plans(full_df):
     ].str.strip()
     full_df = full_df.reset_index(drop=True)
 
+    # Assemble full set of unique retailer and network locations
+    all_retailer_locs = full_df["Retailer location name"].unique()
+    all_network_locs = full_df["Network location names"].unique()
+
     full_df["EDB"] = full_df["Network location names"].apply(map_locations_to_edb)
 
     # Drop tariffs for low density network locations
@@ -133,6 +137,14 @@ def filter_methane_plans(full_df):
     network_locs = full_df["Network location names"].unique()
     logger.info("There are %s unique retailer locations", len(retailer_locs))
     logger.info("There are %s unique network locations", len(network_locs))
+    dropped_retailer_locs = set(all_retailer_locs) - set(retailer_locs)
+    dropped_network_locs = set(all_network_locs) - set(network_locs)
+    logger.info("Dropped %s retailer locations", len(dropped_retailer_locs))
+    for loc in dropped_retailer_locs:
+        logger.info("    Dropped %s", loc)
+    logger.info("Dropped %s network locations", len(dropped_network_locs))
+    for loc in dropped_network_locs:
+        logger.info("    Dropped %s", loc)
 
     full_df.reset_index(drop=True, inplace=True)
     full_df.drop_duplicates(inplace=True)
