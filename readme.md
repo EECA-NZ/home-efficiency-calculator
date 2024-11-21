@@ -87,6 +87,16 @@ It is assumed that the user is working in a powershell environment on a windows 
         -OutFile 'response.json'
     ```
 
+## Generating Lookup tables
+
+For the time being we are using lookup tables (rather than the API) to configure the web tool.
+
+To generate the lookup tables, having created and configured your virtual environment as per the above,
+enter the 'scripts' directory and run the scripts as described in [scripts/readme.md](scripts/readme.md).
+
+The lookup tables will be placed as CSV files within the lookup directory and can be provided to the web
+team for ingestion into the web tool.
+
 ## Docker Setup
 
 1. **Build the Docker image:**
