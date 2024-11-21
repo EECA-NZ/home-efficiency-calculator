@@ -66,16 +66,36 @@ It is assumed that the user is working in a powershell environment on a windows 
     Point your browser at `http://localhost:8000` or `http://localhost:8000/docs` to see the Swagger UI.
 
 1. **Post a request to the API:**
-    ```bash
-    curl -Method 'POST' `
-     -Uri 'http://localhost:8000/water-heating/' `
-     -Headers @{ "Accept"="application/json"; "Content-Type"="application/json" } `
-     -Body '{
-        "volume_litres": 100,
-        "temp_increase_celsius": 50,
-        "efficiency": 0.8
-     }'
     ```
+    curl -Method 'POST' `
+        -Uri 'http://localhost:8000/cooktop/savings' `
+        -Headers @{
+            "Accept"="application/json"
+            "Content-Type"="application/json"
+        } `
+        -Body '{
+            "cooktop_answers": {
+                "cooktop": "Piped gas",
+                "alternative_cooktop": "Electric induction"
+            },
+            "your_home": {
+                "people_in_house": 4,
+                "postcode": "9016",
+                "disconnect_gas": true
+            }
+        }' `
+        -OutFile 'response.json'
+    ```
+
+## Generating Lookup tables
+
+For the time being we are using lookup tables (rather than the API) to configure the web tool.
+
+To generate the lookup tables, having created and configured your virtual environment as per the above,
+enter the 'scripts' directory and run the scripts as described in [scripts/readme.md](scripts/readme.md).
+
+The lookup tables will be placed as CSV files within the lookup directory and can be provided to the web
+team for ingestion into the web tool.
 
 ## Docker Setup
 

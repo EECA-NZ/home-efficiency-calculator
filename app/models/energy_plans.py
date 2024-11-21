@@ -71,8 +71,8 @@ class NaturalGasPlan(BaseModel):
     """
 
     name: str
-    per_natural_gas_kwh: float
     daily_charge: float
+    nzd_per_kwh: Dict[str, float]
 
     def calculate_cost(self, profile):
         """
@@ -82,10 +82,19 @@ class NaturalGasPlan(BaseModel):
         profile: HouseholdYearlyFuelUsageProfile object
 
         Returns:
-        Tuple[float, float], the variable and fixed cost
+        Tuple[float, float], the fixed and variable cost
         of natural gas for the household
         """
-        variable_cost_nzd = profile.natural_gas_kwh * self.per_natural_gas_kwh
+        keys = set(self.nzd_per_kwh.keys())
+        variable_cost_nzd = 0
+
+        if keys == {"Uncontrolled"}:
+            variable_cost_nzd += (profile.natural_gas_kwh) * self.nzd_per_kwh[
+                "Uncontrolled"
+            ]
+        else:
+            raise ValueError(f"Unexpected nzd_per_kwh keys: {keys}")
+
         fixed_cost_nzd = profile.natural_gas_connection_days * self.daily_charge
         return (fixed_cost_nzd, variable_cost_nzd)
 
@@ -107,7 +116,7 @@ class LPGPlan(BaseModel):
         profile: HouseholdYearlyFuelUsageProfile object
 
         Returns:
-        Tuple[float, float], the variable and fixed
+        Tuple[float, float], the fixed and variable
         cost of LPG for the household
         """
         variable_cost_nzd = profile.lpg_kwh * self.per_lpg_kwh
@@ -131,8 +140,9 @@ class WoodPrice(BaseModel):
         profile: HouseholdYearlyFuelUsageProfile object
 
         Returns:
-        Tuple[float, float], the variable cost of wood
-        for the household and fixed cost (which is 0)
+        Tuple[float, float], the fixed cost of wood
+        for the household ($zero) and the variable
+        cost (in NZ$ per embodied kWh) of wood.
         """
         return (0, profile.wood_kwh * self.per_wood_kwh)
 
@@ -153,8 +163,9 @@ class PetrolPrice(BaseModel):
         profile: HouseholdYearlyFuelUsageProfile object
 
         Returns:
-        Tuple[float, float], the variable cost of petrol
-        for the household and fixed cost (which is 0)
+        Tuple[float, float], the fixed cost of petrol
+        for the household ($zero) and the variable cost
+        (in NZ$ per litre) of petrol.
         """
         return (0, profile.petrol_litres * self.per_petrol_litre)
 
@@ -175,8 +186,9 @@ class DieselPrice(BaseModel):
         profile: HouseholdYearlyFuelUsageProfile object
 
         Returns:
-        Tuple[float, float], the variable cost of diesel
-        for the household and fixed cost (which is 0)
+        Tuple[float, float], the fixed cost of diesel
+        for the household ($zero) and the variable cost
+        (in NZ$ per litre) of diesel.
         """
         return (0, profile.diesel_litres * self.per_diesel_litre)
 
@@ -197,8 +209,9 @@ class PublicChargingPrice(BaseModel):
         profile: HouseholdYearlyFuelUsageProfile object
 
         Returns:
-        Tuple[float, float], the variable cost of public charging
-        for the household and fixed cost (which is 0)
+        Tuple[float, float], the fixed cost (which is 0) of
+        public charging for the household and the variable cost
+        (in NZ$ per kWh) of public charging.
         """
         return (0, profile.public_ev_charger_kwh * self.per_kwh)
 
@@ -218,15 +231,23 @@ class NonEnergyVehicleCosts(BaseModel):
         """
         Calculate the cost of vehicle ownership for a household.
 
-        Args:
-        profile: HouseholdYearlyFuelUsageProfile object
+        Parameters
+        ----------
+        profile : HouseholdYearlyFuelUsageProfile
+            The yearly fuel usage profile of the household.
 
-        Returns:
-        Tuple[float, float], the fixed cost of vehicle ownership
-        (licensing) and variable cost (servicing and road user charges).
+        Returns
+        -------
+        fixed_cost : float
+            The fixed cost of vehicle ownership, which is currently set to $0.
+        variable_cost : float
+            The variable cost of vehicle ownership, including licensing, servicing,
+            and road user charges.
 
-        NOTE: for the time being all costs are being put into the
-        "variable" category to make the lookup-table approach simpler.
+        Notes
+        -----
+        For the time being, all costs are being considered as variable costs,
+        treating vehicle ownership as the quantity that varies.
         """
         return (
             0,

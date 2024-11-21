@@ -29,3 +29,8 @@ EMISSIONS_FACTORS = {
 }
 
 DAILY_DUAL_FUEL_DISCOUNT = 0.15
+
+EXCLUDE_POSTCODES = {
+    "Chatham Islands": ["8016"],
+    "Stewart Island": ["9818", "9846"],
+}

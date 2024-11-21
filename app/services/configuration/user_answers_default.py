@@ -17,8 +17,10 @@ from ...services.energy_calculator import estimate_usage_from_profile
 def get_default_your_home_answers():
     """
     Return a default 'your home' answers object.
+
+    Postcode is for Wellington, New Zealand.
     """
-    return YourHomeAnswers(people_in_house=3, postcode="0000", disconnect_gas=False)
+    return YourHomeAnswers(people_in_house=3, postcode="6012", disconnect_gas=False)
 
 
 def get_default_heating_answers():

@@ -29,7 +29,7 @@ def test_household_energy_profile():
     profile_data = {
         "your_home": {
             "people_in_house": 3,
-            "postcode": "1234",
+            "postcode": "6012",
             "disconnect_gas": True,
         },
         "heating": {

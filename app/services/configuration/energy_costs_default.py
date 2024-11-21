@@ -85,8 +85,10 @@ def get_default_natural_gas_plan():
     """
     return NaturalGasPlan(
         name="Default Natural Gas Plan",
-        per_natural_gas_kwh=0.11,
         daily_charge=1.60,
+        nzd_per_kwh={
+            "Uncontrolled": 0.11,
+        },
     )
 
 

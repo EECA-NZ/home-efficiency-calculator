@@ -26,5 +26,5 @@ def test_create_household_profile_answers():
         solar=get_default_solar_answers(),
     )
     assert household_profile.your_home.people_in_house == 3
-    assert household_profile.your_home.postcode == "0000"
+    assert household_profile.your_home.postcode == "6012"
     assert household_profile.driving.vehicle_type == "Electric"

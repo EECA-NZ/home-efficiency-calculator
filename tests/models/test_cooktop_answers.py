@@ -33,7 +33,7 @@ def test_invalid_cooktop_type():
     """
     your_home = YourHomeAnswers(
         people_in_house=3,
-        postcode="1234",
+        postcode="9016",
         disconnect_gas=True,
     )
     cooktop_answers = CooktopAnswers(
@@ -55,8 +55,8 @@ def test_cooking_energy_usage():
 
     # Modeled energy use in kWh for each cooktop type. This is based
     # on a linearized energy use model that preserves the average
-    # household energy use for cooking. (See 'Cooking' sheet of
-    # supporting workbook.)
+    # household energy use for cooking, by the linearity of expectation.
+    # (See 'Cooking' sheet of supporting workbook.)
     expected_energy_use = {
         "Electric induction": [159, 239, 319, 398, 478, 558],
         "Piped gas": [412, 618, 824, 1030, 1236, 1442],
@@ -131,7 +131,7 @@ def manual_cost_calculation_natural_gas():
     """
     energy_plan = get_energy_plan("6012", "None")
     natural_gas_kwh = COOKTOP.energy_usage_pattern(YOUR_HOME).natural_gas_kwh
-    natural_gas_cost_per_kwh = energy_plan.natural_gas_plan.per_natural_gas_kwh
+    natural_gas_cost_per_kwh = energy_plan.natural_gas_plan.nzd_per_kwh["Uncontrolled"]
     annual_running_cost = natural_gas_kwh * natural_gas_cost_per_kwh
     return annual_running_cost
 
@@ -146,7 +146,7 @@ def manual_cost_calculation_electric_induction():
         YOUR_HOME, use_alternative=True
     ).inflexible_day_kwh
     inflexible_kwh_cost_per_kwh = energy_plan.electricity_plan.nzd_per_kwh[
-        "All inclusive"
+        "Uncontrolled"
     ]
     annual_running_cost = inflexible_day_kwh * inflexible_kwh_cost_per_kwh
     return annual_running_cost
