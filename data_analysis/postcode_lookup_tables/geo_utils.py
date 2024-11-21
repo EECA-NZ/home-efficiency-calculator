@@ -12,8 +12,16 @@ from shapely.ops import transform
 
 
 def load_gpkg(gpkg_path):
-    """Load the first layer of a GeoPackage as a GeoDataFrame."""
-    return gpd.read_file(gpkg_path, layer=0)
+    """
+    Load the first layer of a GeoPackage as a GeoDataFrame,
+    checking that the CRS is defined.
+    """
+    # Load the first layer of the GeoPackage
+    gdf = gpd.read_file(gpkg_path, layer=0)
+    # Check if CRS is defined
+    if gdf.crs is None:
+        raise ValueError("The input GeoPackage does not have a defined CRS.")
+    return gdf
 
 
 def reproject_gdf(gdf, epsg=2193):
