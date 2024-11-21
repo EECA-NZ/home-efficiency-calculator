@@ -52,7 +52,11 @@ def is_simple_uncontrolled(row: pd.Series) -> bool:
     other_pricing_columns = [
         x for x in NUMERICAL_COLUMNS if x not in uncontrolled_columns
     ]
-    return pd.notnull(row["Uncontrolled"]) and row[other_pricing_columns].isna().all()
+    return (
+        pd.notnull(row["Uncontrolled"])
+        and pd.notnull(row["Daily charge"])
+        and row[other_pricing_columns].isna().all()
+    )
 
 
 def is_simple_controlled_uncontrolled(row: pd.Series) -> bool:
