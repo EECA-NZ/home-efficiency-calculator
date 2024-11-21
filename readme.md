@@ -68,7 +68,7 @@ It is assumed that the user is working in a powershell environment on a windows 
 1. **Post a request to the API:**
     ```
     curl -Method 'POST' `
-        -Uri 'http://localhost:8000/water-heating/' `
+        -Uri 'http://localhost:8000/cooktop/savings' `
         -Headers @{
             "Accept"="application/json"
             "Content-Type"="application/json"

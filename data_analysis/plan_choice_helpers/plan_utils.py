@@ -133,14 +133,14 @@ def calculate_optimal_plan_by_edb(profile, filtered_df):
     Calculate the optimal electricity plan for each EDB and household profile.
     """
     results = []
-    grouped = filtered_df.groupby("EDB")
+    edb_plans = filtered_df.groupby("EDB")
 
-    for edb, group in grouped:
+    for edb, plans in edb_plans:
         logger.info("Processing EDB: %s", edb)
         best_plan = None
         lowest_cost = float("inf")
 
-        for _, plan_data in group.iterrows():
+        for _, plan_data in plans.iterrows():
             plan = row_to_plan(plan_data)
             fixed_cost, variable_cost = plan.calculate_cost(profile)
             total_cost = fixed_cost + variable_cost
