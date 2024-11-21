@@ -40,6 +40,9 @@ def main():
     print("Loading climate zones GeoPackage...")
     my_climate_zones_gdf = load_gpkg(CLIMATE_GPKG)
 
+    print("Checking consistency of CRS...")
+    assert my_postcode_gdf.crs == my_climate_zones_gdf.crs
+
     print("Plotting postcode and climate zone boundaries...")
     plot_maps(
         my_postcode_gdf,

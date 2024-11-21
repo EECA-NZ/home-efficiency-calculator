@@ -36,6 +36,9 @@ def main():
     print("Loading and transforming EDB boundaries shapefile...")
     my_edb_boundaries_gdf = load_and_transform_shapefile(EDB_REGION_SHAPEFILE)
 
+    print("Checking consistency of CRS...")
+    assert my_postcode_gdf.crs == my_edb_boundaries_gdf.crs
+
     print("Loading tariff data...")
     my_tariff_data = pd.read_csv(
         "../supplementary_data/tariff_data/tariffDataReport_240903.csv"
