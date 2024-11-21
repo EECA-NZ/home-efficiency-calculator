@@ -152,9 +152,12 @@ coverage.xml
 .coverage
 
 # Figures generated
-*.png
+#*.png
+data_analysis/electricity_plans/bynetwork/*.png
+data_analysis/methane_plans/bynetwork/*.png
+data_analysis/postcode_lookup_tables/output/percentage*png
+data_analysis/climate_zone_boundaries/otekaieke_river_path.png
 
 # Data analysis inputs and outputs
 data_analysis/climate_zone_boundaries/output/
 data_analysis/supplementary_data/
-data_analysis/electricity_plans_available/bynetwork/
