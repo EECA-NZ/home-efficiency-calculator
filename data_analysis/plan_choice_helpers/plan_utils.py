@@ -9,7 +9,7 @@ from typing import Union
 import numpy as np
 import pandas as pd
 
-from app.models.energy_plans import ElectricityPlan
+from app.models.energy_plans import ElectricityPlan, NaturalGasPlan
 from data_analysis.plan_choice_helpers.constants import locations_to_edb
 
 logger = logging.getLogger(__name__)
@@ -108,7 +108,9 @@ def row_to_plan(row: pd.Series) -> ElectricityPlan:
     )
 
 
-def add_gst(plan: ElectricityPlan) -> ElectricityPlan:
+def add_gst(
+    plan: Union[ElectricityPlan, NaturalGasPlan]
+) -> Union[ElectricityPlan, NaturalGasPlan]:
     """
     Add GST (Goods and Services Tax) to the plan's charges.
 
