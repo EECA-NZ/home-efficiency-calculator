@@ -22,11 +22,9 @@ from data_analysis.plan_choice_helpers.data_loading import load_tariff_data
 from data_analysis.plan_choice_helpers.general_helpers import (
     clear_output_dir,
     generate_pdf_from_png,
-)
-from data_analysis.plan_choice_helpers.methane_plan_helpers import (
-    filter_methane_plans,
     plot_subset,
 )
+from data_analysis.plan_choice_helpers.methane_plan_helpers import filter_methane_plans
 from data_analysis.postcode_lookup_tables.geo_utils import load_and_transform_shapefile
 
 logging.basicConfig(level=logging.INFO)

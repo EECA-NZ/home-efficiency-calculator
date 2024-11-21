@@ -3,6 +3,7 @@ Generate a lookup table from postcode to climate zone.
 
 As a side effect, generate some data visualizations.
 """
+
 from app.constants import EXCLUDE_POSTCODES
 from data_analysis.postcode_lookup_tables.geo_utils import (
     load_and_transform_shapefile,

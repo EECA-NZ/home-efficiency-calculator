@@ -3,12 +3,9 @@ Helper functions for analyzing and optimizing electricity plans.
 """
 
 import logging
-import os
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
 
 # import app.services.configuration as cfg
 from app.models.energy_plans import ElectricityPlan
@@ -162,78 +159,6 @@ def filter_electricity_plans(full_df):
     full_df.drop_duplicates(inplace=True)
 
     return full_df
-
-
-def plot_subset(df, edb=None, hue_column=None, output_dir="scatterplots"):
-    """
-    Plot an EDB-specific subset of the DataFrame.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        The DataFrame containing the data to plot.
-
-    edb : str or None, optional
-        The EDB name to filter the data by.
-        If None, all EDBs are included. Default is None.
-
-    hue_column : str or None, optional
-        The column to use for coloring the data points.
-        If None, no coloring is applied. Default is None.
-
-    output_dir : str, optional
-        The output directory to save the plot image to.
-        Default is "scatterplots".
-
-    Returns
-    -------
-    None
-    """
-    subset = df.copy()
-    if edb is not None:
-        subset = subset[subset["EDB"] == edb]
-    subset["1/10 x Daily charge"] = subset["Daily charge"] / 10
-    scatterplot_vars = [
-        "All inclusive",
-        "Day",
-        "Uncontrolled",
-        "Controlled",
-        "Night",
-        "1/10 x Daily charge",
-    ]
-    plot_height = 1
-    plot_aspect = 2
-    if (
-        hue_column is not None
-        and hue_column in subset.columns
-        and subset[hue_column].notnull().any()
-    ):
-        g = sns.pairplot(
-            subset,
-            vars=scatterplot_vars,
-            hue=hue_column,
-            palette="Set1",
-            plot_kws={"alpha": 0.6},
-            height=plot_height,
-            aspect=plot_aspect,
-        )
-    else:
-        g = sns.pairplot(
-            subset,
-            vars=scatterplot_vars,
-            plot_kws={"alpha": 0.6},
-            height=plot_height,
-            aspect=plot_aspect,
-        )
-    for ax in g.axes.flatten():
-        if ax is not None:
-            ax.set_xlim(0, 0.5)
-            ax.set_ylim(0, 0.5)
-    g.fig.suptitle(edb if edb else "All EDBs", fontsize=16, y=0.98)
-    os.makedirs(output_dir, exist_ok=True)
-    filename = f"{output_dir}/{edb.replace(' ', '_') if edb else 'all'}.png"
-    plt.savefig(filename)
-    plt.close()
 
 
 def load_electrified_household_energy_usage_profile():
