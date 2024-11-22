@@ -279,6 +279,28 @@ def assemble_total_savings(totals, gas_disconnection_savings):
     )
 
 
+def determine_gas_connection_checkbox(profile):
+    """
+    Determine the behaviour of the gas connection checkbox.
+
+    Returns:
+    - A dictionary of fixed cost savings for each gas connection.
+    """
+    current_uses_natural_gas = uses_natural_gas(profile)
+    current_uses_lpg = uses_lpg(profile)
+    alternative_uses_natural_gas = uses_natural_gas(profile, use_alternatives=True)
+    alternative_uses_lpg = uses_lpg(profile, use_alternatives=True)
+
+    return CHECKBOX_BEHAVIOUR[
+        (
+            current_uses_natural_gas,
+            current_uses_lpg,
+            alternative_uses_natural_gas,
+            alternative_uses_lpg,
+        )
+    ]
+
+
 def calculate_fixed_cost_savings(profile):
     """
     Calculate the fixed cost savings for the household, by inferring
@@ -299,15 +321,6 @@ def calculate_fixed_cost_savings(profile):
     current_uses_lpg = uses_lpg(profile)
     alternative_uses_natural_gas = uses_natural_gas(profile, use_alternatives=True)
     alternative_uses_lpg = uses_lpg(profile, use_alternatives=True)
-
-    checkbox = CHECKBOX_BEHAVIOUR[
-        (
-            current_uses_natural_gas,
-            current_uses_lpg,
-            alternative_uses_natural_gas,
-            alternative_uses_lpg,
-        )
-    ]
 
     current_natural_gas_fixed_cost = (
         your_plan.natural_gas_plan.daily_charge * DAYS_IN_YEAR
@@ -386,4 +399,4 @@ def calculate_fixed_cost_savings(profile):
             ),
         }
         for fuel, data in fixed_cost_savings_dict.items()
-    }, checkbox
+    }
