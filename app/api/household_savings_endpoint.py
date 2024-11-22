@@ -33,7 +33,7 @@ def household_energy_profile(profile: HouseholdAnswers):
             edb_region=postcode_to_edb_zone(profile.your_home.postcode),
         )
         response, totals = calculate_component_savings(profile)
-        gas_connection_savings = calculate_fixed_cost_savings(profile)
+        gas_connection_savings, checkbox = calculate_fixed_cost_savings(profile)
         total_fuel_savings = assemble_fuel_savings(totals)
         total_savings = assemble_total_savings(totals, gas_connection_savings)
         current_fuel_use_profile = estimate_usage_from_profile(
@@ -49,6 +49,7 @@ def household_energy_profile(profile: HouseholdAnswers):
             driving_fuel_savings=response.get("driving", None),
             total_fuel_savings=total_fuel_savings,
             gas_connection_savings=gas_connection_savings,
+            checkbox=checkbox,
             total_savings=total_savings,
             user_geography=user_geography,
             current_fuel_use=current_fuel_use_profile,

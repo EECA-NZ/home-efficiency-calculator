@@ -1,32 +1,5 @@
 """
 Script to generate lookup table for the deviate PHP web app.
-
-Logic is as follows:
-
-- First determine whether piped gas or bottled gas is used
-in the current and alternative scenario. Then, determine:
-
-    - Checkbox Visibility:
-        The checkbox is not visible only when there is no
-        gas usage in either the current or alternative states.
-        Otherwise, the checkbox is visible.
-    - Checkbox Text:
-        The text depends on the differences between the
-        current and alternative gas usage.
-        Possible actions include adding or removing a gas
-        connection or gas bottle rental, or replacing one
-        with the other.
-    - Checkbox Greyed Out:
-        The checkbox is greyed out when there is no change
-        in the gas usage. In this case the checkbox is
-        defaulted off.
-        Otherwise, it is active (not greyed out).
-    - Checkbox Default On:
-        The checkbox is defaulted on for actions that add
-        or remove services.
-        As per above, if the checkbox is greyed out, it is
-        defaulted off (and can't be toggled).
-
 """
 
 import itertools
@@ -34,6 +7,8 @@ import logging
 import os
 
 import pandas as pd
+
+from app.constants import CHECKBOX_BEHAVIOUR
 
 logging.basicConfig(level=logging.INFO)
 
@@ -69,118 +44,6 @@ cooktop_types = [
     None,
 ]
 vehicle_types = ["Petrol", "Diesel", "Hybrid", "Plug-in hybrid", "Electric", None]
-
-
-# Below, the key stands for:
-#   (
-#    current_uses_piped_gas,
-#    current_uses_bottled_gas,
-#    alternative_uses_piped_gas,
-#    alternative_uses_bottled_gas
-#   )
-checkbox_behaviour = {
-    (False, False, False, False): {
-        "checkbox_visible": False,
-        "checkbox_text": None,
-        "checkbox_greyed_out": None,
-        "checkbox_default_on": None,
-    },
-    (False, False, False, True): {
-        "checkbox_visible": True,
-        "checkbox_text": "Extra costs associated with" + " adding a gas bottle rental",
-        "checkbox_greyed_out": False,
-        "checkbox_default_on": True,
-    },
-    (False, False, True, False): {
-        "checkbox_visible": True,
-        "checkbox_text": "Extra costs associated with" + " adding a gas connection",
-        "checkbox_greyed_out": False,
-        "checkbox_default_on": True,
-    },
-    (False, False, True, True): {
-        "checkbox_visible": True,
-        "checkbox_text": "Extra costs associated with"
-        + " adding a gas connection and gas bottle rental",
-        "checkbox_greyed_out": False,
-        "checkbox_default_on": True,
-    },
-    (False, True, False, False): {
-        "checkbox_visible": True,
-        "checkbox_text": "Savings associated with" + " removing your gas bottle rental",
-        "checkbox_greyed_out": False,
-        "checkbox_default_on": True,
-    },
-    (False, True, False, True): {
-        "checkbox_visible": True,
-        "checkbox_text": "Savings associated with" + " removing your gas bottle rental",
-        "checkbox_greyed_out": True,
-        "checkbox_default_on": False,
-    },
-    (False, True, True, False): {
-        "checkbox_visible": True,
-        "checkbox_text": "Fixed cost changes associated with"
-        + " replacing your gas bottle rental with a gas connection",
-        "checkbox_greyed_out": False,
-        "checkbox_default_on": True,
-    },
-    (False, True, True, True): {
-        "checkbox_visible": True,
-        "checkbox_text": "Extra costs associated with" + " adding a gas connection",
-        "checkbox_greyed_out": False,
-        "checkbox_default_on": True,
-    },
-    (True, False, False, False): {
-        "checkbox_visible": True,
-        "checkbox_text": "Savings associated with" + " removing your gas connection",
-        "checkbox_greyed_out": False,
-        "checkbox_default_on": True,
-    },
-    (True, False, False, True): {
-        "checkbox_visible": True,
-        "checkbox_text": "Fixed cost changes associated with"
-        + " replacing your gas connection with a gas bottle rental",
-        "checkbox_greyed_out": False,
-        "checkbox_default_on": True,
-    },
-    (True, False, True, False): {
-        "checkbox_visible": True,
-        "checkbox_text": "Savings associated with" + " removing your gas connection",
-        "checkbox_greyed_out": True,
-        "checkbox_default_on": False,
-    },
-    (True, False, True, True): {
-        "checkbox_visible": True,
-        "checkbox_text": "Extra costs associated with" + " adding a gas bottle rental",
-        "checkbox_greyed_out": False,
-        "checkbox_default_on": True,
-    },
-    (True, True, False, False): {
-        "checkbox_visible": True,
-        "checkbox_text": "Savings associated with"
-        + " removing your gas connection and gas bottle rental",
-        "checkbox_greyed_out": False,
-        "checkbox_default_on": True,
-    },
-    (True, True, False, True): {
-        "checkbox_visible": True,
-        "checkbox_text": "Savings associated with" + " removing your gas connection",
-        "checkbox_greyed_out": False,
-        "checkbox_default_on": True,
-    },
-    (True, True, True, False): {
-        "checkbox_visible": True,
-        "checkbox_text": "Savings associated with" + " removing your gas bottle rental",
-        "checkbox_greyed_out": False,
-        "checkbox_default_on": True,
-    },
-    (True, True, True, True): {
-        "checkbox_visible": True,
-        "checkbox_text": "Savings associated with"
-        + " removing your gas connection and gas bottle rental",
-        "checkbox_greyed_out": True,
-        "checkbox_default_on": False,
-    },
-}
 
 alternative_main_heating_sources = main_heating_sources.copy()
 alternative_hot_water_heating_sources = hot_water_heating_sources.copy()
@@ -235,7 +98,7 @@ for combination in itertools.product(
         "bottled gas" in source.lower() for source in alternative_sources if source
     )
 
-    checkbox = checkbox_behaviour[
+    checkbox = CHECKBOX_BEHAVIOUR[
         (
             current_uses_piped_gas,
             current_uses_bottled_gas,

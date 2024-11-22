@@ -2,7 +2,9 @@
 This module provides functions to optimize the cost of energy for a household.
 """
 
-from ..constants import DAYS_IN_YEAR
+import numpy as np
+
+from ..constants import CHECKBOX_BEHAVIOUR, DAYS_IN_YEAR
 from ..models.response_models import SavingsData, SavingsResponse
 from ..models.usage_profiles import YearlyFuelUsageProfile
 from ..services.energy_calculator import uses_lpg, uses_natural_gas
@@ -292,33 +294,89 @@ def calculate_fixed_cost_savings(profile):
         )
     else:
         your_plan = get_energy_plan(profile.your_home.postcode, "None")
+
+    current_uses_natural_gas = uses_natural_gas(profile)
+    current_uses_lpg = uses_lpg(profile)
+    alternative_uses_natural_gas = uses_natural_gas(profile, use_alternatives=True)
+    alternative_uses_lpg = uses_lpg(profile, use_alternatives=True)
+
+    checkbox = CHECKBOX_BEHAVIOUR[
+        (
+            current_uses_natural_gas,
+            current_uses_lpg,
+            alternative_uses_natural_gas,
+            alternative_uses_lpg,
+        )
+    ]
+
+    current_natural_gas_fixed_cost = (
+        your_plan.natural_gas_plan.daily_charge * DAYS_IN_YEAR
+        if current_uses_natural_gas
+        else 0
+    )
+    current_lpg_fixed_cost = (
+        your_plan.lpg_plan.daily_charge * DAYS_IN_YEAR if current_uses_lpg else 0
+    )
+    alternative_natural_gas_fixed_cost = (
+        your_plan.natural_gas_plan.daily_charge * DAYS_IN_YEAR
+        if alternative_uses_natural_gas
+        else 0
+    )
+    alternative_lpg_fixed_cost = (
+        your_plan.lpg_plan.daily_charge * DAYS_IN_YEAR if alternative_uses_lpg else 0
+    )
+
     fixed_cost_savings_dict = {}
-    if uses_natural_gas(profile) and not uses_natural_gas(
-        profile, use_alternatives=True
-    ):
-        natural_gas_fixed_cost = your_plan.natural_gas_plan.daily_charge * DAYS_IN_YEAR
-        fixed_cost_savings_dict["natural_gas"] = {
-            "current": natural_gas_fixed_cost,
-            "alternative": (
-                0 if profile.your_home.disconnect_gas else natural_gas_fixed_cost
-            ),
-            "absolute_reduction": (
-                natural_gas_fixed_cost if profile.your_home.disconnect_gas else 0
-            ),
-            "percentage_reduction": 100 if profile.your_home.disconnect_gas else 0,
-        }
-    elif uses_lpg(profile) and not uses_lpg(profile, use_alternatives=True):
-        lpg_gas_fixed_cost = your_plan.lpg_plan.daily_charge * DAYS_IN_YEAR
-        fixed_cost_savings_dict["lpg_gas"] = {
-            "current": lpg_gas_fixed_cost,
-            "alternative": (
-                0 if profile.your_home.disconnect_gas else lpg_gas_fixed_cost
-            ),
-            "absolute_reduction": (
-                lpg_gas_fixed_cost if profile.your_home.disconnect_gas else 0
-            ),
-            "percentage_reduction": 100 if profile.your_home.disconnect_gas else 0,
-        }
+    fixed_cost_savings_dict["natural_gas"] = {
+        "current": current_natural_gas_fixed_cost,
+        "alternative": (
+            alternative_natural_gas_fixed_cost
+            if profile.your_home.disconnect_gas
+            else current_natural_gas_fixed_cost
+        ),
+        "absolute_reduction": (
+            current_natural_gas_fixed_cost - alternative_natural_gas_fixed_cost
+            if profile.your_home.disconnect_gas
+            else 0
+        ),
+        "percentage_reduction": (
+            safe_percentage_reduction(
+                current_natural_gas_fixed_cost, alternative_natural_gas_fixed_cost
+            )
+            if not np.isnan(
+                safe_percentage_reduction(
+                    current_natural_gas_fixed_cost, alternative_natural_gas_fixed_cost
+                )
+            )
+            and profile.your_home.disconnect_gas
+            else 0
+        ),
+    }
+    fixed_cost_savings_dict["lpg"] = {
+        "current": current_lpg_fixed_cost,
+        "alternative": (
+            alternative_lpg_fixed_cost
+            if profile.your_home.disconnect_gas
+            else current_lpg_fixed_cost
+        ),
+        "absolute_reduction": (
+            current_lpg_fixed_cost - alternative_lpg_fixed_cost
+            if profile.your_home.disconnect_gas
+            else 0
+        ),
+        "percentage_reduction": (
+            safe_percentage_reduction(
+                current_lpg_fixed_cost, alternative_lpg_fixed_cost
+            )
+            if not np.isnan(
+                safe_percentage_reduction(
+                    current_lpg_fixed_cost, alternative_lpg_fixed_cost
+                )
+            )
+            and profile.your_home.disconnect_gas
+            else 0
+        ),
+    }
     fixed_cost_savings_dict = round_floats_to_2_dp(fixed_cost_savings_dict)
     return {
         fuel: {
@@ -328,4 +386,4 @@ def calculate_fixed_cost_savings(profile):
             ),
         }
         for fuel, data in fixed_cost_savings_dict.items()
-    }
+    }, checkbox
