@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from app.models.usage_profiles import HouseholdOtherElectricityUsageProfile
 
 from ..constants import (
+    AVERAGE_AIR_TEMPERATURE_BY_CLIMATE_ZONE,
     DAY_NIGHT_FRAC,
     DAYS_IN_YEAR,
     ELECTRIC_HOT_WATER_CYLINDER_LOSSES_55_DEGREE_DELTA_T_KWH_PER_DAY,
@@ -209,7 +210,7 @@ def standing_loss_kwh_per_year(hot_water_heating_source, household_size, climate
     tank_description = TANK_SIZE_BY_HOUSEHOLD_SIZE[household_size]
     outdoor_delta_t = (
         HOT_WATER_STORAGE_TEMPERATURE_C
-        - INLET_WATER_TEMPERATURE_BY_CLIMATE_ZONE[climate_zone]
+        - AVERAGE_AIR_TEMPERATURE_BY_CLIMATE_ZONE[climate_zone]
     )
     indoor_delta_t = (
         HOT_WATER_STORAGE_TEMPERATURE_C - INDOOR_CYLINDER_AMBIENT_TEMPERATURE_C
@@ -263,16 +264,16 @@ def hot_water_heating_efficiency(hot_water_heating_source, climate_zone):
     raise ValueError(f"Unknown hot water heating source: {hot_water_heating_source}")
 
 
-def hot_water_cylinder_heat_loss_kwh_per_day(tank_size, delta_t=47):
+def hot_water_cylinder_heat_loss_kwh_per_day(tank_size, delta_t=55):
     """
     Calculate the heat loss for a hot water cylinder.
     Based on MEPS level with TPR valve 4692.
-    This was based on a 55 degree temperature rise, correct with
-    linear scaling to 47 degree temperature rise by default.
-    47 degrees corresponds to an indoor cylinder location.
+    This was based on a 55 degree temperature rise; correct with
+    linear scaling if another delta T is appropriate.
 
     Parameters:
     - tank_size: The size of the hot water cylinder in litres.
+    - delta_t: Temperature difference between hot water and ambient.
 
     Returns:
     - The heat loss in kWh/day.
@@ -287,17 +288,18 @@ def hot_water_cylinder_heat_loss_kwh_per_day(tank_size, delta_t=47):
     ) * (delta_t / 55)
 
 
-def gas_storage_heat_loss_kwh_per_day(tank_size, delta_t=47):
+def gas_storage_heat_loss_kwh_per_day(tank_size, delta_t=55):
     """
     Calculate the heat loss for a gas storage hot water cylinder.
     6.9.2 based on AS/NZS 4552.2:2010, 45 degree temperature rise,
-    corrected to 47 degree temp rise by default, representing
-    an indoor cylinder location.
-    Assumed 30 MJ nominal gas consumption
+    corrected to 55 degree temp rise by default; correct with
+    linear scaling if another delta T is appropriate.
+
+    (Assumed 30 MJ nominal gas consumption)
 
     Parameters:
     - tank_size: The size of the hot water cylinder in litres.
-    - temperature_inlet: The temperature of the water entering the cylinder.
+    - delta_t: Temperature difference between hot water and ambient.
 
     Returns:
     - The heat loss in kWh/day.
@@ -307,17 +309,18 @@ def gas_storage_heat_loss_kwh_per_day(tank_size, delta_t=47):
     )
 
 
-def heat_pump_cylinder_heat_loss_kwh_per_day(tank_size, delta_t=52.5):
+def heat_pump_cylinder_heat_loss_kwh_per_day(tank_size, delta_t=55):
     """
     Calculate the heat loss for a heat pump hot water cylinder.
     Based on heat exchanger MEPS in AU 4692.
-    - Adjusted from Delta T = 55 degrees to Delta T = 52.5 degrees
-    by default (a climatological mean for NZ).
+    - This was based on a 55 degree temperature rise; correct with
+    linear scaling if another delta T is appropriate.
     - 0.2 added for TPR valve,
     - 0.2 added for two fittings.
 
     Parameters:
     - tank_size: The size of the hot water cylinder in litres.
+    - delta_t: Temperature difference between hot water and ambient.
 
     Returns:
     - The heat loss in kWh/day.
