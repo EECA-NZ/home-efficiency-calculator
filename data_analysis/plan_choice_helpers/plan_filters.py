@@ -13,6 +13,30 @@ from data_analysis.plan_choice_helpers.constants import NUMERICAL_COLUMNS
 logger = logging.getLogger(__name__)
 
 
+def is_big_four_retailer(row) -> bool:
+    """
+    Check if the plan is from one of the big four retailers.
+
+    Parameters
+    ----------
+    row : pd.Series
+        A row from the DataFrame.
+
+    Returns
+    -------
+    bool
+        True if the plan is from one of the big four retailers, False otherwise.
+    """
+    big_four_retailers = [
+        "Genesis Energy",
+        "Mercury",
+        "Contact Energy",
+        "Meridian Energy",
+    ]
+
+    return any(retailer in row["Retailer name"] for retailer in big_four_retailers)
+
+
 def is_simple_all_inclusive(row: pd.Series) -> bool:
     """
     Check if the plan is a simple all-inclusive plan.

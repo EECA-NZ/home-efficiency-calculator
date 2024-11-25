@@ -23,6 +23,7 @@ from app.services.helpers import other_electricity_energy_usage_profile
 from data_analysis.plan_choice_helpers.constants import NUMERICAL_COLUMNS
 from data_analysis.plan_choice_helpers.data_loading import eval_or_return
 from data_analysis.plan_choice_helpers.plan_filters import (
+    is_big_four_retailer,
     is_simple_all_inclusive,
     is_simple_controlled_uncontrolled,
     is_simple_day_night,
@@ -135,6 +136,7 @@ def filter_electricity_plans(full_df):
 
     filters = (
         (~full_df["Fixed term"])
+        & (full_df.apply(is_big_four_retailer, axis=1))
         & (~full_df["Low user"])
         & (
             ~full_df["Name"]
