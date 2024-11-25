@@ -145,9 +145,7 @@ def manual_cost_calculation_electric_induction():
     inflexible_day_kwh = COOKTOP.energy_usage_pattern(
         YOUR_HOME, use_alternative=True
     ).inflexible_day_kwh
-    inflexible_kwh_cost_per_kwh = energy_plan.electricity_plan.nzd_per_kwh[
-        "Uncontrolled"
-    ]
+    inflexible_kwh_cost_per_kwh = energy_plan.electricity_plan.nzd_per_kwh["Day"]
     annual_running_cost = inflexible_day_kwh * inflexible_kwh_cost_per_kwh
     return annual_running_cost
 
