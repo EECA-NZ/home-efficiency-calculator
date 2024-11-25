@@ -19,7 +19,7 @@ In either case the same codebase is used, providing a single source of truth, an
 Before running the application, ensure you have Python and Docker installed on your system. Python 3.12 or higher is recommended.
 
 ## Local Setup
-It is assumed that the user is working in a powershell environment on a windows machine.
+It is assumed that the user is working in a powershell environment on a Windows machine.
 
 1. **Create and activate a virtual environment:**
    ```bash
@@ -92,8 +92,8 @@ It is assumed that the user is working in a powershell environment on a windows 
 
 For the time being we are using lookup tables (rather than the API) to configure the web tool.
 
-To generate the lookup tables, having created and configured your virtual environment as per the above,
-enter the 'scripts' directory and run the scripts as described in [scripts/readme.md](scripts/readme.md).
+To generate the lookup tables, having created and configured your virtual environment as described above,
+enter the `scripts` directory and run the scripts as described in [scripts/readme.md](scripts/readme.md).
 
 The lookup tables will be placed as CSV files within the lookup directory and can be provided to the web
 team for ingestion into the web tool.
@@ -121,7 +121,7 @@ team for ingestion into the web tool.
 * The Docker setup runs the application on port 8000, make sure this port is available on your machine.
 * The API uses FastAPI, which provides automatic interactive API documentation (Swagger UI).
 
-## Deploying the EV Roam Container
+## Deploying the Container
 
 This section provides step-by-step instructions for building, pushing, and deploying the `home-efficiency-calculator` Docker container to Azure.
 
