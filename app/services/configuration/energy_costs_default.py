@@ -125,8 +125,8 @@ def get_default_wood_price():
         ($/m3)(m3/kg)(kg/MJ)(MJ/kWh) = ($/kWh)
     """
     price_per_cubic_metre = 140
-    thrown_density_kg_per_m3 = 300
-    net_calorific_value_mj_per_kg = 16
+    thrown_density_kg_per_m3 = 307
+    net_calorific_value_mj_per_kg = 14.3
     conversion_factor_mj_per_kwh = 3.6
 
     return WoodPrice(

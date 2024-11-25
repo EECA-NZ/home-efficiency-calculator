@@ -32,9 +32,9 @@ def test_edb_zone_to_electricity_plan():
     """
     plan = edb_zone_to_electricity_plan("Wellington Electricity")
     assert re.match(r"Electricity PlanId [0-9]+|Default Electricity Plan", plan.name)
-    assert plan.daily_charge in (1.6674999999999998, 2.0)
+    assert plan.daily_charge in (2.4172999999999996, 2.0)
     assert plan.nzd_per_kwh in (
-        {"Controlled": 0.20239999999999997, "Uncontrolled": 0.22424999999999998},
+        {"Day": 0.21228999999999998, "Night": 0.17204},
         {"Day": 0.242, "Night": 0.18},
     )
 
@@ -45,9 +45,9 @@ def test_postcode_to_electricity_plan():
     """
     plan = postcode_to_electricity_plan("6012")
     assert re.match(r"Electricity PlanId [0-9]+|Default Electricity Plan", plan.name)
-    assert plan.daily_charge in (1.6674999999999998, 2.0)
+    assert plan.daily_charge in (2.4172999999999996, 2.0)
     assert plan.nzd_per_kwh in (
-        {"Controlled": 0.20239999999999997, "Uncontrolled": 0.22424999999999998},
+        {"Day": 0.21228999999999998, "Night": 0.17204},
         {"Day": 0.242, "Night": 0.18},
     )
 
@@ -62,9 +62,9 @@ def test_get_energy_plan():
         r"Electricity PlanId [0-9]+|Default Electricity Plan",
         plan.electricity_plan.name,
     )
-    assert plan.electricity_plan.daily_charge in (1.6674999999999998, 2.0)
+    assert plan.electricity_plan.daily_charge in (2.4172999999999996, 2.0)
     assert plan.electricity_plan.nzd_per_kwh in (
-        {"Controlled": 0.20239999999999997, "Uncontrolled": 0.22424999999999998},
+        {"Day": 0.21228999999999998, "Night": 0.17204},
         {"Day": 0.242, "Night": 0.18},
     )
     assert "Methane" in plan.natural_gas_plan.name
@@ -72,16 +72,16 @@ def test_get_energy_plan():
     assert plan.natural_gas_plan.nzd_per_kwh["Uncontrolled"] == approx(
         0.11
     ) or plan.natural_gas_plan.nzd_per_kwh["Uncontrolled"] == approx(
-        0.21813199999999996
+        0.21389999999999998
     )
     assert plan.natural_gas_plan.daily_charge == approx(
         1.6
-    ) or plan.natural_gas_plan.daily_charge == approx(0.682025)
+    ) or plan.natural_gas_plan.daily_charge == approx(1.01449)
     assert plan.lpg_plan.name == "Default LPG Plan"
     assert plan.lpg_plan.per_lpg_kwh == 0.244
     assert plan.lpg_plan.daily_charge == 0.37782340862423
     assert plan.wood_price.name == "Default Wood Price"
-    assert plan.wood_price.per_wood_kwh == approx(0.105)
+    assert plan.wood_price.per_wood_kwh == approx(0.1148, rel=1e-4)
     assert plan.petrol_price.name == "Default Petrol Price"
     assert plan.petrol_price.per_petrol_litre == 2.78
     assert plan.diesel_price.name == "Default Diesel Price"

@@ -70,7 +70,7 @@ class HotWaterAnswers(BaseModel):
         heat_demand_kwh_per_year = (
             energy_service_demand_kwh_per_year
             + standing_loss_kwh_per_year(
-                hot_water_heating_source, your_home.people_in_house
+                hot_water_heating_source, your_home.people_in_house, climate_zone
             )
         )
         efficiency_factor = hot_water_heating_efficiency(

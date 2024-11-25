@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 # import app.services.configuration as cfg
-from app.models.energy_plans import ElectricityPlan
+from app.models.energy_plans import NaturalGasPlan
 from app.models.user_answers import (
     CooktopAnswers,
     DrivingAnswers,
@@ -22,6 +22,7 @@ from app.services.energy_calculator import estimate_usage_from_profile
 from data_analysis.plan_choice_helpers.constants import NUMERICAL_COLUMNS
 from data_analysis.plan_choice_helpers.data_loading import eval_or_return
 from data_analysis.plan_choice_helpers.plan_filters import (
+    is_big_four_retailer,
     is_simple_all_inclusive,
     is_simple_controlled_uncontrolled,
     is_simple_day_night,
@@ -38,12 +39,12 @@ logger = logging.getLogger(__name__)
 
 def row_to_plan(row):
     """
-    Converts a DataFrame row to an ElectricityPlan instance.
+    Converts a DataFrame row to an NaturalGasPlan instance.
     Args:
         row: pd.Series, a row from the electricity plan DataFrame
 
     Returns:
-        ElectricityPlan: an instantiated object of ElectricityPlan
+        NaturalGasPlan: an instantiated object of NaturalGasPlan
     """
     pricing_dict = {}
     for key in [
@@ -56,7 +57,7 @@ def row_to_plan(row):
         if not pd.isna(row.get(key)):
             pricing_dict[key] = row[key]
 
-    return ElectricityPlan(
+    return NaturalGasPlan(
         name=str(row["PlanId"]),
         daily_charge=row["Daily charge"],
         nzd_per_kwh=pricing_dict,
@@ -114,13 +115,7 @@ def filter_methane_plans(full_df):
 
     filters = (
         (~full_df["Fixed term"])
-        & (~full_df["Low user"])
-        & (
-            ~full_df["Name"]
-            .str.lower()
-            .str.contains("no electric hot water cylinder", na=False)
-        )
-        & (~full_df["Name"].str.lower().str.contains("broadband", na=False))
+        & (full_df.apply(is_big_four_retailer, axis=1))
         & (
             full_df.apply(is_simple_all_inclusive, axis=1)
             | full_df.apply(is_simple_controlled_uncontrolled, axis=1)
@@ -170,7 +165,7 @@ def load_gas_using_household_energy_usage_profile():
             disconnect_gas=True,
         ),
         heating=HeatingAnswers(
-            main_heating_source="Piped gas heater",
+            main_heating_source="Heat pump",
             heating_during_day="Never",
             insulation_quality="Moderately insulated",
         ),
