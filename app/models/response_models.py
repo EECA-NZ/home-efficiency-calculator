@@ -49,6 +49,18 @@ class ComponentSavingsResponse(BaseModel):
     alternative_fuel_use: Optional[YearlyFuelUsageProfile]
 
 
+class CheckboxData(BaseModel):
+    """
+    Model for configuring the checkbox to configure
+    gas connection fixed cost behaviour.
+    """
+
+    checkbox_visible: Optional[bool]
+    checkbox_text: Optional[str]
+    checkbox_greyed_out: Optional[bool]
+    checkbox_default_on: Optional[bool]
+
+
 class HouseholdSavingsResponse(BaseModel):
     """
     Response model for the household energy profile endpoint.
@@ -60,6 +72,7 @@ class HouseholdSavingsResponse(BaseModel):
     driving_fuel_savings: Optional[SavingsResponse]
     total_fuel_savings: SavingsResponse
     gas_connection_savings: dict[str, SavingsResponse]
+    checkbox: CheckboxData
     total_savings: SavingsResponse
     user_geography: UserGeography
     current_fuel_use: YearlyFuelUsageProfile

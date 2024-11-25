@@ -11,6 +11,7 @@ from ..services.cost_calculator import (
     assemble_total_savings,
     calculate_component_savings,
     calculate_fixed_cost_savings,
+    determine_gas_connection_checkbox,
 )
 from ..services.energy_calculator import estimate_usage_from_profile
 from ..services.get_climate_zone import climate_zone
@@ -34,6 +35,7 @@ def household_energy_profile(profile: HouseholdAnswers):
         )
         response, totals = calculate_component_savings(profile)
         gas_connection_savings = calculate_fixed_cost_savings(profile)
+        checkbox = determine_gas_connection_checkbox(profile)
         total_fuel_savings = assemble_fuel_savings(totals)
         total_savings = assemble_total_savings(totals, gas_connection_savings)
         current_fuel_use_profile = estimate_usage_from_profile(
@@ -49,6 +51,7 @@ def household_energy_profile(profile: HouseholdAnswers):
             driving_fuel_savings=response.get("driving", None),
             total_fuel_savings=total_fuel_savings,
             gas_connection_savings=gas_connection_savings,
+            checkbox=checkbox,
             total_savings=total_savings,
             user_geography=user_geography,
             current_fuel_use=current_fuel_use_profile,
