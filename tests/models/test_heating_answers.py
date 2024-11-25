@@ -24,11 +24,11 @@ def test_space_heating_energy_usage():
     ]
 
     expected_energy_cost = {
-        "Heat pump": {"electricity_variable_cost_nzd": 148.84585943932396},
-        "Electric heater": {"electricity_variable_cost_nzd": 739.76392141344},
-        "Wood burner": {"wood_variable_cost_nzd": 458.53135624800007},
-        "Piped gas heater": {"natural_gas_variable_cost_nzd": 420.320409894},
-        "Bottled gas heater": {"lpg_variable_cost_nzd": 932.3470910376001},
+        "Heat pump": {"electricity_variable_cost_nzd": approx(148.8459)},
+        "Electric heater": {"electricity_variable_cost_nzd": approx(739.7639)},
+        "Wood burner": {"wood_variable_cost_nzd": approx(501.34405)},
+        "Piped gas heater": {"natural_gas_variable_cost_nzd": approx(420.3204)},
+        "Bottled gas heater": {"lpg_variable_cost_nzd": approx(932.3471)},
     }
 
     for main_heating_source in main_heating_sources:

@@ -23,7 +23,7 @@ def test_water_heating_energy_usage():
 
     """
     profile = get_default_household_answers()
-    total_kwh = 2665.7668670365156  # This is 2666.15 in the spreadsheet
+    total_kwh = 2572.2628670365157
     flexible_kwh = total_kwh * HOT_WATER_FLEXIBLE_KWH_FRACTION
     inflexible_day_kwh = total_kwh - flexible_kwh
     hot_water_sources = {

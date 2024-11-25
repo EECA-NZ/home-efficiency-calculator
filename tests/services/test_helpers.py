@@ -73,17 +73,32 @@ def test_standing_loss_kwh_per_year():
     """
     Test the standing_loss_kwh_per_year hot water energy use function.
     """
+    climate_zone = "Wellington"
     tech_to_size_to_annual_kwh = {
-        "Electric hot water cylinder": {1: 570, 2: 570, 3: 643, 4: 643, 5: 789, 6: 789},
-        "Piped gas hot water cylinder": {
-            1: 3313,
-            2: 3313,
-            3: 3683,
-            4: 3683,
-            5: 4210,
-            6: 4210,
+        "Electric hot water cylinder": {
+            1: approx(486.911),
+            2: approx(486.911),
+            3: approx(549.336),
+            4: approx(549.336),
+            5: approx(674.185),
+            6: approx(674.185),
         },
-        "Hot water heat pump": {1: 1335, 2: 1335, 3: 1494, 4: 1494, 5: 1577, 6: 1577},
+        "Piped gas hot water cylinder": {
+            1: approx(2831.232),
+            2: approx(2831.232),
+            3: approx(3147.479),
+            4: approx(3147.479),
+            5: approx(3597.966),
+            6: approx(3597.966),
+        },
+        "Hot water heat pump": {
+            1: approx(1273.8762),
+            2: approx(1273.8762),
+            3: approx(1425.0153),
+            4: approx(1425.0153),
+            5: approx(1503.359),
+            6: approx(1503.359),
+        },
     }
     for (
         hot_water_heating_source,
@@ -91,6 +106,6 @@ def test_standing_loss_kwh_per_year():
     ) in tech_to_size_to_annual_kwh.items():
         for household_size, expected_kwh in size_to_annual_kwh.items():
             standing_loss_kwh = standing_loss_kwh_per_year(
-                hot_water_heating_source, household_size
+                hot_water_heating_source, household_size, climate_zone
             )
             assert standing_loss_kwh == approx(expected_kwh, abs=10)
