@@ -174,7 +174,7 @@ az container show -g $resourceGroup -n $containerGroupName
 az container logs -g $resourceGroup -n $containerGroupName
 ```
 
-Restart the container (after pushing updates to the registry) to pull the latest version (TBC):
+Restart the container (after pushing updates to the registry) to pull the latest version:
 ```
 az container restart -g $resourceGroup -n $containerGroupName
 ```
