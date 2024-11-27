@@ -55,7 +55,7 @@ def uses_natural_gas(profile: HouseholdAnswers, use_alternatives: bool = False) 
             main_heating_source == "Piped gas heater",
             hot_water_heating_source
             in ["Piped gas hot water cylinder", "Piped gas instantaneous"],
-            cooktop == "Gas hob",
+            cooktop == "Piped gas",
         ]
     )
 
