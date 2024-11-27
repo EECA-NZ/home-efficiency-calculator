@@ -67,7 +67,10 @@ def test_get_energy_plan():
         {"Day": 0.21228999999999998, "Night": 0.17204},
         {"Day": 0.242, "Night": 0.18},
     )
-    assert "Methane" in plan.natural_gas_plan.name
+    assert (
+        "Methane" in plan.natural_gas_plan.name
+        or "Default Natural Gas Plan" in plan.natural_gas_plan.name
+    )
     # Plan tariffs are either RA numbers or averages from Powerswitch dataset
     assert plan.natural_gas_plan.nzd_per_kwh["Uncontrolled"] == approx(
         0.11

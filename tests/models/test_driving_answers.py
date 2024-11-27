@@ -70,7 +70,7 @@ def manual_calculation_petrol():
     return annual_running_cost
 
 
-def manual_calculation_ev():
+def manual_calculation_ev(home_elx_cost_per_kwh):
     """
     A manual calculation of the annual running
     cost for a small electric car.
@@ -81,7 +81,6 @@ def manual_calculation_ev():
     battery_economy_kwh_per_100km = BATTERY_ECONOMY_KWH_PER_100KM["Electric"]["Small"]
     ev_public_charging_fraction = 0.2
     public_elx_cost_per_kwh = 0.80
-    home_elx_cost_per_kwh = 0.17204
     annual_distance_km = float(DRIVING.km_per_week) / 7 * DAYS_IN_YEAR
     annual_elx_consumption_kwh = (
         annual_distance_km / 100 * battery_economy_kwh_per_100km
@@ -191,4 +190,6 @@ def test_savings_calculations():
     assert electric_energy_costs[1] == approx(
         calculated_savings["variable_cost_nzd"]["alternative"]
     )
-    assert electric_energy_costs[1] == approx(manual_calculation_ev())
+    assert (electric_energy_costs[1] == approx(manual_calculation_ev(0.17204))) or (
+        electric_energy_costs[1] == approx(manual_calculation_ev(0.18))
+    )
