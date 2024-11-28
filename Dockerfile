@@ -8,9 +8,12 @@ WORKDIR /app
 COPY . /app
 
 # Ensure pip is up to date
-RUN pip install --upgrade pip 
+RUN pip install --upgrade pip
 
-# Install the package and its dependencies
+# Install necessary packages
+COPY requirements.txt requirements-dev.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements-dev.txt
 RUN pip install -v --root-user-action=ignore .
 
 # Make port 80 available to the world outside this container

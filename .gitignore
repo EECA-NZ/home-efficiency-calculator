@@ -32,6 +32,12 @@ share/python-wheels/
 .installed.cfg
 *.egg
 
+/build/
+/dist/
+*.egg-info/
+__pycache__/
+*.pyc
+
 # PyInstaller
 # Usually these files are written by a python script from a template
 # before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -139,3 +145,22 @@ prof/
 # Virtualenv
 venv/
 ENV/
+
+# Coverage reports
+htmlcov/
+coverage.xml
+.coverage
+
+# Figures generated
+data_analysis/electricity_plans/bynetwork/*.png
+data_analysis/electricity_plans/bynetwork/*.pdf
+data_analysis/methane_plans/bynetwork/*.png
+data_analysis/methane_plans/bynetwork/*.pdf
+data_analysis/postcode_lookup_tables/output/percentage*png
+data_analysis/climate_zone_boundaries/otekaieke_river_path.png
+
+# Data analysis inputs and outputs
+data_analysis/climate_zone_boundaries/output/
+data_analysis/supplementary_data/
+data_analysis/electricity_plans/output/*.csv
+data_analysis/methane_plans/output/*.csv

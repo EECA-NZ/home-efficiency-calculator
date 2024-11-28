@@ -1,4 +1,10 @@
 # Home Efficiency Calculator
+
+![Linting](https://github.com/EECA-NZ/home-efficiency-calculator/actions/workflows/pylint.yml/badge.svg)
+![Tests](https://github.com/EECA-NZ/home-efficiency-calculator/actions/workflows/python-tests.yml/badge.svg)
+[Test Coverage Report](https://eeca-nz.github.io/home-efficiency-calculator/htmlcov)
+[API documentation](http://home-efficiency-calculator.australiaeast.azurecontainer.io:8000/docs)
+
 This repository contains the source code for the home efficiency calculator, a FastAPI application designed to provide insights into household energy costs and CO2 emissions.
 
 This is a prototype for an approach to deploying our models that aims to make it easy:
@@ -13,7 +19,7 @@ In either case the same codebase is used, providing a single source of truth, an
 Before running the application, ensure you have Python and Docker installed on your system. Python 3.12 or higher is recommended.
 
 ## Local Setup
-It is assumed that the user is working in a powershell environment on a windows machine.
+It is assumed that the user is working in a powershell environment on a Windows machine.
 
 1. **Create and activate a virtual environment:**
    ```bash
@@ -24,18 +30,31 @@ It is assumed that the user is working in a powershell environment on a windows 
 1. **Upgrade pip and install dependencies:**
     ```bash
     python -m pip install --upgrade pip
+    python -m pip install -r requirements-dev.txt
     python -m pip install .
     ```
 
+1. **Install the pre-commit hooks:**
+   ```
+   pre-commit install
+   ```
+    This installs the Git hooks specified in `.pre-commit-config.yaml` and ensures that code formatting and linting checks run before each commit.
+
 1. **Run the test suite:**
     ```bash
-    python -m pytest
+    python -m pytest --verbose
     ```
 
-1. **Run a script using the library:**
+1. **Run the test suite with coverage:**
     ```bash
-    cd scripts
-    python run_heating_analysis.py
+    python -m coverage run -m pytest
+    python -m coverage report
+    python -m coverage html
+    ```
+
+1. **Run pylint:**
+    ```bash
+    python -m pylint --disable=R0801 $(git ls-files '*.py')
     ```
 
 1. **Run the application locally:**
@@ -48,16 +67,36 @@ It is assumed that the user is working in a powershell environment on a windows 
     Point your browser at `http://localhost:8000` or `http://localhost:8000/docs` to see the Swagger UI.
 
 1. **Post a request to the API:**
-    ```bash
-    curl -Method 'POST' `
-     -Uri 'http://localhost:8000/water-heating/' `
-     -Headers @{ "Accept"="application/json"; "Content-Type"="application/json" } `
-     -Body '{
-        "volume_litres": 100,
-        "temp_increase_celsius": 50,
-        "efficiency": 0.8
-     }'
     ```
+    curl -Method 'POST' `
+        -Uri 'http://localhost:8000/cooktop/savings' `
+        -Headers @{
+            "Accept"="application/json"
+            "Content-Type"="application/json"
+        } `
+        -Body '{
+            "cooktop_answers": {
+                "cooktop": "Piped gas",
+                "alternative_cooktop": "Electric induction"
+            },
+            "your_home": {
+                "people_in_house": 4,
+                "postcode": "9016",
+                "disconnect_gas": true
+            }
+        }' `
+        -OutFile 'response.json'
+    ```
+
+## Generating Lookup tables
+
+For the time being we are using lookup tables (rather than the API) to configure the web tool.
+
+To generate the lookup tables, having created and configured your virtual environment as described above,
+enter the `scripts` directory and run the scripts as described in [scripts/readme.md](scripts/readme.md).
+
+The lookup tables will be placed as CSV files within the lookup directory and can be provided to the web
+team for ingestion into the web tool.
 
 ## Docker Setup
 
@@ -82,7 +121,7 @@ It is assumed that the user is working in a powershell environment on a windows 
 * The Docker setup runs the application on port 8000, make sure this port is available on your machine.
 * The API uses FastAPI, which provides automatic interactive API documentation (Swagger UI).
 
-## Deploying the EV Roam Container
+## Deploying the Container
 
 This section provides step-by-step instructions for building, pushing, and deploying the `home-efficiency-calculator` Docker container to Azure.
 
@@ -125,7 +164,7 @@ docker push $imageTag
 Create the Azure Container Instance:
 
 ```powershell
-az container create -g $resourceGroup -n $containerGroupName --registry-username $acrName --registry-password $acrPassword --image $imageTag --cpu 1 --memory 1 --dns-name-label "aciacr" --ports 8000 --restart-policy Always
+az container create -g $resourceGroup -n $containerGroupName --registry-username $acrName --registry-password $acrPassword --image $imageTag --cpu 1 --memory 1 --dns-name-label "home-efficiency-calculator" --ports 8000 --restart-policy Always
 ```
 
 Verify the container and view its logs:
@@ -135,24 +174,59 @@ az container show -g $resourceGroup -n $containerGroupName
 az container logs -g $resourceGroup -n $containerGroupName
 ```
 
+Restart the container (after pushing updates to the registry) to pull the latest version:
+```
+az container restart -g $resourceGroup -n $containerGroupName
+```
+
 ### Accessing the Application
 
 Point your browser at:
 
 ```
-http://aciacr.australiaeast.azurecontainer.io:8000/
+http://home-efficiency-calculator.australiaeast.azurecontainer.io:8000/
 ```
 
 ### Post a request to the API:
-```bash
+```
 curl -Method 'POST' `
-    -Uri 'http://aciacr.australiaeast.azurecontainer.io:8000/water-heating/' `
-    -Headers @{ "Accept"="application/json"; "Content-Type"="application/json" } `
+    -Uri 'http://home-efficiency-calculator.australiaeast.azurecontainer.io:8000/household-energy-profile/' `
+    -Headers @{
+        "Accept"="application/json"
+        "Content-Type"="application/json"
+    } `
     -Body '{
-    "volume_litres": 100,
-    "temp_increase_celsius": 50,
-    "efficiency": 0.8
-    }'
+        "your_home": {
+            "people_in_house": 4,
+            "postcode": "6012",
+            "disconnect_gas": true,
+        },
+        "heating": {
+            "main_heating_source": "Piped gas heater",
+            "alternative_main_heating_source": "Heat pump",
+            "heating_during_day": "Never",
+            "insulation_quality": "Not well insulated",
+        },
+        "hot_water": {
+            "hot_water_usage": "High",
+            "hot_water_heating_source": "Electric hot water cylinder",
+            "alternative_hot_water_heating_source": "Hot water heat pump",
+        },
+        "cooktop": {
+            "cooktop": "Piped gas",
+            "alternative_cooktop": "Electric induction",
+        },
+        "driving": {
+            "vehicle_type": "Petrol",
+            "alternative_vehicle_type": "Electric",
+            "vehicle_size": "Small",
+            "km_per_week": "200",
+        },
+        "solar": {
+            "hasSolar": true,
+        }
+    }' `
+    -OutFile 'response.json'
 ```
 
 ### Cleanup

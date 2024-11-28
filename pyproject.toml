@@ -1,18 +1,37 @@
 [build-system]
-requires = ["setuptools>=61.0.0", "wheel"]  # Ensure setuptools is at a sufficient version
+requires = ["setuptools>=61.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "electrify_app"
+name = "home_efficiency_calculator"
 version = "0.1.0"
-description = "A web API for household energy cost estimates"
+description = "A web API for household energy cost and CO2 emissions estimates"
 authors = [{ name = "EECA", email = "DataAndAnalytics@eeca.govt.nz" }]
 dependencies = [
     "fastapi",
     "pydantic",
     "uvicorn",
-    "pytest",  # Note: Typically, test dependencies are not included in the main dependencies
     "requests",
     "httpx"
 ]
-scripts = {"electrify_app" = "app.main:run"}
+
+[project.scripts]
+electrify_app = "app.main:run"
+
+[project.urls]
+Homepage = "https://github.com/EECA-NZ/home-efficiency-calculator"
+
+[tool.setuptools]
+packages = { find = { exclude = ["build*", "dist*", "*egg-info*", "__pycache__*", "*__pycache__*", "lookup", "lookup.*"] } }
+include-package-data = true
+package-data = { "data_analysis" = ["postcode_lookup_tables/output/*.csv",
+                                    "electricity_plans/output/*.csv",
+                                    "methane_plans/output/*.csv",
+                                    "supplementary_data/tariff_data/*.csv"] }
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+
+[tool.isort]
+profile = "black"
