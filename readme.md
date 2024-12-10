@@ -9,9 +9,9 @@ This repository contains the source code for the [Home efficiency calculator](ht
 
 It is used to serve the numbers behind EECA's public-facing [Home energy savings calculator](https://www.genless.govt.nz/for-everyone/at-home/energy-saving-appliances/home-energy-savings-calculator/) web app.
 
-We would like to thank the team behind the related [Powerswitch](https://www.powerswitch.org.nz/questionnaire) tool for their generosity in sharing a national tariff dataset, allowing us to provide regional energy pricing.
+We would like to thank the team behind the related [Powerswitch](https://www.powerswitch.org.nz/questionnaire) tool for their generosity in sharing a national tariff dataset, which has allowed us to build regional energy pricing into our model.
 
-Users of the [Home energy savings calculator](https://www.genless.govt.nz/for-everyone/at-home/energy-saving-appliances/home-energy-savings-calculator/) may also be interested in the [Electrification calculator](https://calculate.rewiring.nz/), developed by Rewiring Aotearoa, which helps users calculate how much they could save by electrifying their household.
+Users of the [Home energy savings calculator](https://www.genless.govt.nz/for-everyone/at-home/energy-saving-appliances/home-energy-savings-calculator/) are likely to also be interested in the [Electrification calculator](https://calculate.rewiring.nz/), developed by Rewiring Aotearoa, which helps users calculate how much they could save by electrifying their household.
 
 ## About
 This is a prototype for an approach to deploying our models that aims to make it easy:
