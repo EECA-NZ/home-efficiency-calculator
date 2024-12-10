@@ -5,8 +5,15 @@
 [Test Coverage Report](https://eeca-nz.github.io/home-efficiency-calculator/htmlcov)
 [API documentation](http://home-efficiency-calculator.australiaeast.azurecontainer.io:8000/docs)
 
-This repository contains the source code for the home efficiency calculator, a FastAPI application designed to provide insights into household energy costs and CO2 emissions.
+This repository contains the source code for the [Home efficiency calculator](http://home-efficiency-calculator.australiaeast.azurecontainer.io:8000/docs), a FastAPI application designed to provide insights into household energy costs and CO2 emissions.
 
+It is used to serve the numbers behind EECA's public-facing [Home energy savings calculator](https://www.genless.govt.nz/for-everyone/at-home/energy-saving-appliances/home-energy-savings-calculator/) web app.
+
+We would like to thank the team behind the [Powerswitch](https://www.powerswitch.org.nz/questionnaire) tool for their generosity in sharing a national tariff dataset, which has allowed us to build regional energy pricing into our model.
+
+Users of the [Home energy savings calculator](https://www.genless.govt.nz/for-everyone/at-home/energy-saving-appliances/home-energy-savings-calculator/) are likely to also be interested in the [Electrification calculator](https://calculate.rewiring.nz/), developed by Rewiring Aotearoa, which helps users calculate how much they could save by electrifying their household.
+
+## About
 This is a prototype for an approach to deploying our models that aims to make it easy:
 
 * to deploy them as a Dockerized backend for our public tools, and
