@@ -20,7 +20,7 @@ logging.basicConfig(level=logging.INFO)
 LOOKUP_DIR = os.path.join(os.path.dirname(__file__), "..", "lookup")
 os.makedirs(LOOKUP_DIR, exist_ok=True)
 
-OUTPUT_FILE = "solar_kwh_reduction_lookup_table_collapsed.csv"
+OUTPUT_FILE = "solar_kwh_reduction_lookup_table.csv"
 REPORT_EVERY_N_ROWS = 1e5
 DEFAULT_VEHICLE_TYPE = "None"
 
@@ -168,7 +168,7 @@ def calculate_solar_kwh_reduction(params):
 # ------------------------
 # Main generation function
 # ------------------------
-def generate_solar_kwh_reduction_lookup_table_collapsed():
+def generate_solar_kwh_reduction_lookup_table():
     """
     Build a CSV with columns:
       - climate_zone
@@ -248,6 +248,6 @@ def generate_solar_kwh_reduction_lookup_table_collapsed():
 
 
 if __name__ == "__main__":
-    logging.info("Generating collapsed solar kWh reduction lookup table...")
-    generate_solar_kwh_reduction_lookup_table_collapsed()
+    logging.info("Generating solar kWh reduction lookup table...")
+    generate_solar_kwh_reduction_lookup_table()
     logging.info("Done.")
