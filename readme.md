@@ -38,7 +38,7 @@ It is assumed that the user is working in a powershell environment on a Windows 
     ```bash
     python -m pip install --upgrade pip
     python -m pip install -r requirements-dev.txt
-    python -m pip install .
+    python -m pip install . # or python -m pip install -e .
     ```
 
 1. **Install the pre-commit hooks:**
