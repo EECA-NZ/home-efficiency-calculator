@@ -1,6 +1,7 @@
 """
 Test energy consumption profile and behaviour of the DrivingAnswers class.
 """
+# pylint: disable=no-member
 
 from pytest import approx
 
@@ -12,7 +13,7 @@ from app.constants import (
     FUEL_CONSUMPTION_LITRES_PER_100KM,
 )
 from app.models.energy_plans import HouseholdEnergyPlan
-from app.models.usage_profiles import YearlyFuelUsageProfile
+from app.models.usage_profiles import ElectricityUsage, YearlyFuelUsageProfile
 from app.models.user_answers import DrivingAnswers, YourHomeAnswers
 from app.services.cost_calculator import calculate_savings_for_option
 from app.services.get_energy_plans import postcode_to_electricity_plan
@@ -44,7 +45,7 @@ def test_small_electric_car():
     my_driving_energy_usage = my_driving_answers.energy_usage_pattern(YOUR_HOME)
 
     assert (
-        my_driving_energy_usage.flexible_kwh
+        my_driving_energy_usage.anytime_kwh.controllable
         + my_driving_energy_usage.public_ev_charger_kwh
     ) / DAYS_IN_YEAR == approx(5.114202500144706)
 
@@ -141,8 +142,9 @@ def test_savings_calculations():
     petrol_energy_costs = petrol_plan.calculate_cost(
         YearlyFuelUsageProfile(
             elx_connection_days=365.25,
-            inflexible_day_kwh=0,
-            flexible_kwh=0,
+            day_kwh=ElectricityUsage(uncontrolled=0.0),
+            anytime_kwh=ElectricityUsage(uncontrolled=0.0),
+            night_kwh=ElectricityUsage(uncontrolled=0.0),
             natural_gas_connection_days=0,
             natural_gas_kwh=0,
             lpg_tanks_rental_days=0,
@@ -162,12 +164,13 @@ def test_savings_calculations():
         * BATTERY_ECONOMY_KWH_PER_100KM["Electric"]["Small"]
     )
     public_ev_charger_kwh = total_kwh * EV_PUBLIC_CHARGING_FRACTION
-    flexible_kwh = total_kwh - public_ev_charger_kwh
+    anytime_kwh = total_kwh - public_ev_charger_kwh
     electric_energy_costs = electric_plan.calculate_cost(
         YearlyFuelUsageProfile(
             elx_connection_days=365.25,
-            inflexible_day_kwh=0,
-            flexible_kwh=flexible_kwh,
+            day_kwh=ElectricityUsage(controllable=0),
+            anytime_kwh=ElectricityUsage(controllable=anytime_kwh),
+            night_kwh=ElectricityUsage(controllable=0),
             natural_gas_connection_days=0,
             natural_gas_kwh=0,
             lpg_tanks_rental_days=0,

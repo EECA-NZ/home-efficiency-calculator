@@ -21,7 +21,7 @@ from ...constants import (
 )
 from ...services import get_climate_zone
 from ...services.helpers import heating_frequency_factor
-from ..usage_profiles import HeatingYearlyFuelUsageProfile
+from ..usage_profiles import ElectricityUsage, HeatingYearlyFuelUsageProfile
 
 
 class HeatingAnswers(BaseModel):
@@ -97,12 +97,16 @@ class HeatingAnswers(BaseModel):
                 "lpg_tanks_rental_days": DAYS_IN_YEAR,
             },
             "Heat pump": {
-                "inflexible_day_kwh": heating_energy_service_demand
-                / HEAT_PUMP_COP_BY_CLIMATE_ZONE[climate_zone],
+                "day_kwh": ElectricityUsage(
+                    uncontrolled=heating_energy_service_demand
+                    / HEAT_PUMP_COP_BY_CLIMATE_ZONE[climate_zone]
+                ),
             },
             "Electric heater": {
-                "inflexible_day_kwh": heating_energy_service_demand
-                / ELECTRIC_HEATER_SPACE_HEATING_EFFICIENCY,
+                "day_kwh": ElectricityUsage(
+                    uncontrolled=heating_energy_service_demand
+                    / ELECTRIC_HEATER_SPACE_HEATING_EFFICIENCY
+                ),
             },
             "Wood burner": {
                 "wood_kwh": heating_energy_service_demand

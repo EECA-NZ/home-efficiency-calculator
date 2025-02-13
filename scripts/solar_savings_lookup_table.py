@@ -41,6 +41,7 @@ people_in_house_options = [1, 2, 3, 4, 5, 6]
 HEATING_ELECTRIC = "Electric heater"
 HEATING_HEAT_PUMP = "Heat pump"
 HEATING_OTHER = "other_heating"
+heating_electric = [HEATING_ELECTRIC, HEATING_HEAT_PUMP]
 heating_categories = [HEATING_ELECTRIC, HEATING_HEAT_PUMP, HEATING_OTHER]
 heating_during_day_options = [
     "Never",
@@ -58,6 +59,7 @@ insulation_quality_options = [
 HOT_WATER_ELECTRIC = "Electric hot water cylinder"
 HOT_WATER_HEAT_PUMP = "Hot water heat pump"
 HOT_WATER_OTHER = "other_hot_water"
+hot_water_electric = [HOT_WATER_ELECTRIC, HOT_WATER_HEAT_PUMP]
 hot_water_categories = [HOT_WATER_ELECTRIC, HOT_WATER_HEAT_PUMP, HOT_WATER_OTHER]
 hot_water_usage_options = ["Low", "Average", "High"]
 
@@ -65,6 +67,7 @@ hot_water_usage_options = ["Low", "Average", "High"]
 DRIVING_ELECTRIC = "Electric"
 DRIVING_PLUGIN_HYBRID = "Plug-in hybrid"
 DRIVING_OTHER = "other_vehicle"
+driving_electric = [DRIVING_ELECTRIC, DRIVING_PLUGIN_HYBRID]
 driving_categories = [DRIVING_ELECTRIC, DRIVING_PLUGIN_HYBRID, DRIVING_OTHER]
 km_per_week_options = ["50 or less", "100", "200", "300", "400 or more"]
 size_options = ["Small", "Medium", "Large"]
@@ -120,7 +123,7 @@ def all_heating_combinations():
     for 'other_heating', yield one combo with None values.
     """
     for cat in heating_categories:
-        if cat in (HEATING_ELECTRIC, HEATING_HEAT_PUMP):
+        if cat in heating_electric:
             for day_opt in heating_during_day_options:
                 for ins_opt in insulation_quality_options:
                     yield (cat, day_opt, ins_opt)
@@ -135,7 +138,7 @@ def all_hot_water_combinations():
     otherwise yield one combo with usage=None.
     """
     for cat in hot_water_categories:
-        if cat in (HOT_WATER_ELECTRIC, HOT_WATER_HEAT_PUMP):
+        if cat in hot_water_electric:
             for usage_opt in hot_water_usage_options:
                 yield (cat, usage_opt)
         else:
@@ -149,7 +152,7 @@ def all_driving_combinations():
     otherwise yield one combo with km_per_week=None.
     """
     for cat in driving_categories:
-        if cat in (DRIVING_ELECTRIC, DRIVING_PLUGIN_HYBRID):
+        if cat in driving_electric:
             for size_opt in size_options:
                 for km_opt in km_per_week_options:
                     yield (cat, size_opt, km_opt)
@@ -213,11 +216,6 @@ def generate_solar_kwh_reduction_lookup_table():
                                 vehicle_size=drive_size,
                                 km_per_week=drive_km,
                             )
-                        # Calculate the solar benefit.
-                        result = calculate_solar_savings(
-                            your_home, heating_obj, hot_water_obj, driving_obj
-                        )
-
                         # Build the CSV row.
                         row = {
                             "climate_zone": cz_value,
@@ -231,15 +229,13 @@ def generate_solar_kwh_reduction_lookup_table():
                             "driving_category": drive_cat,
                             "vehicle_size": drive_size,
                             "km_per_week": drive_km,
-                            "annual_kwh_generated": result["annual_kwh_generated"],
-                            "annual_kg_co2e_saving": result["annual_kg_co2e_saving"],
-                            "annual_savings_solar_export": result[
-                                "annual_savings_solar_export"
-                            ],
-                            "annual_savings_solar_self_consumption": result[
-                                "annual_savings_solar_self_consumption"
-                            ],
                         }
+                        # Calculate the solar benefit and add to the row.
+                        result = calculate_solar_savings(
+                            your_home, heating_obj, hot_water_obj, driving_obj
+                        )
+                        row.update(result)
+                        # Append the row to the list.
                         rows.append(row)
                         total_count += 1
                         if total_count % REPORT_EVERY_N_ROWS == 0:

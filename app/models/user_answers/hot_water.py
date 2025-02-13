@@ -14,7 +14,7 @@ from ...services.helpers import (
     shower_kwh_per_year,
     standing_loss_kwh_per_year,
 )
-from ..usage_profiles import HotWaterYearlyFuelUsageProfile
+from ..usage_profiles import ElectricityUsage, HotWaterYearlyFuelUsageProfile
 
 
 class HotWaterAnswers(BaseModel):
@@ -80,19 +80,22 @@ class HotWaterAnswers(BaseModel):
 
         # Following breakdown is used if the hot water heating
         # source is electric (hot water cylinder or heat pump)
-        flexible_kwh = total_kwh * HOT_WATER_FLEXIBLE_KWH_FRACTION
-        inflexible_day_kwh = total_kwh - flexible_kwh
+        anytime_kwh = total_kwh * HOT_WATER_FLEXIBLE_KWH_FRACTION
+        day_kwh = total_kwh - anytime_kwh
+
+        anytime_kwh = ElectricityUsage(controllable=anytime_kwh)
+        day_kwh = ElectricityUsage(controllable=day_kwh)
 
         fuel_usage = {
             "Electric hot water cylinder": {
                 "elx_connection_days": DAYS_IN_YEAR,
-                "flexible_kwh": flexible_kwh,
-                "inflexible_day_kwh": inflexible_day_kwh,
+                "day_kwh": day_kwh,
+                "anytime_kwh": anytime_kwh,
             },
             "Hot water heat pump": {
                 "elx_connection_days": DAYS_IN_YEAR,
-                "flexible_kwh": flexible_kwh,
-                "inflexible_day_kwh": inflexible_day_kwh,
+                "day_kwh": day_kwh,
+                "anytime_kwh": anytime_kwh,
             },
             "Piped gas hot water cylinder": {
                 "natural_gas_connection_days": DAYS_IN_YEAR,
