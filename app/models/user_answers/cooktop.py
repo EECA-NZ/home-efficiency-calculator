@@ -11,7 +11,7 @@ from ...constants import (
     DAYS_IN_YEAR,
     STANDARD_HOUSEHOLD_COOKTOP_ENERGY_USAGE_KWH,
 )
-from ..usage_profiles import CooktopYearlyFuelUsageProfile
+from ..usage_profiles import CooktopYearlyFuelUsageProfile, ElectricityUsage
 
 
 class CooktopAnswers(BaseModel):
@@ -87,7 +87,11 @@ class CooktopAnswers(BaseModel):
             * (1 + your_home.people_in_house)
             / (1 + AVERAGE_HOUSEHOLD_SIZE)
         )
-        factor["inflexible_day_kwh"] = total_kwh if "Electric" in cooktop_type else 0
+        factor["day_kwh"] = (
+            ElectricityUsage(uncontrolled=total_kwh)
+            if "Electric" in cooktop_type
+            else ElectricityUsage(uncontrolled=0)
+        )
         factor["natural_gas_kwh"] = total_kwh if cooktop_type == "Piped gas" else 0
         factor["lpg_kwh"] = total_kwh if cooktop_type == "Bottled gas" else 0
 

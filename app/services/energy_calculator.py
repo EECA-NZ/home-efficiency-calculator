@@ -157,19 +157,12 @@ def estimate_usage_from_profile(
         DAYS_IN_YEAR if uses_natural_gas(answers, use_alternatives) else 0
     )
 
+    profiles = [heating_profile, hot_water_profile, cooktop_profile, driving_profile]
+
     # Variable electricity usage
-    inflexible_day_kwh = (
-        heating_profile.inflexible_day_kwh
-        + hot_water_profile.inflexible_day_kwh
-        + cooktop_profile.inflexible_day_kwh
-        + driving_profile.inflexible_day_kwh
-    )
-    flexible_kwh = (
-        heating_profile.flexible_kwh
-        + hot_water_profile.flexible_kwh
-        + cooktop_profile.flexible_kwh
-        + driving_profile.flexible_kwh
-    )
+    day_kwh = sum(profile.day_kwh for profile in profiles)
+    anytime_kwh = sum(profile.anytime_kwh for profile in profiles)
+    night_kwh = sum(profile.night_kwh for profile in profiles)
 
     # Natural gas and LPG usage
     natural_gas_kwh = (
@@ -190,8 +183,9 @@ def estimate_usage_from_profile(
 
     result = {
         "elx_connection_days": elx_connection_days,
-        "inflexible_day_kwh": inflexible_day_kwh,
-        "flexible_kwh": flexible_kwh,
+        "day_kwh": day_kwh,
+        "anytime_kwh": anytime_kwh,
+        "night_kwh": night_kwh,
         "natural_gas_connection_days": natural_gas_connection_days,
         "natural_gas_kwh": natural_gas_kwh,
         "lpg_tanks_rental_days": lpg_tanks_rental_days,
@@ -215,8 +209,9 @@ def emissions_kg_co2e(usage_profile: YearlyFuelUsageProfile) -> float:
     """
     # List of emissions components
     components = [
-        (usage_profile.inflexible_day_kwh, "electricity_kg_co2e_per_kwh"),
-        (usage_profile.flexible_kwh, "electricity_kg_co2e_per_kwh"),
+        (usage_profile.day_kwh.from_grid, "electricity_kg_co2e_per_kwh"),
+        (usage_profile.anytime_kwh.from_grid, "electricity_kg_co2e_per_kwh"),
+        (usage_profile.night_kwh.from_grid, "electricity_kg_co2e_per_kwh"),
         (usage_profile.natural_gas_kwh, "natural_gas_kg_co2e_per_kwh"),
         (usage_profile.lpg_kwh, "lpg_kg_co2e_per_kwh"),
         (usage_profile.wood_kwh, "wood_kg_co2e_per_kwh"),

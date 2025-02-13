@@ -5,7 +5,10 @@ Module for generic helper functions.
 import numpy as np
 from pydantic import BaseModel
 
-from app.models.usage_profiles import HouseholdOtherElectricityUsageProfile
+from app.models.usage_profiles import (
+    ElectricityUsage,
+    HouseholdOtherElectricityUsageProfile,
+)
 
 from ..constants import (
     AVERAGE_AIR_TEMPERATURE_BY_CLIMATE_ZONE,
@@ -335,7 +338,7 @@ def other_electricity_energy_usage_profile():
     Returns:
     - A HouseholdOtherElectricityUsageProfile object.
     """
-    inflexible_day_kwh = DAYS_IN_YEAR * (
+    uncontrolled_day_kwh = DAYS_IN_YEAR * (
         OTHER_ELX_KWH_PER_DAY["Refrigeration"]["kWh/day"]
         * DAY_NIGHT_FRAC["Refrigeration"]["Day"]
         + OTHER_ELX_KWH_PER_DAY["Lighting"]["kWh/day"]
@@ -343,7 +346,7 @@ def other_electricity_energy_usage_profile():
         + OTHER_ELX_KWH_PER_DAY["Laundry"]["kWh/day"] * DAY_NIGHT_FRAC["Laundry"]["Day"]
         + OTHER_ELX_KWH_PER_DAY["Other"]["kWh/day"] * DAY_NIGHT_FRAC["Other"]["Day"]
     )
-    flexible_kwh = DAYS_IN_YEAR * (
+    uncontrolled_night_kwh = DAYS_IN_YEAR * (
         OTHER_ELX_KWH_PER_DAY["Refrigeration"]["kWh/day"]
         * DAY_NIGHT_FRAC["Refrigeration"]["Night"]
         + OTHER_ELX_KWH_PER_DAY["Lighting"]["kWh/day"]
@@ -354,6 +357,6 @@ def other_electricity_energy_usage_profile():
     )
     return HouseholdOtherElectricityUsageProfile(
         elx_connection_days=DAYS_IN_YEAR,
-        inflexible_day_kwh=inflexible_day_kwh,
-        flexible_kwh=flexible_kwh,
+        day_kwh=ElectricityUsage(uncontrolled=uncontrolled_day_kwh),
+        night_kwh=ElectricityUsage(uncontrolled=uncontrolled_night_kwh),
     )

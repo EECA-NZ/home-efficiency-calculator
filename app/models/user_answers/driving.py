@@ -13,7 +13,7 @@ from ...constants import (
     EV_PUBLIC_CHARGING_FRACTION,
     FUEL_CONSUMPTION_LITRES_PER_100KM,
 )
-from ..usage_profiles import DrivingYearlyFuelUsageProfile
+from ..usage_profiles import DrivingYearlyFuelUsageProfile, ElectricityUsage
 
 
 class DrivingAnswers(BaseModel):
@@ -71,9 +71,11 @@ class DrivingAnswers(BaseModel):
             public_charging_kwh = 0
             home_charging_kwh = 0
 
+        anytime_kwh = ElectricityUsage(controllable=home_charging_kwh)
+
         return DrivingYearlyFuelUsageProfile(
             elx_connection_days=DAYS_IN_YEAR,
-            flexible_kwh=home_charging_kwh,
+            anytime_kwh=anytime_kwh,
             petrol_litres=yearly_fuel_litres if liquid_fuel == "Petrol" else 0,
             diesel_litres=yearly_fuel_litres if liquid_fuel == "Diesel" else 0,
             public_ev_charger_kwh=public_charging_kwh,
