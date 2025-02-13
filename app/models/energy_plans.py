@@ -23,7 +23,7 @@ class ElectricityPlan(BaseModel):
 
         Args:
             profile: HouseholdYearlyFuelUsageProfile object
-            containing inflexible_day_kwh, flexible_kwh, and other usage data.
+            containing energy usage data.
 
         Returns:
             Tuple[float, float]: the fixed and variable cost of
@@ -34,29 +34,75 @@ class ElectricityPlan(BaseModel):
 
         if keys == {"All inclusive"}:
             variable_cost_nzd += (
-                profile.inflexible_day_kwh + profile.flexible_kwh
-            ) * self.nzd_per_kwh["All inclusive"]
+                profile.day_kwh.from_grid * self.nzd_per_kwh["All inclusive"]
+            )
+            variable_cost_nzd += (
+                profile.anytime_kwh.from_grid * self.nzd_per_kwh["All inclusive"]
+            )
+            variable_cost_nzd += (
+                profile.night_kwh.from_grid * self.nzd_per_kwh["All inclusive"]
+            )
         elif keys == {"Day", "Night"}:
-            variable_cost_nzd += profile.inflexible_day_kwh * self.nzd_per_kwh["Day"]
-            variable_cost_nzd += profile.flexible_kwh * self.nzd_per_kwh["Night"]
+            variable_cost_nzd += profile.day_kwh.from_grid * self.nzd_per_kwh["Day"]
+            variable_cost_nzd += (
+                profile.anytime_kwh.from_grid * self.nzd_per_kwh["Night"]
+            )
+            variable_cost_nzd += profile.night_kwh.from_grid * self.nzd_per_kwh["Night"]
         elif keys == {"Uncontrolled"}:
             variable_cost_nzd += (
-                profile.inflexible_day_kwh + profile.flexible_kwh
-            ) * self.nzd_per_kwh["Uncontrolled"]
+                profile.day_kwh.from_grid * self.nzd_per_kwh["Uncontrolled"]
+            )
+            variable_cost_nzd += (
+                profile.anytime_kwh.from_grid * self.nzd_per_kwh["Uncontrolled"]
+            )
+            variable_cost_nzd += (
+                profile.night_kwh.from_grid * self.nzd_per_kwh["Uncontrolled"]
+            )
         elif keys == {"Uncontrolled", "Controlled"}:
             variable_cost_nzd += (
-                profile.inflexible_day_kwh * self.nzd_per_kwh["Uncontrolled"]
+                profile.day_kwh.uncontrolled * self.nzd_per_kwh["Uncontrolled"]
             )
-            variable_cost_nzd += profile.flexible_kwh * self.nzd_per_kwh["Controlled"]
+            variable_cost_nzd += (
+                profile.anytime_kwh.uncontrolled * self.nzd_per_kwh["Uncontrolled"]
+            )
+            variable_cost_nzd += (
+                profile.night_kwh.uncontrolled * self.nzd_per_kwh["Uncontrolled"]
+            )
+            variable_cost_nzd += (
+                profile.day_kwh.controllable * self.nzd_per_kwh["Controlled"]
+            )
+            variable_cost_nzd += (
+                profile.anytime_kwh.controllable * self.nzd_per_kwh["Controlled"]
+            )
+            variable_cost_nzd += (
+                profile.night_kwh.controllable * self.nzd_per_kwh["Controlled"]
+            )
         elif keys == {"Night", "All inclusive"}:
-            variable_cost_nzd += profile.flexible_kwh * self.nzd_per_kwh["Night"]
             variable_cost_nzd += (
-                profile.inflexible_day_kwh * self.nzd_per_kwh["All inclusive"]
+                profile.day_kwh.from_grid * self.nzd_per_kwh["All inclusive"]
             )
-        elif keys == {"Night", "Uncontrolled"}:
-            variable_cost_nzd += profile.flexible_kwh * self.nzd_per_kwh["Night"]
             variable_cost_nzd += (
-                profile.inflexible_day_kwh * self.nzd_per_kwh["Uncontrolled"]
+                profile.anytime_kwh.from_grid * self.nzd_per_kwh["Night"]
+            )
+            variable_cost_nzd += profile.night_kwh.from_grid * self.nzd_per_kwh["Night"]
+        elif keys == {"Night", "Uncontrolled"}:
+            variable_cost_nzd += (
+                profile.day_kwh.uncontrolled * self.nzd_per_kwh["Uncontrolled"]
+            )
+            variable_cost_nzd += (
+                profile.anytime_kwh.uncontrolled * self.nzd_per_kwh["Uncontrolled"]
+            )
+            variable_cost_nzd += (
+                profile.night_kwh.uncontrolled * self.nzd_per_kwh["Uncontrolled"]
+            )
+            variable_cost_nzd += (
+                profile.day_kwh.controllable * self.nzd_per_kwh["Uncontrolled"]
+            )
+            variable_cost_nzd += (
+                profile.anytime_kwh.controllable * self.nzd_per_kwh["Night"]
+            )
+            variable_cost_nzd += (
+                profile.night_kwh.controllable * self.nzd_per_kwh["Night"]
             )
         else:
             raise ValueError(f"Unexpected nzd_per_kwh keys: {keys}")

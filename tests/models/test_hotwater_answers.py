@@ -5,7 +5,7 @@ Test energy consumption profile and behaviour of the HotWaterAnswers class.
 from pytest import approx
 
 from app.constants import DAYS_IN_YEAR, HOT_WATER_FLEXIBLE_KWH_FRACTION
-from app.models.usage_profiles import HotWaterYearlyFuelUsageProfile
+from app.models.usage_profiles import ElectricityUsage, HotWaterYearlyFuelUsageProfile
 from app.models.user_answers import HotWaterAnswers
 from app.services.configuration import get_default_household_answers
 
@@ -24,13 +24,16 @@ def test_water_heating_energy_usage():
     """
     profile = get_default_household_answers()
     total_kwh = 2572.2628670365157
-    flexible_kwh = total_kwh * HOT_WATER_FLEXIBLE_KWH_FRACTION
-    inflexible_day_kwh = total_kwh - flexible_kwh
+    anytime_kwh = total_kwh * HOT_WATER_FLEXIBLE_KWH_FRACTION
+    day_kwh = total_kwh - anytime_kwh
+    anytime_kwh = ElectricityUsage(controllable=anytime_kwh)
+    day_kwh = ElectricityUsage(controllable=day_kwh)
+
     hot_water_sources = {
         "Electric hot water cylinder": HotWaterYearlyFuelUsageProfile(
             elx_connection_days=DAYS_IN_YEAR,
-            inflexible_day_kwh=inflexible_day_kwh,
-            flexible_kwh=flexible_kwh,
+            day_kwh=day_kwh,
+            anytime_kwh=anytime_kwh,
             natural_gas_connection_days=0,
             natural_gas_kwh=0,
             lpg_tanks_rental_days=0,

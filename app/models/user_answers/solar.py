@@ -43,5 +43,5 @@ class SolarAnswers(BaseModel):
             )
 
         return SolarYearlyFuelGenerationProfile(
-            inflexible_day_kwh=-annual_generation_kwh,
+            solar_export_kwh=annual_generation_kwh,
         )
