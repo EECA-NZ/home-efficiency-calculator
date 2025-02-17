@@ -55,14 +55,14 @@ Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Defaul
 Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Piped gas,49.26612466124661,80.32520325203252
 Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Bottled gas,100.50948509485096,88.15176151761518
 Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Electric (coil or ceramic),43.675067750677506,18.883468834688347
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Electric induction,45.00669918699187,17.082276422764227
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Piped gas,85.26829268292683,80.32520325203252
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Bottled gas,100.50948509485096,88.15176151761518
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Electric (coil or ceramic),49.75230352303522,18.883468834688347
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Electric induction,45.00669918699187,17.082276422764227
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Piped gas,85.26829268292683,80.32520325203252
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Bottled gas,100.50948509485096,88.15176151761518
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Electric (coil or ceramic),49.75230352303522,18.883468834688347
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Electric induction,38.959382113821135,17.082276422764227
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Piped gas,85.26829268292683,80.32520325203252
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Bottled gas,100.50948509485096,88.15176151761518
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Electric (coil or ceramic),43.06734417344173,18.883468834688347
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Electric induction,38.959382113821135,17.082276422764227
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Piped gas,85.26829268292683,80.32520325203252
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Bottled gas,100.50948509485096,88.15176151761518
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Electric (coil or ceramic),43.06734417344173,18.883468834688347
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Electric induction,34.01157723577235,17.082276422764227
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Piped gas,51.634688346883465,80.32520325203252
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Bottled gas,100.50948509485096,88.15176151761518
@@ -71,14 +71,14 @@ Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,D
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Piped gas,51.634688346883465,80.32520325203252
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Bottled gas,100.50948509485096,88.15176151761518
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Electric (coil or ceramic),37.597831978319775,18.883468834688347
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Electric induction,45.00669918699187,17.082276422764227
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Piped gas,85.26829268292683,80.32520325203252
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Bottled gas,100.50948509485096,88.15176151761518
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Electric (coil or ceramic),49.75230352303522,18.883468834688347
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Electric induction,45.00669918699187,17.082276422764227
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Piped gas,85.26829268292683,80.32520325203252
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Bottled gas,100.50948509485096,88.15176151761518
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Electric (coil or ceramic),49.75230352303522,18.883468834688347
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Electric induction,38.959382113821135,17.082276422764227
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Piped gas,85.26829268292683,80.32520325203252
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Bottled gas,100.50948509485096,88.15176151761518
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Electric (coil or ceramic),43.06734417344173,18.883468834688347
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Electric induction,38.959382113821135,17.082276422764227
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Piped gas,85.26829268292683,80.32520325203252
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Bottled gas,100.50948509485096,88.15176151761518
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Electric (coil or ceramic),43.06734417344173,18.883468834688347
 Rotorua,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Electric induction,43.723934959349585,17.082276422764227
 Rotorua,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Piped gas,86.68943089430894,80.32520325203252
 Rotorua,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Bottled gas,100.50948509485096,88.15176151761518
@@ -119,14 +119,14 @@ Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default W
 Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Piped gas,49.26612466124661,80.32520325203252
 Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Bottled gas,100.50948509485096,88.15176151761518
 Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Electric (coil or ceramic),52.790921409214086,18.883468834688347
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Electric induction,45.00669918699187,17.082276422764227
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Piped gas,85.26829268292683,80.32520325203252
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Bottled gas,100.50948509485096,88.15176151761518
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Electric (coil or ceramic),49.75230352303522,18.883468834688347
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Electric induction,45.00669918699187,17.082276422764227
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Piped gas,85.26829268292683,80.32520325203252
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Bottled gas,100.50948509485096,88.15176151761518
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Electric (coil or ceramic),49.75230352303522,18.883468834688347
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Electric induction,38.959382113821135,17.082276422764227
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Piped gas,85.26829268292683,80.32520325203252
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Bottled gas,100.50948509485096,88.15176151761518
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Electric (coil or ceramic),43.06734417344173,18.883468834688347
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Electric induction,38.959382113821135,17.082276422764227
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Piped gas,85.26829268292683,80.32520325203252
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Bottled gas,100.50948509485096,88.15176151761518
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Electric (coil or ceramic),43.06734417344173,18.883468834688347
 Auckland,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Electric induction,43.723934959349585,17.082276422764227
 Auckland,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Piped gas,86.68943089430894,80.32520325203252
 Auckland,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Bottled gas,100.50948509485096,88.15176151761518
@@ -151,14 +151,14 @@ East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Defau
 East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Piped gas,53.055826558265586,80.32520325203252
 East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Bottled gas,100.50948509485096,88.15176151761518
 East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Electric (coil or ceramic),40.251558265582645,18.883468834688347
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Electric induction,45.00669918699187,17.082276422764227
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Piped gas,85.26829268292683,80.32520325203252
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Bottled gas,100.50948509485096,88.15176151761518
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Electric (coil or ceramic),49.75230352303522,18.883468834688347
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Electric induction,45.00669918699187,17.082276422764227
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Piped gas,85.26829268292683,80.32520325203252
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Bottled gas,100.50948509485096,88.15176151761518
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Electric (coil or ceramic),49.75230352303522,18.883468834688347
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Electric induction,38.959382113821135,17.082276422764227
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Piped gas,85.26829268292683,80.32520325203252
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Bottled gas,100.50948509485096,88.15176151761518
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Electric (coil or ceramic),43.06734417344173,18.883468834688347
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Electric induction,38.959382113821135,17.082276422764227
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Piped gas,85.26829268292683,80.32520325203252
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Bottled gas,100.50948509485096,88.15176151761518
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,False,Electric (coil or ceramic),43.06734417344173,18.883468834688347
 East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Electric induction,38.56260162601626,17.082276422764227
 East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Piped gas,45.31165311653117,80.32520325203252
 East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,1,True,Bottled gas,100.50948509485096,88.15176151761518
@@ -455,14 +455,14 @@ Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Defaul
 Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Piped gas,73.89918699186991,120.48780487804878
 Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Bottled gas,150.7642276422764,132.22764227642276
 Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Electric (coil or ceramic),65.51260162601626,28.325203252032523
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Electric induction,67.5100487804878,25.623414634146343
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Piped gas,127.90243902439023,120.48780487804878
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Bottled gas,150.7642276422764,132.22764227642276
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Electric (coil or ceramic),74.62845528455284,28.325203252032523
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Electric induction,67.5100487804878,25.623414634146343
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Piped gas,127.90243902439023,120.48780487804878
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Bottled gas,150.7642276422764,132.22764227642276
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Electric (coil or ceramic),74.62845528455284,28.325203252032523
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Electric induction,58.4390731707317,25.623414634146343
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Piped gas,127.90243902439023,120.48780487804878
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Bottled gas,150.7642276422764,132.22764227642276
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Electric (coil or ceramic),64.60101626016261,28.325203252032523
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Electric induction,58.4390731707317,25.623414634146343
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Piped gas,127.90243902439023,120.48780487804878
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Bottled gas,150.7642276422764,132.22764227642276
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Electric (coil or ceramic),64.60101626016261,28.325203252032523
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Electric induction,51.01736585365853,25.623414634146343
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Piped gas,77.45203252032519,120.48780487804878
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Bottled gas,150.7642276422764,132.22764227642276
@@ -471,14 +471,14 @@ Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,D
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Piped gas,77.45203252032519,120.48780487804878
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Bottled gas,150.7642276422764,132.22764227642276
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Electric (coil or ceramic),56.39674796747967,28.325203252032523
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Electric induction,67.5100487804878,25.623414634146343
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Piped gas,127.90243902439023,120.48780487804878
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Bottled gas,150.7642276422764,132.22764227642276
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Electric (coil or ceramic),74.62845528455284,28.325203252032523
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Electric induction,67.5100487804878,25.623414634146343
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Piped gas,127.90243902439023,120.48780487804878
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Bottled gas,150.7642276422764,132.22764227642276
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Electric (coil or ceramic),74.62845528455284,28.325203252032523
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Electric induction,58.4390731707317,25.623414634146343
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Piped gas,127.90243902439023,120.48780487804878
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Bottled gas,150.7642276422764,132.22764227642276
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Electric (coil or ceramic),64.60101626016261,28.325203252032523
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Electric induction,58.4390731707317,25.623414634146343
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Piped gas,127.90243902439023,120.48780487804878
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Bottled gas,150.7642276422764,132.22764227642276
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Electric (coil or ceramic),64.60101626016261,28.325203252032523
 Rotorua,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Electric induction,65.58590243902438,25.623414634146343
 Rotorua,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Piped gas,130.03414634146338,120.48780487804878
 Rotorua,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Bottled gas,150.7642276422764,132.22764227642276
@@ -519,14 +519,14 @@ Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default W
 Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Piped gas,73.89918699186991,120.48780487804878
 Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Bottled gas,150.7642276422764,132.22764227642276
 Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Electric (coil or ceramic),79.18638211382114,28.325203252032523
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Electric induction,67.5100487804878,25.623414634146343
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Piped gas,127.90243902439023,120.48780487804878
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Bottled gas,150.7642276422764,132.22764227642276
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Electric (coil or ceramic),74.62845528455284,28.325203252032523
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Electric induction,67.5100487804878,25.623414634146343
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Piped gas,127.90243902439023,120.48780487804878
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Bottled gas,150.7642276422764,132.22764227642276
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Electric (coil or ceramic),74.62845528455284,28.325203252032523
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Electric induction,58.4390731707317,25.623414634146343
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Piped gas,127.90243902439023,120.48780487804878
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Bottled gas,150.7642276422764,132.22764227642276
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Electric (coil or ceramic),64.60101626016261,28.325203252032523
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Electric induction,58.4390731707317,25.623414634146343
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Piped gas,127.90243902439023,120.48780487804878
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Bottled gas,150.7642276422764,132.22764227642276
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Electric (coil or ceramic),64.60101626016261,28.325203252032523
 Auckland,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Electric induction,65.58590243902438,25.623414634146343
 Auckland,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Piped gas,130.03414634146338,120.48780487804878
 Auckland,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Bottled gas,150.7642276422764,132.22764227642276
@@ -551,14 +551,14 @@ East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Defau
 East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Piped gas,79.58373983739837,120.48780487804878
 East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Bottled gas,150.7642276422764,132.22764227642276
 East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Electric (coil or ceramic),60.377337398373975,28.325203252032523
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Electric induction,67.5100487804878,25.623414634146343
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Piped gas,127.90243902439023,120.48780487804878
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Bottled gas,150.7642276422764,132.22764227642276
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Electric (coil or ceramic),74.62845528455284,28.325203252032523
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Electric induction,67.5100487804878,25.623414634146343
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Piped gas,127.90243902439023,120.48780487804878
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Bottled gas,150.7642276422764,132.22764227642276
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Electric (coil or ceramic),74.62845528455284,28.325203252032523
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Electric induction,58.4390731707317,25.623414634146343
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Piped gas,127.90243902439023,120.48780487804878
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Bottled gas,150.7642276422764,132.22764227642276
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Electric (coil or ceramic),64.60101626016261,28.325203252032523
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Electric induction,58.4390731707317,25.623414634146343
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Piped gas,127.90243902439023,120.48780487804878
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Bottled gas,150.7642276422764,132.22764227642276
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,False,Electric (coil or ceramic),64.60101626016261,28.325203252032523
 East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Electric induction,57.84390243902439,25.623414634146343
 East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Piped gas,67.96747967479675,120.48780487804878
 East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,2,True,Bottled gas,150.7642276422764,132.22764227642276
@@ -855,14 +855,14 @@ Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Defaul
 Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Piped gas,98.53224932249321,160.65040650406505
 Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Bottled gas,201.01897018970192,176.30352303523037
 Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Electric (coil or ceramic),87.35013550135501,37.766937669376695
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Electric induction,90.01339837398373,34.164552845528455
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Piped gas,170.53658536585365,160.65040650406505
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Bottled gas,201.01897018970192,176.30352303523037
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Electric (coil or ceramic),99.50460704607045,37.766937669376695
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Electric induction,90.01339837398373,34.164552845528455
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Piped gas,170.53658536585365,160.65040650406505
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Bottled gas,201.01897018970192,176.30352303523037
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Electric (coil or ceramic),99.50460704607045,37.766937669376695
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Electric induction,77.91876422764227,34.164552845528455
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Piped gas,170.53658536585365,160.65040650406505
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Bottled gas,201.01897018970192,176.30352303523037
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Electric (coil or ceramic),86.13468834688346,37.766937669376695
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Electric induction,77.91876422764227,34.164552845528455
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Piped gas,170.53658536585365,160.65040650406505
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Bottled gas,201.01897018970192,176.30352303523037
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Electric (coil or ceramic),86.13468834688346,37.766937669376695
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Electric induction,68.0231544715447,34.164552845528455
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Piped gas,103.26937669376693,160.65040650406505
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Bottled gas,201.01897018970192,176.30352303523037
@@ -871,14 +871,14 @@ Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,D
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Piped gas,103.26937669376693,160.65040650406505
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Bottled gas,201.01897018970192,176.30352303523037
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Electric (coil or ceramic),75.19566395663955,37.766937669376695
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Electric induction,90.01339837398373,34.164552845528455
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Piped gas,170.53658536585365,160.65040650406505
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Bottled gas,201.01897018970192,176.30352303523037
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Electric (coil or ceramic),99.50460704607045,37.766937669376695
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Electric induction,90.01339837398373,34.164552845528455
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Piped gas,170.53658536585365,160.65040650406505
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Bottled gas,201.01897018970192,176.30352303523037
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Electric (coil or ceramic),99.50460704607045,37.766937669376695
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Electric induction,77.91876422764227,34.164552845528455
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Piped gas,170.53658536585365,160.65040650406505
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Bottled gas,201.01897018970192,176.30352303523037
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Electric (coil or ceramic),86.13468834688346,37.766937669376695
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Electric induction,77.91876422764227,34.164552845528455
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Piped gas,170.53658536585365,160.65040650406505
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Bottled gas,201.01897018970192,176.30352303523037
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Electric (coil or ceramic),86.13468834688346,37.766937669376695
 Rotorua,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Electric induction,87.44786991869917,34.164552845528455
 Rotorua,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Piped gas,173.37886178861788,160.65040650406505
 Rotorua,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Bottled gas,201.01897018970192,176.30352303523037
@@ -919,14 +919,14 @@ Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default W
 Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Piped gas,98.53224932249321,160.65040650406505
 Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Bottled gas,201.01897018970192,176.30352303523037
 Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Electric (coil or ceramic),105.58184281842817,37.766937669376695
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Electric induction,90.01339837398373,34.164552845528455
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Piped gas,170.53658536585365,160.65040650406505
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Bottled gas,201.01897018970192,176.30352303523037
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Electric (coil or ceramic),99.50460704607045,37.766937669376695
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Electric induction,90.01339837398373,34.164552845528455
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Piped gas,170.53658536585365,160.65040650406505
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Bottled gas,201.01897018970192,176.30352303523037
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Electric (coil or ceramic),99.50460704607045,37.766937669376695
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Electric induction,77.91876422764227,34.164552845528455
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Piped gas,170.53658536585365,160.65040650406505
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Bottled gas,201.01897018970192,176.30352303523037
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Electric (coil or ceramic),86.13468834688346,37.766937669376695
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Electric induction,77.91876422764227,34.164552845528455
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Piped gas,170.53658536585365,160.65040650406505
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Bottled gas,201.01897018970192,176.30352303523037
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Electric (coil or ceramic),86.13468834688346,37.766937669376695
 Auckland,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Electric induction,87.44786991869917,34.164552845528455
 Auckland,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Piped gas,173.37886178861788,160.65040650406505
 Auckland,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Bottled gas,201.01897018970192,176.30352303523037
@@ -951,14 +951,14 @@ East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Defau
 East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Piped gas,106.11165311653117,160.65040650406505
 East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Bottled gas,201.01897018970192,176.30352303523037
 East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Electric (coil or ceramic),80.50311653116529,37.766937669376695
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Electric induction,90.01339837398373,34.164552845528455
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Piped gas,170.53658536585365,160.65040650406505
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Bottled gas,201.01897018970192,176.30352303523037
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Electric (coil or ceramic),99.50460704607045,37.766937669376695
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Electric induction,90.01339837398373,34.164552845528455
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Piped gas,170.53658536585365,160.65040650406505
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Bottled gas,201.01897018970192,176.30352303523037
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Electric (coil or ceramic),99.50460704607045,37.766937669376695
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Electric induction,77.91876422764227,34.164552845528455
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Piped gas,170.53658536585365,160.65040650406505
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Bottled gas,201.01897018970192,176.30352303523037
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Electric (coil or ceramic),86.13468834688346,37.766937669376695
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Electric induction,77.91876422764227,34.164552845528455
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Piped gas,170.53658536585365,160.65040650406505
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Bottled gas,201.01897018970192,176.30352303523037
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,False,Electric (coil or ceramic),86.13468834688346,37.766937669376695
 East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Electric induction,77.12520325203252,34.164552845528455
 East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Piped gas,90.62330623306234,160.65040650406505
 East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,3,True,Bottled gas,201.01897018970192,176.30352303523037
@@ -1255,14 +1255,14 @@ Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Defaul
 Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Piped gas,123.16531165311652,200.8130081300813
 Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Bottled gas,251.27371273712737,220.37940379403793
 Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Electric (coil or ceramic),109.18766937669376,47.20867208672087
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Electric induction,112.51674796747966,42.705691056910574
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Piped gas,213.17073170731706,200.8130081300813
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Bottled gas,251.27371273712737,220.37940379403793
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Electric (coil or ceramic),124.38075880758807,47.20867208672087
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Electric induction,112.51674796747966,42.705691056910574
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Piped gas,213.17073170731706,200.8130081300813
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Bottled gas,251.27371273712737,220.37940379403793
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Electric (coil or ceramic),124.38075880758807,47.20867208672087
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Electric induction,97.39845528455284,42.705691056910574
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Piped gas,213.17073170731706,200.8130081300813
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Bottled gas,251.27371273712737,220.37940379403793
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Electric (coil or ceramic),107.66836043360433,47.20867208672087
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Electric induction,97.39845528455284,42.705691056910574
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Piped gas,213.17073170731706,200.8130081300813
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Bottled gas,251.27371273712737,220.37940379403793
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Electric (coil or ceramic),107.66836043360433,47.20867208672087
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Electric induction,85.02894308943088,42.705691056910574
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Piped gas,129.08672086720867,200.8130081300813
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Bottled gas,251.27371273712737,220.37940379403793
@@ -1271,14 +1271,14 @@ Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,D
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Piped gas,129.08672086720867,200.8130081300813
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Bottled gas,251.27371273712737,220.37940379403793
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Electric (coil or ceramic),93.99457994579944,47.20867208672087
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Electric induction,112.51674796747966,42.705691056910574
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Piped gas,213.17073170731706,200.8130081300813
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Bottled gas,251.27371273712737,220.37940379403793
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Electric (coil or ceramic),124.38075880758807,47.20867208672087
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Electric induction,112.51674796747966,42.705691056910574
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Piped gas,213.17073170731706,200.8130081300813
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Bottled gas,251.27371273712737,220.37940379403793
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Electric (coil or ceramic),124.38075880758807,47.20867208672087
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Electric induction,97.39845528455284,42.705691056910574
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Piped gas,213.17073170731706,200.8130081300813
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Bottled gas,251.27371273712737,220.37940379403793
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Electric (coil or ceramic),107.66836043360433,47.20867208672087
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Electric induction,97.39845528455284,42.705691056910574
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Piped gas,213.17073170731706,200.8130081300813
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Bottled gas,251.27371273712737,220.37940379403793
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Electric (coil or ceramic),107.66836043360433,47.20867208672087
 Rotorua,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Electric induction,109.30983739837397,42.705691056910574
 Rotorua,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Piped gas,216.72357723577232,200.8130081300813
 Rotorua,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Bottled gas,251.27371273712737,220.37940379403793
@@ -1319,14 +1319,14 @@ Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default W
 Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Piped gas,123.16531165311652,200.8130081300813
 Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Bottled gas,251.27371273712737,220.37940379403793
 Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Electric (coil or ceramic),131.9773035230352,47.20867208672087
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Electric induction,112.51674796747966,42.705691056910574
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Piped gas,213.17073170731706,200.8130081300813
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Bottled gas,251.27371273712737,220.37940379403793
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Electric (coil or ceramic),124.38075880758807,47.20867208672087
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Electric induction,112.51674796747966,42.705691056910574
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Piped gas,213.17073170731706,200.8130081300813
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Bottled gas,251.27371273712737,220.37940379403793
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Electric (coil or ceramic),124.38075880758807,47.20867208672087
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Electric induction,97.39845528455284,42.705691056910574
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Piped gas,213.17073170731706,200.8130081300813
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Bottled gas,251.27371273712737,220.37940379403793
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Electric (coil or ceramic),107.66836043360433,47.20867208672087
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Electric induction,97.39845528455284,42.705691056910574
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Piped gas,213.17073170731706,200.8130081300813
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Bottled gas,251.27371273712737,220.37940379403793
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Electric (coil or ceramic),107.66836043360433,47.20867208672087
 Auckland,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Electric induction,109.30983739837397,42.705691056910574
 Auckland,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Piped gas,216.72357723577232,200.8130081300813
 Auckland,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Bottled gas,251.27371273712737,220.37940379403793
@@ -1351,14 +1351,14 @@ East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Defau
 East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Piped gas,132.63956639566396,200.8130081300813
 East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Bottled gas,251.27371273712737,220.37940379403793
 East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Electric (coil or ceramic),100.62889566395663,47.20867208672087
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Electric induction,112.51674796747966,42.705691056910574
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Piped gas,213.17073170731706,200.8130081300813
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Bottled gas,251.27371273712737,220.37940379403793
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Electric (coil or ceramic),124.38075880758807,47.20867208672087
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Electric induction,112.51674796747966,42.705691056910574
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Piped gas,213.17073170731706,200.8130081300813
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Bottled gas,251.27371273712737,220.37940379403793
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Electric (coil or ceramic),124.38075880758807,47.20867208672087
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Electric induction,97.39845528455284,42.705691056910574
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Piped gas,213.17073170731706,200.8130081300813
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Bottled gas,251.27371273712737,220.37940379403793
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Electric (coil or ceramic),107.66836043360433,47.20867208672087
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Electric induction,97.39845528455284,42.705691056910574
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Piped gas,213.17073170731706,200.8130081300813
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Bottled gas,251.27371273712737,220.37940379403793
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,False,Electric (coil or ceramic),107.66836043360433,47.20867208672087
 East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Electric induction,96.40650406504065,42.705691056910574
 East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Piped gas,113.27913279132791,200.8130081300813
 East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,4,True,Bottled gas,251.27371273712737,220.37940379403793
@@ -1655,14 +1655,14 @@ Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Defaul
 Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Piped gas,147.79837398373982,240.97560975609755
 Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Bottled gas,301.5284552845528,264.4552845528455
 Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Electric (coil or ceramic),131.02520325203253,56.650406504065046
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Electric induction,135.0200975609756,51.246829268292686
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Piped gas,255.80487804878047,240.97560975609755
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Bottled gas,301.5284552845528,264.4552845528455
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Electric (coil or ceramic),149.25691056910568,56.650406504065046
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Electric induction,135.0200975609756,51.246829268292686
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Piped gas,255.80487804878047,240.97560975609755
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Bottled gas,301.5284552845528,264.4552845528455
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Electric (coil or ceramic),149.25691056910568,56.650406504065046
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Electric induction,116.8781463414634,51.246829268292686
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Piped gas,255.80487804878047,240.97560975609755
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Bottled gas,301.5284552845528,264.4552845528455
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Electric (coil or ceramic),129.20203252032522,56.650406504065046
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Electric induction,116.8781463414634,51.246829268292686
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Piped gas,255.80487804878047,240.97560975609755
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Bottled gas,301.5284552845528,264.4552845528455
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Electric (coil or ceramic),129.20203252032522,56.650406504065046
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Electric induction,102.03473170731706,51.246829268292686
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Piped gas,154.90406504065038,240.97560975609755
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Bottled gas,301.5284552845528,264.4552845528455
@@ -1671,14 +1671,14 @@ Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,D
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Piped gas,154.90406504065038,240.97560975609755
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Bottled gas,301.5284552845528,264.4552845528455
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Electric (coil or ceramic),112.79349593495934,56.650406504065046
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Electric induction,135.0200975609756,51.246829268292686
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Piped gas,255.80487804878047,240.97560975609755
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Bottled gas,301.5284552845528,264.4552845528455
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Electric (coil or ceramic),149.25691056910568,56.650406504065046
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Electric induction,135.0200975609756,51.246829268292686
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Piped gas,255.80487804878047,240.97560975609755
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Bottled gas,301.5284552845528,264.4552845528455
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Electric (coil or ceramic),149.25691056910568,56.650406504065046
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Electric induction,116.8781463414634,51.246829268292686
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Piped gas,255.80487804878047,240.97560975609755
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Bottled gas,301.5284552845528,264.4552845528455
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Electric (coil or ceramic),129.20203252032522,56.650406504065046
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Electric induction,116.8781463414634,51.246829268292686
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Piped gas,255.80487804878047,240.97560975609755
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Bottled gas,301.5284552845528,264.4552845528455
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Electric (coil or ceramic),129.20203252032522,56.650406504065046
 Rotorua,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Electric induction,131.17180487804876,51.246829268292686
 Rotorua,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Piped gas,260.06829268292677,240.97560975609755
 Rotorua,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Bottled gas,301.5284552845528,264.4552845528455
@@ -1719,14 +1719,14 @@ Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default W
 Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Piped gas,147.79837398373982,240.97560975609755
 Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Bottled gas,301.5284552845528,264.4552845528455
 Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Electric (coil or ceramic),158.37276422764228,56.650406504065046
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Electric induction,135.0200975609756,51.246829268292686
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Piped gas,255.80487804878047,240.97560975609755
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Bottled gas,301.5284552845528,264.4552845528455
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Electric (coil or ceramic),149.25691056910568,56.650406504065046
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Electric induction,135.0200975609756,51.246829268292686
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Piped gas,255.80487804878047,240.97560975609755
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Bottled gas,301.5284552845528,264.4552845528455
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Electric (coil or ceramic),149.25691056910568,56.650406504065046
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Electric induction,116.8781463414634,51.246829268292686
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Piped gas,255.80487804878047,240.97560975609755
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Bottled gas,301.5284552845528,264.4552845528455
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Electric (coil or ceramic),129.20203252032522,56.650406504065046
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Electric induction,116.8781463414634,51.246829268292686
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Piped gas,255.80487804878047,240.97560975609755
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Bottled gas,301.5284552845528,264.4552845528455
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Electric (coil or ceramic),129.20203252032522,56.650406504065046
 Auckland,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Electric induction,131.17180487804876,51.246829268292686
 Auckland,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Piped gas,260.06829268292677,240.97560975609755
 Auckland,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Bottled gas,301.5284552845528,264.4552845528455
@@ -1751,14 +1751,14 @@ East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Defau
 East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Piped gas,159.16747967479674,240.97560975609755
 East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Bottled gas,301.5284552845528,264.4552845528455
 East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Electric (coil or ceramic),120.75467479674795,56.650406504065046
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Electric induction,135.0200975609756,51.246829268292686
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Piped gas,255.80487804878047,240.97560975609755
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Bottled gas,301.5284552845528,264.4552845528455
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Electric (coil or ceramic),149.25691056910568,56.650406504065046
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Electric induction,135.0200975609756,51.246829268292686
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Piped gas,255.80487804878047,240.97560975609755
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Bottled gas,301.5284552845528,264.4552845528455
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Electric (coil or ceramic),149.25691056910568,56.650406504065046
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Electric induction,116.8781463414634,51.246829268292686
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Piped gas,255.80487804878047,240.97560975609755
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Bottled gas,301.5284552845528,264.4552845528455
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Electric (coil or ceramic),129.20203252032522,56.650406504065046
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Electric induction,116.8781463414634,51.246829268292686
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Piped gas,255.80487804878047,240.97560975609755
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Bottled gas,301.5284552845528,264.4552845528455
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,False,Electric (coil or ceramic),129.20203252032522,56.650406504065046
 East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Electric induction,115.68780487804878,51.246829268292686
 East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Piped gas,135.9349593495935,240.97560975609755
 East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,5,True,Bottled gas,301.5284552845528,264.4552845528455
@@ -2055,14 +2055,14 @@ Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Defaul
 Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Piped gas,172.4314363143631,281.1382113821138
 Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Bottled gas,351.78319783197827,308.53116531165307
 Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Electric (coil or ceramic),152.86273712737128,66.09214092140921
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Electric induction,157.52344715447154,59.787967479674805
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Piped gas,298.4390243902439,281.1382113821138
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Bottled gas,351.78319783197827,308.53116531165307
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Electric (coil or ceramic),174.1330623306233,66.09214092140921
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Electric induction,157.52344715447154,59.787967479674805
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Piped gas,298.4390243902439,281.1382113821138
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Bottled gas,351.78319783197827,308.53116531165307
-Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Electric (coil or ceramic),174.1330623306233,66.09214092140921
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Electric induction,136.357837398374,59.787967479674805
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Piped gas,298.4390243902439,281.1382113821138
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Bottled gas,351.78319783197827,308.53116531165307
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Electric (coil or ceramic),150.73570460704607,66.09214092140921
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Electric induction,136.357837398374,59.787967479674805
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Piped gas,298.4390243902439,281.1382113821138
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Bottled gas,351.78319783197827,308.53116531165307
+Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Electric (coil or ceramic),150.73570460704607,66.09214092140921
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Electric induction,119.04052032520323,59.787967479674805
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Piped gas,180.72140921409212,281.1382113821138
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Bottled gas,351.78319783197827,308.53116531165307
@@ -2071,14 +2071,14 @@ Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,D
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Piped gas,180.72140921409212,281.1382113821138
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Bottled gas,351.78319783197827,308.53116531165307
 Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Electric (coil or ceramic),131.59241192411923,66.09214092140921
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Electric induction,157.52344715447154,59.787967479674805
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Piped gas,298.4390243902439,281.1382113821138
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Bottled gas,351.78319783197827,308.53116531165307
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Electric (coil or ceramic),174.1330623306233,66.09214092140921
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Electric induction,157.52344715447154,59.787967479674805
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Piped gas,298.4390243902439,281.1382113821138
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Bottled gas,351.78319783197827,308.53116531165307
-Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Electric (coil or ceramic),174.1330623306233,66.09214092140921
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Electric induction,136.357837398374,59.787967479674805
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Piped gas,298.4390243902439,281.1382113821138
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Bottled gas,351.78319783197827,308.53116531165307
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Electric (coil or ceramic),150.73570460704607,66.09214092140921
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Electric induction,136.357837398374,59.787967479674805
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Piped gas,298.4390243902439,281.1382113821138
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Bottled gas,351.78319783197827,308.53116531165307
+Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Electric (coil or ceramic),150.73570460704607,66.09214092140921
 Rotorua,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Electric induction,153.03377235772356,59.787967479674805
 Rotorua,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Piped gas,303.41300813008127,281.1382113821138
 Rotorua,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Bottled gas,351.78319783197827,308.53116531165307
@@ -2119,14 +2119,14 @@ Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default W
 Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Piped gas,172.4314363143631,281.1382113821138
 Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Bottled gas,351.78319783197827,308.53116531165307
 Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Electric (coil or ceramic),184.7682249322493,66.09214092140921
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Electric induction,157.52344715447154,59.787967479674805
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Piped gas,298.4390243902439,281.1382113821138
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Bottled gas,351.78319783197827,308.53116531165307
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Electric (coil or ceramic),174.1330623306233,66.09214092140921
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Electric induction,157.52344715447154,59.787967479674805
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Piped gas,298.4390243902439,281.1382113821138
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Bottled gas,351.78319783197827,308.53116531165307
-Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Electric (coil or ceramic),174.1330623306233,66.09214092140921
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Electric induction,136.357837398374,59.787967479674805
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Piped gas,298.4390243902439,281.1382113821138
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Bottled gas,351.78319783197827,308.53116531165307
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Electric (coil or ceramic),150.73570460704607,66.09214092140921
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Electric induction,136.357837398374,59.787967479674805
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Piped gas,298.4390243902439,281.1382113821138
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Bottled gas,351.78319783197827,308.53116531165307
+Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Electric (coil or ceramic),150.73570460704607,66.09214092140921
 Auckland,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Electric induction,153.03377235772356,59.787967479674805
 Auckland,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Piped gas,303.41300813008127,281.1382113821138
 Auckland,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Bottled gas,351.78319783197827,308.53116531165307
@@ -2151,14 +2151,14 @@ East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Defau
 East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Piped gas,185.69539295392954,281.1382113821138
 East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Bottled gas,351.78319783197827,308.53116531165307
 East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Electric (coil or ceramic),140.88045392953927,66.09214092140921
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Electric induction,157.52344715447154,59.787967479674805
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Piped gas,298.4390243902439,281.1382113821138
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Bottled gas,351.78319783197827,308.53116531165307
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Electric (coil or ceramic),174.1330623306233,66.09214092140921
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Electric induction,157.52344715447154,59.787967479674805
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Piped gas,298.4390243902439,281.1382113821138
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Bottled gas,351.78319783197827,308.53116531165307
-East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Electric (coil or ceramic),174.1330623306233,66.09214092140921
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Electric induction,136.357837398374,59.787967479674805
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Piped gas,298.4390243902439,281.1382113821138
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Bottled gas,351.78319783197827,308.53116531165307
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Electric (coil or ceramic),150.73570460704607,66.09214092140921
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Electric induction,136.357837398374,59.787967479674805
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Piped gas,298.4390243902439,281.1382113821138
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Bottled gas,351.78319783197827,308.53116531165307
+East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,False,Electric (coil or ceramic),150.73570460704607,66.09214092140921
 East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Electric induction,134.9691056910569,59.787967479674805
 East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Piped gas,158.59078590785907,281.1382113821138
 East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price,6,True,Bottled gas,351.78319783197827,308.53116531165307

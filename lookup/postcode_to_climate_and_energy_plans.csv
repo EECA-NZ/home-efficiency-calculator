@@ -208,21 +208,21 @@ postcode,climate_zone,electricity_plan_name,natural_gas_plan_name,lpg_plan_name,
 2695,Hamilton,Electricity PlanId 91529,Methane PlanId 161165,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 2696,Hamilton,Electricity PlanId 91529,Methane PlanId 161165,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 2697,Hamilton,Electricity PlanId 91529,Methane PlanId 161165,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-3010,Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-3015,Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-3020,Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+3010,Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+3015,Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+3020,Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3025,Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-3072,Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-3073,Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-3074,Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-3076,Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-3077,Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-3078,Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+3072,Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+3073,Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+3074,Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+3076,Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+3077,Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+3078,Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3079,Bay of Plenty,Electricity PlanId 161155,Methane PlanId 161192,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-3081,Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-3083,Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+3081,Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+3083,Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3096,Rotorua,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-3097,Rotorua,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+3097,Rotorua,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3110,Bay of Plenty,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3112,Bay of Plenty,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3114,Bay of Plenty,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
@@ -286,8 +286,8 @@ postcode,climate_zone,electricity_plan_name,natural_gas_plan_name,lpg_plan_name,
 3300,Hamilton,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3310,Hamilton,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3320,Hamilton,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-3330,Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-3332,Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+3330,Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+3332,Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3334,Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3371,Hamilton,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3372,Hamilton,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
@@ -295,13 +295,13 @@ postcode,climate_zone,electricity_plan_name,natural_gas_plan_name,lpg_plan_name,
 3374,Hamilton,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3375,Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3377,Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-3378,Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-3379,Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+3378,Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+3379,Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3380,Hamilton,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3381,Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3382,Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-3384,Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-3385,Taupo,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+3384,Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+3385,Taupo,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3391,Hamilton,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3392,Hamilton,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3393,Hamilton,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
@@ -324,7 +324,7 @@ postcode,climate_zone,electricity_plan_name,natural_gas_plan_name,lpg_plan_name,
 3483,Hamilton,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3484,Hamilton,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3485,Hamilton,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-3491,Hamilton,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+3491,Hamilton,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3492,Taupo,Electricity PlanId 161153,Methane PlanId 161190,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3493,Hamilton,Electricity PlanId 160758,Methane PlanId 161166,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 3494,Hamilton,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
@@ -445,26 +445,26 @@ postcode,climate_zone,electricity_plan_name,natural_gas_plan_name,lpg_plan_name,
 4092,East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 4093,East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 4094,East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-4102,East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-4104,East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+4102,East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+4104,East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 4108,East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-4110,East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-4112,East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-4120,East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-4122,East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-4130,East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-4171,East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-4172,East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+4110,East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+4112,East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+4120,East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+4122,East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+4130,East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+4171,East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+4172,East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 4174,East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-4175,East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+4175,East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 4178,East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-4179,East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-4180,East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-4181,East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-4182,East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-4183,East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-4184,East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-4186,East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+4179,East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+4180,East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+4181,East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+4182,East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+4183,East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+4184,East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+4186,East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 4188,East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 4189,East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 4191,East Coast,Electricity PlanId 99895,Methane PlanId 161171,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
@@ -497,7 +497,7 @@ postcode,climate_zone,electricity_plan_name,natural_gas_plan_name,lpg_plan_name,
 4291,East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 4292,East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 4293,East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
-4294,East Coast,Electricity PlanId 161005,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
+4294,East Coast,Electricity PlanId 160999,Methane PlanId 161161,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 4295,East Coast,Default Electricity Plan,Default Natural Gas Plan,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 4310,New Plymouth,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
 4312,New Plymouth,Electricity PlanId 160772,Methane PlanId 161160,Default LPG Plan,Default Wood Price,Default Petrol Price,Default Diesel Price
