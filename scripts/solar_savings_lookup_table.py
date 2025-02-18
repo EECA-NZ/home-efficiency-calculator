@@ -32,7 +32,8 @@ os.makedirs(LOOKUP_DIR, exist_ok=True)
 # -----------------------------------------------------------------------------
 # Global Constants
 # -----------------------------------------------------------------------------
-OUTPUT_FILE = "solar_savings_lookup_table.csv"
+# Output file name template; the placeholder will be replaced with the climate zone.
+OUTPUT_FILE_TEMPLATE = "solar_savings_lookup_table_{}.csv"
 REPORT_EVERY_N_ROWS = 1e5
 DEFAULT_VEHICLE_TYPE = "None"
 people_in_house_options = [1, 2, 3, 4, 5, 6]
@@ -161,11 +162,11 @@ def all_driving_combinations():
 
 
 # -----------------------------------------------------------------------------
-# Main Generation Function
+# Main Generation Function (producing one CSV per climate zone)
 # -----------------------------------------------------------------------------
-def generate_solar_kwh_reduction_lookup_table():
+def generate_solar_kwh_reduction_lookup_tables():
     """
-    Generate a CSV lookup table that includes:
+    Generate a CSV lookup table for each climate zone that includes:
       - climate_zone
       - electricity_plan_name
       - people_in_house
@@ -175,14 +176,19 @@ def generate_solar_kwh_reduction_lookup_table():
       - solar benefit results (kWh generated, kg CO2e saving,
             export & self-consumption dollar values)
     """
-    # pylint: disable=too-many-locals,too-many-nested-blocks
-    rows = []
-    total_count = 0
+    # pylint: disable=too-many-locals,too-many-nested-blocks,too-many-branches
+    # Dictionary to accumulate rows per climate zone.
+    zone_tables = {}
 
     # Get one representative postcode for each unique (climate_zone, plan) pair.
     rep_entries = get_representative_postcode_for_each_climate_zone_plan()
 
+    total_count = 0
     for postcode, cz_value, plan_name in rep_entries:
+        # Ensure we have a list for this climate zone.
+        if cz_value not in zone_tables:
+            zone_tables[cz_value] = []
+
         for num_people in people_in_house_options:
             for heat_cat, heat_day, ins_qual in all_heating_combinations():
                 for hw_cat, hw_usage in all_hot_water_combinations():
@@ -235,18 +241,23 @@ def generate_solar_kwh_reduction_lookup_table():
                             your_home, heating_obj, hot_water_obj, driving_obj
                         )
                         row.update(result)
-                        # Append the row to the list.
-                        rows.append(row)
+                        # Append the row to the corresponding climate zone list.
+                        zone_tables[cz_value].append(row)
                         total_count += 1
                         if total_count % REPORT_EVERY_N_ROWS == 0:
                             logging.info("Appended %s rows...", total_count)
 
-    df = pd.DataFrame(rows)
-    logging.info("Final row count = %s", len(df))
-    out_path = os.path.join(LOOKUP_DIR, OUTPUT_FILE)
-    uniquify_rows_and_write_to_csv(df, out_path)
-    logging.info("Wrote CSV to %s", out_path)
-    return df
+    # Write out a separate CSV file for each climate zone.
+    for cz, rows in zone_tables.items():
+        df = pd.DataFrame(rows)
+        logging.info("Climate zone %s: %s rows before deduplication.", cz, len(df))
+        df = uniquify_rows_and_write_to_csv(
+            df, os.path.join(LOOKUP_DIR, OUTPUT_FILE_TEMPLATE.format(cz))
+        )
+        logging.info("Wrote CSV for climate zone %s with %s rows.", cz, len(df))
+
+    logging.info("Final total row count across all climate zones = %s", total_count)
+    return zone_tables
 
 
 # -----------------------------------------------------------------------------
@@ -254,12 +265,15 @@ def generate_solar_kwh_reduction_lookup_table():
 # -----------------------------------------------------------------------------
 def main():
     """
-    Main entry point for the script. Generates and saves lookup table.
+    Main entry point for the script. Generates and
+    saves a lookup table for each climate zone.
     """
-    logging.info("Generating solar kWh reduction lookup table...")
-    df = generate_solar_kwh_reduction_lookup_table()
+    logging.info(
+        "Generating solar kWh reduction lookup tables for each climate zone..."
+    )
+    tables = generate_solar_kwh_reduction_lookup_tables()
     logging.info("Done.")
-    return df
+    return tables
 
 
 if __name__ == "__main__":

@@ -160,4 +160,4 @@ data_analysis/climate_zone_boundaries/otekaieke_river_path.png
 # Data analysis inputs and outputs
 data_analysis/climate_zone_boundaries/output/
 data_analysis/supplementary_data/
-lookup/solar_savings_lookup_table.csv
+lookup/solar_savings_lookup_table*.csv
