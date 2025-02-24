@@ -225,11 +225,13 @@ def load_electrified_household_energy_usage_profile():
     household_energy_use.anytime_kwh.uncontrolled += (
         other_electricity_use.anytime_kwh.uncontrolled
     )
-    household_energy_use.day_kwh.controlled += other_electricity_use.day_kwh.controlled
-    household_energy_use.night_kwh.controlled += (
-        other_electricity_use.night_kwh.controlled
+    household_energy_use.day_kwh.controllable += (
+        other_electricity_use.day_kwh.controllable
     )
-    household_energy_use.anytime_kwh.controlled += (
-        other_electricity_use.anytime_kwh.controlled
+    household_energy_use.night_kwh.controllable += (
+        other_electricity_use.night_kwh.controllable
+    )
+    household_energy_use.anytime_kwh.controllable += (
+        other_electricity_use.anytime_kwh.controllable
     )
     return household_energy_use
