@@ -67,7 +67,7 @@ def niwa_data(region: str) -> pd.DataFrame:
     df_solar = pd.read_csv(csv_path)
 
     # Create a datetime index for a non-leap year (e.g. 2023).
-    date_range = pd.date_range("2023-01-01", "2023-12-31 23:00", freq="H")
+    date_range = pd.date_range("2023-01-01", "2023-12-31 23:00", freq="h")
     df_solar.index = date_range
     LOGGER.info(
         "Solar data for %s loaded from %s with %d rows.",
@@ -251,7 +251,7 @@ def normalized_water_heating_profile(
     normalized so the total sum = 1.
     """
     # pylint: disable=too-many-locals,too-many-branches
-    hourly_index = pd.date_range("2023-01-01", "2023-12-31 23:00", freq="H")
+    hourly_index = pd.date_range("2023-01-01", "2023-12-31 23:00", freq="h")
     profile = pd.Series(0.0, index=hourly_index)
 
     days = day_hours.index
@@ -260,10 +260,10 @@ def normalized_water_heating_profile(
 
     for day_dt in days:
         morning_window = pd.date_range(
-            day_dt + pd.Timedelta("08:00:00"), periods=max_day_hrs, freq="H"
+            day_dt + pd.Timedelta("08:00:00"), periods=max_day_hrs, freq="h"
         )
         evening_window = pd.date_range(
-            day_dt + pd.Timedelta("21:00:00"), periods=max_night_hrs, freq="H"
+            day_dt + pd.Timedelta("21:00:00"), periods=max_night_hrs, freq="h"
         )
 
         active_day_hours = day_hours.loc[day_dt]
@@ -344,7 +344,7 @@ def ev_charging_profile(annual_kwh: float, charger_kw: float) -> pd.Series:
     Returns a Series with length 8760, sum=1.
     """
     # pylint: disable=no-member
-    idx = pd.date_range("2023-01-01", "2023-12-31 23:00", freq="H")
+    idx = pd.date_range("2023-01-01", "2023-12-31 23:00", freq="h")
     profile = pd.Series(0.0, index=idx)
 
     # Instead of is_weekday, is_weekend, etc. we can do:

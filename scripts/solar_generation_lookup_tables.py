@@ -1,25 +1,24 @@
 """
-This module generates CSV lookup tables with monthly JSON timeseries
-for solar usage, hot water, vehicle, and space heating, plus an
-electricity plans lookup table. Each table uses uniform hourly values
-summed to 1000 across the year, grouped by calendar month.
+This script generates the lookup tables for the solar generation model.
 """
 
-import json
 import logging
 import os
 
 import pandas as pd
 
+from app.services.get_climate_zone import postcode_dict
 from app.services.get_energy_plans import postcode_to_electricity_plan_dict
 
-# Formatting constants
+# Round numerical outputs to 3 decimal places.
 FLOAT_FORMAT = "%.3f"
-TIMESERIES_SUM = 1000.0  # Sum across all 8760 hours
-ANNUAL_TOTAL_KWH_PLACEHOLDER = 9999.0
-EXPORT_RATE = 0.12  # For electricity plans
 
-# Directory for outputs (relative to this script).
+# Constants for placeholders
+EXPORT_RATE = 0.12  # NZD per kWh for exported electricity
+ANNUAL_TOTAL_KWH_PLACEHOLDER = 9999.0
+TIMESERIES_SUM = 1000.0  # Sum of hour columns for each row
+
+# Constant for the lookup directory. Relative to the script location.
 LOOKUP_DIR = os.path.join(os.path.dirname(__file__), "..", "lookup")
 
 VEHICLE_PLUGIN_HYBRID = "Plug-in hybrid"
@@ -33,6 +32,8 @@ HOT_WATER_ELECTRIC = "Electric hot water cylinder"
 hot_water_heating_sources = [HOT_WATER_HEAT_PUMP, HOT_WATER_ELECTRIC]
 hot_water_usage_options = ["Low", "Average", "High"]
 people_in_house_options = [1, 2, 3, 4, 5, 6]
+climate_zones = list(set(postcode_dict.values()))
+climate_zones = [1, 2, 3, 4, 5, 6]
 
 HEATING_HEAT_PUMP = "Heat pump"
 HEATING_ELECTRIC = "Electric heater"
@@ -49,8 +50,7 @@ insulation_quality_options = [
     "Well insulated",
 ]
 
-# Climate zones
-climate_zones = [1, 2, 3, 4, 5, 6]
+# Climate zones for the solar_generation_lookup_table
 full_climate_zones_for_solar = [
     "Northland",
     "Auckland",
@@ -73,72 +73,27 @@ full_climate_zones_for_solar = [
 ]
 
 
-def build_monthly_timeseries() -> dict[str, str]:
+def hourly_values_summing_to_1000() -> dict:
     """
-    Construct a DataFrame of 8760 hourly rows for a typical non-leap year.
-    Each row is labeled with a datetime index from Jan 1 to Dec 31 (inclusive),
-    and has a single 'value' column whose sum across the entire year
-    is TIMESERIES_SUM (1000).
-
-    Then group by the 'month' (1..12) to build JSON arrays for each month.
-    Return a dict of:
-      {
-        "january_timeseries_json": "[...]", ..., "december_timeseries_json": "[...]"
-      }
-
-    We use uniform distribution so that each hour is (1000 / 8760). Summing
-    them yields ~1000 total.
+    Returns a dict of hour columns (strings "1".."8760")
+    whose values sum to TIMESERIES_SUM (1000).
+    We'll do a uniform distribution: each hour = 1000 / 8760.
     """
-    dt_index = pd.date_range("2023-01-01", "2023-12-31 23:00", freq="h")
-
-    df = pd.DataFrame(index=dt_index)
-    per_hour = TIMESERIES_SUM / 8760.0
-    df["value"] = round(per_hour, 3)
-
-    df["month"] = df.index.month  # integer 1..12
-
-    results = {}
-    month_num_to_name = {
-        1: "january",
-        2: "february",
-        3: "march",
-        4: "april",
-        5: "may",
-        6: "june",
-        7: "july",
-        8: "august",
-        9: "september",
-        10: "october",
-        11: "november",
-        12: "december",
-    }
-
-    grouped = df.groupby("month")["value"]
-    for m in range(1, 13):
-        group_values = grouped.get_group(m).tolist()
-        month_json = json.dumps(group_values)
-        col_name = f"{month_num_to_name[m]}_timeseries_json"
-        results[col_name] = month_json
-
-    return results
+    hour_dict = {}
+    per_hour = TIMESERIES_SUM / 8760.0  # e.g. ~0.114155
+    for hour in range(1, 8761):
+        hour_dict[str(hour)] = per_hour
+    return hour_dict
 
 
-def build_df_with_monthly_json(rows: list[dict], filename: str) -> None:
-    """
-    Turn a list of dictionaries into a DataFrame and write as CSV.
-    The monthly JSON columns are just strings in the CSV.
-    """
-    df = pd.DataFrame(rows)
-    out_path = os.path.join(LOOKUP_DIR, filename)
-    df.to_csv(out_path, float_format=FLOAT_FORMAT, index=False)
-    logging.info("Wrote %s rows to %s", len(df), out_path)
-
-
-def generate_vehicle_solar_lookup_table() -> None:
+# ----------------------------------------------------------------------
+# 1) Generate Vehicle Table
+# ----------------------------------------------------------------------
+def generate_vehicle_solar_lookup_table(output_dir="."):
     """
     Creates solar_vehicle_lookup_table.csv with columns:
       vehicle_type, vehicle_size, km_per_week, annual_total_kwh,
-      january_timeseries_json, ..., december_timeseries_json
+      plus 8760 hourly columns (1..8760) whose sum = 1000.
     """
     rows = []
     for vt in vehicle_types:
@@ -148,20 +103,28 @@ def generate_vehicle_solar_lookup_table() -> None:
                     "vehicle_type": vt,
                     "vehicle_size": size,
                     "km_per_week": km,
+                    # Place a placeholder for the annual total kWh
                     "annual_total_kwh": ANNUAL_TOTAL_KWH_PLACEHOLDER,
                 }
-                row.update(build_monthly_timeseries())
+                # Add the 8760-hour shape that sums to 1000
+                row.update(hourly_values_summing_to_1000())
                 rows.append(row)
 
-    build_df_with_monthly_json(rows, "solar_vehicle_lookup_table.csv")
+    df = pd.DataFrame(rows)
+    out_path = os.path.join(output_dir, "solar_vehicle_lookup_table.csv")
+    df.to_csv(out_path, float_format=FLOAT_FORMAT, index=False)
+    logging.info("Wrote %s rows to %s", len(df), out_path)
 
 
-def generate_hot_water_solar_lookup_table() -> None:
+# ----------------------------------------------------------------------
+# 2) Generate Hot Water Table
+# ----------------------------------------------------------------------
+def generate_hot_water_solar_lookup_table(output_dir="."):
     """
     Creates solar_hot_water_lookup_table.csv with columns:
       climate_zone, people_in_house, hot_water_usage, hot_water_heating_source,
       annual_total_kwh,
-      january_timeseries_json, ..., december_timeseries_json
+      plus 8760 hourly columns (1..8760) summing to 1000.
     """
     rows = []
     for cz in climate_zones:
@@ -175,18 +138,24 @@ def generate_hot_water_solar_lookup_table() -> None:
                         "hot_water_heating_source": hw_source,
                         "annual_total_kwh": ANNUAL_TOTAL_KWH_PLACEHOLDER,
                     }
-                    row.update(build_monthly_timeseries())
+                    row.update(hourly_values_summing_to_1000())
                     rows.append(row)
 
-    build_df_with_monthly_json(rows, "solar_hot_water_lookup_table.csv")
+    df = pd.DataFrame(rows)
+    out_path = os.path.join(output_dir, "solar_hot_water_lookup_table.csv")
+    df.to_csv(out_path, float_format=FLOAT_FORMAT, index=False)
+    logging.info("Wrote %s rows to %s", len(df), out_path)
 
 
-def generate_space_heating_solar_lookup_table() -> None:
+# ----------------------------------------------------------------------
+# 3) Generate Space Heating Table
+# ----------------------------------------------------------------------
+def generate_space_heating_solar_lookup_table(output_dir="."):
     """
     Creates solar_space_heating_lookup_table.csv with columns:
       climate_zone, main_heating_source, heating_during_day, insulation_quality,
       annual_total_kwh,
-      january_timeseries_json, ..., december_timeseries_json
+      plus 8760 hourly columns (1..8760) summing to 1000.
     """
     rows = []
     for cz in climate_zones:
@@ -200,18 +169,24 @@ def generate_space_heating_solar_lookup_table() -> None:
                         "insulation_quality": ins_quality,
                         "annual_total_kwh": ANNUAL_TOTAL_KWH_PLACEHOLDER,
                     }
-                    row.update(build_monthly_timeseries())
+                    row.update(hourly_values_summing_to_1000())
                     rows.append(row)
 
-    build_df_with_monthly_json(rows, "solar_space_heating_lookup_table.csv")
+    df = pd.DataFrame(rows)
+    out_path = os.path.join(output_dir, "solar_space_heating_lookup_table.csv")
+    df.to_csv(out_path, float_format=FLOAT_FORMAT, index=False)
+    logging.info("Wrote %s rows to %s", len(df), out_path)
 
 
-def generate_solar_generation_lookup_table() -> None:
+# ----------------------------------------------------------------------
+# 4) Generate Solar Generation Table
+# ----------------------------------------------------------------------
+def generate_solar_generation_lookup_table(output_dir="."):
     """
     Creates solar_generation_lookup_table.csv with columns:
       climate_zone, annual_total_kwh,
-      january_timeseries_json, ..., december_timeseries_json
-    One row per climate zone in full_climate_zones_for_solar.
+      plus 8760 columns (1..8760) whose sum = 1000.
+    One row per climate zone; 18 zones.
     """
     rows = []
     for zone in full_climate_zones_for_solar:
@@ -219,29 +194,57 @@ def generate_solar_generation_lookup_table() -> None:
             "climate_zone": zone,
             "annual_total_kwh": ANNUAL_TOTAL_KWH_PLACEHOLDER,
         }
-        row.update(build_monthly_timeseries())
+        row.update(hourly_values_summing_to_1000())
         rows.append(row)
 
-    build_df_with_monthly_json(rows, "solar_generation_lookup_table.csv")
+    df = pd.DataFrame(rows)
+    out_path = os.path.join(output_dir, "solar_generation_lookup_table.csv")
+    df.to_csv(out_path, float_format=FLOAT_FORMAT, index=False)
+    logging.info("Wrote %s rows to %s", len(df), out_path)
 
 
-def generate_other_electricity_usage_lookup_table() -> None:
+# ----------------------------------------------------------------------
+# 5) Generate Other Electricity Usage Table
+# ----------------------------------------------------------------------
+def generate_other_electricity_usage_lookup_table(output_dir="."):
     """
-    Creates solar_other_electricity_usage_lookup_table.csv with columns:
+    Creates solar_other_electricity_usage_lookup_table.csv with:
       annual_total_kwh,
-      january_timeseries_json, ..., december_timeseries_json
-    This table has just one row.
+      plus 8760 hourly columns (1..8760) summing to 1000.
+    This table has just one row (other usage).
     """
     row = {"annual_total_kwh": ANNUAL_TOTAL_KWH_PLACEHOLDER}
-    row.update(build_monthly_timeseries())
-    build_df_with_monthly_json([row], "solar_other_electricity_usage_lookup_table.csv")
+    row.update(hourly_values_summing_to_1000())
+
+    df = pd.DataFrame([row])
+    out_path = os.path.join(
+        output_dir, "solar_other_electricity_usage_lookup_table.csv"
+    )
+    df.to_csv(out_path, float_format=FLOAT_FORMAT, index=False)
+    logging.info("Wrote 1 row to %s", out_path)
 
 
-def transform_plans_to_dataframe() -> pd.DataFrame:
+# ----------------------------------------------------------------------
+# 6) Generate Electricity Plans Lookup Table
+# ----------------------------------------------------------------------
+def generate_electricity_plans_lookup_table(output_dir="."):
+    """
+    Creates electricity_plans_lookup_table.csv with columns:
+      electricity_plan_name, daily_charge, nzd_per_kwh_day, nzd_per_kwh_night,
+      kg_co2e_per_kwh
+    (The last column is a constant 0.1072 for all plans.)
+    """
+    df = transform_plans_to_dataframe()
+    out_path = os.path.join(output_dir, "electricity_plans_lookup_table.csv")
+    df.to_csv(out_path, float_format=FLOAT_FORMAT, index=False)
+    logging.info("Wrote %s rows to %s", len(df), out_path)
+
+
+def transform_plans_to_dataframe():
     """
     Build a DataFrame of electricity plans with columns:
       electricity_plan_name, daily_charge, nzd_per_kwh_day, nzd_per_kwh_night,
-      nzd_per_kwh_export, kg_co2e_per_kwh
+      kg_co2e_per_kwh (all 0.1072).
     """
     modified_plans = {}
     for plan in postcode_to_electricity_plan_dict.values():
@@ -278,36 +281,24 @@ def transform_plans_to_dataframe() -> pd.DataFrame:
         "nzd_per_kwh_export",
         "kg_co2e_per_kwh",
     ]
-    return df[desired_cols]
+    df = df[desired_cols]
+    return df
 
 
-def generate_electricity_plans_lookup_table() -> None:
+def main():
     """
-    Creates electricity_plans_lookup_table.csv with columns:
-      electricity_plan_name, daily_charge, nzd_per_kwh_day,
-      nzd_per_kwh_night, nzd_per_kwh_export, kg_co2e_per_kwh
-    """
-    df = transform_plans_to_dataframe()
-    out_path = os.path.join(LOOKUP_DIR, "electricity_plans_lookup_table.csv")
-    df.to_csv(out_path, float_format=FLOAT_FORMAT, index=False)
-    logging.info("Wrote %s rows to %s", len(df), out_path)
-
-
-def main() -> None:
-    """
-    Main entry point for generating all lookup tables.
-    Ensures output directory exists, then produces each CSV
-    with monthly JSON timeseries or simpler plan data.
+    Main entry point: generate all lookup tables.
     """
     logging.basicConfig(level=logging.INFO)
     os.makedirs(LOOKUP_DIR, exist_ok=True)
 
-    generate_vehicle_solar_lookup_table()
-    generate_hot_water_solar_lookup_table()
-    generate_space_heating_solar_lookup_table()
-    generate_other_electricity_usage_lookup_table()
-    generate_solar_generation_lookup_table()
-    generate_electricity_plans_lookup_table()
+    # Generate each lookup table
+    generate_vehicle_solar_lookup_table(LOOKUP_DIR)
+    generate_hot_water_solar_lookup_table(LOOKUP_DIR)
+    generate_space_heating_solar_lookup_table(LOOKUP_DIR)
+    generate_other_electricity_usage_lookup_table(LOOKUP_DIR)
+    generate_solar_generation_lookup_table(LOOKUP_DIR)
+    generate_electricity_plans_lookup_table(LOOKUP_DIR)
 
 
 if __name__ == "__main__":
