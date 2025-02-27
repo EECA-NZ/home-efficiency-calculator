@@ -5,14 +5,15 @@ might not be relevant for some areas.
 """
 
 import functools
+
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.services.usage_profile_helpers import (
     day_night_flag,
     ensure_8760_array,
-    zeros_8760,
     night_shift,
+    zeros_8760,
 )
 
 day_mask = day_night_flag()
@@ -48,7 +49,7 @@ class ElectricityUsageProfile(BaseModel):
     fixed_time_controllable: np.ndarray = Field(
         default_factory=zeros_8760,
         description="Usage that can be under ripple control (kWh) "
-        "(E.g. some hot water cylinder load)."
+        "(E.g. some hot water cylinder load).",
     )
     shift_able_uncontrolled: np.ndarray = Field(
         default_factory=zeros_8760,

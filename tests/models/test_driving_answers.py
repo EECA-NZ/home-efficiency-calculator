@@ -42,9 +42,7 @@ def test_small_electric_car():
     Test the energy usage pattern for a small electric car.
     """
     my_driving_answers = DrivingAnswers(
-        vehicle_type="Electric",
-        vehicle_size="Small",
-        km_per_week="200"
+        vehicle_type="Electric", vehicle_size="Small", km_per_week="200"
     )
     my_driving_energy_usage = my_driving_answers.energy_usage_pattern(YOUR_HOME)
     assert (

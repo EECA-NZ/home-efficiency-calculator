@@ -30,7 +30,6 @@ from data_analysis.plan_choice_helpers.plan_filters import (
     is_simple_controlled_uncontrolled,
     is_simple_day_night,
     is_simple_night_all_inclusive,
-    # is_simple_night_uncontrolled,
     is_simple_uncontrolled,
     open_plans,
 )
