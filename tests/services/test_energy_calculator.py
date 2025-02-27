@@ -1,6 +1,7 @@
 """
 Tests for the energy_calculator module.
 """
+
 # pylint: disable=no-member
 
 from pytest import approx
@@ -29,9 +30,8 @@ def test_estimate_usage_from_profile():
     """
     energy_usage = estimate_usage_from_profile(household_profile)
     assert energy_usage.elx_connection_days == DAYS_IN_YEAR
-    assert energy_usage.anytime_kwh.total == approx(3618.6299)
-    assert energy_usage.day_kwh.total == approx(1271.1487)
-    assert energy_usage.night_kwh.total == approx(0.0)
+    assert energy_usage.electricity_kwh.shift_able.sum() == approx(3618.6299)
+    assert energy_usage.electricity_kwh.fixed_time.sum() == approx(1271.1487)
     assert energy_usage.natural_gas_connection_days == approx(0.0)
     assert energy_usage.natural_gas_kwh == approx(0.0)
     assert energy_usage.lpg_tanks_rental_days == approx(0.0)

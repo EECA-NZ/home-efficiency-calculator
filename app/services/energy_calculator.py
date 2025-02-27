@@ -160,9 +160,10 @@ def estimate_usage_from_profile(
     profiles = [heating_profile, hot_water_profile, cooktop_profile, driving_profile]
 
     # Variable electricity usage
-    day_kwh = sum(profile.day_kwh for profile in profiles)
-    anytime_kwh = sum(profile.anytime_kwh for profile in profiles)
-    night_kwh = sum(profile.night_kwh for profile in profiles)
+    electricity_kwh = sum(profile.electricity_kwh for profile in profiles)
+
+    # Solar electricity generation
+    solar_generation_kwh = sum(profile.solar_generation_kwh for profile in profiles)
 
     # Natural gas and LPG usage
     natural_gas_kwh = (
@@ -183,9 +184,8 @@ def estimate_usage_from_profile(
 
     result = {
         "elx_connection_days": elx_connection_days,
-        "day_kwh": day_kwh,
-        "anytime_kwh": anytime_kwh,
-        "night_kwh": night_kwh,
+        "electricity_kwh": electricity_kwh,
+        "solar_generation_kwh": solar_generation_kwh,
         "natural_gas_connection_days": natural_gas_connection_days,
         "natural_gas_kwh": natural_gas_kwh,
         "lpg_tanks_rental_days": lpg_tanks_rental_days,
@@ -209,9 +209,11 @@ def emissions_kg_co2e(usage_profile: YearlyFuelUsageProfile) -> float:
     """
     # List of emissions components
     components = [
-        (usage_profile.day_kwh.from_grid, "electricity_kg_co2e_per_kwh"),
-        (usage_profile.anytime_kwh.from_grid, "electricity_kg_co2e_per_kwh"),
-        (usage_profile.night_kwh.from_grid, "electricity_kg_co2e_per_kwh"),
+        (-usage_profile.solar_generation_kwh.total, "electricity_kg_co2e_per_kwh"),
+        (
+            usage_profile.electricity_kwh.total.sum(),
+            "electricity_kg_co2e_per_kwh",
+        ),
         (usage_profile.natural_gas_kwh, "natural_gas_kg_co2e_per_kwh"),
         (usage_profile.lpg_kwh, "lpg_kg_co2e_per_kwh"),
         (usage_profile.wood_kwh, "wood_kg_co2e_per_kwh"),

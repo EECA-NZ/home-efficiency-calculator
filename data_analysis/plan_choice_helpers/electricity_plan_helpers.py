@@ -1,6 +1,7 @@
 """
 Helper functions for analyzing and optimizing electricity plans.
 """
+
 # pylint: disable=no-member
 
 import logging
@@ -29,7 +30,7 @@ from data_analysis.plan_choice_helpers.plan_filters import (
     is_simple_controlled_uncontrolled,
     is_simple_day_night,
     is_simple_night_all_inclusive,
-    is_simple_night_uncontrolled,
+    # is_simple_night_uncontrolled,
     is_simple_uncontrolled,
     open_plans,
 )
@@ -151,7 +152,7 @@ def filter_electricity_plans(full_df):
             | full_df.apply(is_simple_day_night, axis=1)
             | full_df.apply(is_simple_uncontrolled, axis=1)
             | full_df.apply(is_simple_night_all_inclusive, axis=1)
-            | full_df.apply(is_simple_night_uncontrolled, axis=1)
+            # | full_df.apply(is_simple_night_uncontrolled, axis=1)
         )
     )
     full_df = full_df[filters]
@@ -216,20 +217,14 @@ def load_electrified_household_energy_usage_profile():
     )
     household_energy_use = estimate_usage_from_profile(household_profile)
     other_electricity_use = other_electricity_energy_usage_profile()
-    household_energy_use.day_kwh.uncontrolled += (
-        other_electricity_use.day_kwh.uncontrolled
-    )
-    household_energy_use.night_kwh.uncontrolled += (
-        other_electricity_use.night_kwh.uncontrolled
+    household_energy_use.fixed_kwh.uncontrolled += (
+        other_electricity_use.fixed_kwh.uncontrolled
     )
     household_energy_use.anytime_kwh.uncontrolled += (
         other_electricity_use.anytime_kwh.uncontrolled
     )
-    household_energy_use.day_kwh.controllable += (
-        other_electricity_use.day_kwh.controllable
-    )
-    household_energy_use.night_kwh.controllable += (
-        other_electricity_use.night_kwh.controllable
+    household_energy_use.fixed_kwh.controllable += (
+        other_electricity_use.fixed_kwh.controllable
     )
     household_energy_use.anytime_kwh.controllable += (
         other_electricity_use.anytime_kwh.controllable

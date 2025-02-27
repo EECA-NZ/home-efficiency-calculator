@@ -11,7 +11,8 @@ from ...constants import (
     DAYS_IN_YEAR,
     STANDARD_HOUSEHOLD_COOKTOP_ENERGY_USAGE_KWH,
 )
-from ..usage_profiles import CooktopYearlyFuelUsageProfile, ElectricityUsage
+from ...services.usage_profile_helpers import flat_day_night_profiles
+from ..usage_profiles import CooktopYearlyFuelUsageProfile, ElectricityUsageProfile
 
 
 class CooktopAnswers(BaseModel):
@@ -30,6 +31,22 @@ class CooktopAnswers(BaseModel):
             "Electric (coil or ceramic)",
         ]
     ] = None
+
+    def cooktop_hourly_usage_profile(
+        self,
+    ):
+        """
+        Create a default electricity usage profile for cooking.
+        The resulting array is normalized so that its sum is 1.
+
+        Returns
+        -------
+        np.ndarray
+            A 1D array of shape (8760,) where each element is 1/8760.
+        Placeholder for a more realistic profile.
+        """
+        day_profile, _ = flat_day_night_profiles()
+        return day_profile
 
     def energy_usage_pattern(
         self, your_home, use_alternative: bool = False
@@ -87,10 +104,12 @@ class CooktopAnswers(BaseModel):
             * (1 + your_home.people_in_house)
             / (1 + AVERAGE_HOUSEHOLD_SIZE)
         )
-        factor["day_kwh"] = (
-            ElectricityUsage(uncontrolled=total_kwh)
+        factor["electricity_kwh"] = (
+            ElectricityUsageProfile(
+                fixed_time_uncontrolled=total_kwh * self.cooktop_hourly_usage_profile()
+            )
             if "Electric" in cooktop_type
-            else ElectricityUsage(uncontrolled=0)
+            else ElectricityUsageProfile()
         )
         factor["natural_gas_kwh"] = total_kwh if cooktop_type == "Piped gas" else 0
         factor["lpg_kwh"] = total_kwh if cooktop_type == "Bottled gas" else 0

@@ -14,7 +14,8 @@ from ...services.helpers import (
     shower_kwh_per_year,
     standing_loss_kwh_per_year,
 )
-from ..usage_profiles import ElectricityUsage, HotWaterYearlyFuelUsageProfile
+from ...services.usage_profile_helpers import flat_day_night_profiles
+from ..usage_profiles import ElectricityUsageProfile, HotWaterYearlyFuelUsageProfile
 
 
 class HotWaterAnswers(BaseModel):
@@ -39,6 +40,24 @@ class HotWaterAnswers(BaseModel):
             "Hot water heat pump",
         ]
     ] = None
+
+    def hot_water_hourly_usage_profile(
+        self,
+    ):
+        """
+        Create a default electricity usage profile for hot water heating.
+        The resulting array is normalized so that its sum is 1.
+
+        Returns
+        -------
+        np.ndarray
+            A 1D array of shape (8760,) where each element is 1/8760.
+        Placeholder for a more realistic profile.
+        """
+        # anytime_kwh can be shifted to daytime for solar self-consumption
+        # or to nighttime for cheaper electricity rates
+        day_profile, _ = flat_day_night_profiles()
+        return day_profile
 
     def energy_usage_pattern(
         self, your_home, use_alternative: bool = False
@@ -81,21 +100,21 @@ class HotWaterAnswers(BaseModel):
         # Following breakdown is used if the hot water heating
         # source is electric (hot water cylinder or heat pump)
         anytime_kwh = total_kwh * HOT_WATER_FLEXIBLE_KWH_FRACTION
-        day_kwh = total_kwh - anytime_kwh
+        fixed_kwh = total_kwh - anytime_kwh
 
-        anytime_kwh = ElectricityUsage(controllable=anytime_kwh)
-        day_kwh = ElectricityUsage(controllable=day_kwh)
+        electricity_kwh = ElectricityUsageProfile(
+            fixed_time_controllable=fixed_kwh * self.hot_water_hourly_usage_profile(),
+            shift_able_controllable=anytime_kwh * self.hot_water_hourly_usage_profile(),
+        )
 
         fuel_usage = {
             "Electric hot water cylinder": {
                 "elx_connection_days": DAYS_IN_YEAR,
-                "day_kwh": day_kwh,
-                "anytime_kwh": anytime_kwh,
+                "electricity_kwh": electricity_kwh,
             },
             "Hot water heat pump": {
                 "elx_connection_days": DAYS_IN_YEAR,
-                "day_kwh": day_kwh,
-                "anytime_kwh": anytime_kwh,
+                "electricity_kwh": electricity_kwh,
             },
             "Piped gas hot water cylinder": {
                 "natural_gas_connection_days": DAYS_IN_YEAR,

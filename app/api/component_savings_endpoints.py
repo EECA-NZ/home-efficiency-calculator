@@ -14,6 +14,7 @@ from ..models.response_models import (
     SavingsResponse,
     UserGeography,
 )
+from ..models.usage_profiles import YearlyFuelUsageReport
 from ..models.user_answers import (
     CooktopAnswers,
     DrivingAnswers,
@@ -60,6 +61,9 @@ async def calculate_component_savings(
             component_answers, component_name, your_home
         )
         current_fuel_use = component_answers.energy_usage_pattern(your_home)
+        current_fuel_use_report = YearlyFuelUsageReport(
+            current_fuel_use, decimal_places=2
+        )
         options_dict = round_floats_to_2_dp(options_dict)
         if getattr(component_answers, f"alternative_{component_name}", None):
             specific_alternative = getattr(
@@ -73,13 +77,21 @@ async def calculate_component_savings(
             alternative_fuel_use = component_answers.energy_usage_pattern(
                 your_home, use_alternative=True
             )
+            alternative_fuel_use_report = YearlyFuelUsageReport(
+                alternative_fuel_use, decimal_places=2
+            )
         else:
-            alternative_fuel_use = None
+            alternative_fuel_use_report = None
         user_geography = {
             "edb_region": postcode_to_edb_zone(your_home.postcode),
             "climate_zone": climate_zone(your_home.postcode),
         }
-        return options_dict, user_geography, current_fuel_use, alternative_fuel_use
+        return (
+            options_dict,
+            user_geography,
+            current_fuel_use_report,
+            alternative_fuel_use_report,
+        )
     except Exception as e:
         logger.error("Error calculating %s savings: %s", component_name, e)
         return {"error": f"Error calculating {component_name} savings: {e}"}

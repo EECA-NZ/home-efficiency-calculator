@@ -1,8 +1,10 @@
 """
 Test energy consumption profile and behaviour of the CooktopAnswers class.
 """
+
 # pylint: disable=no-member
 
+import numpy as np
 from pytest import approx, raises
 
 from app.constants import DAYS_IN_YEAR
@@ -26,6 +28,26 @@ COOKTOP = CooktopAnswers(
     cooktop="Piped gas",
     alternative_cooktop="Electric induction",
 )
+
+
+def validate_energy_usage_fields(energy_usage, expected_fields, cooktop_type):
+    """
+    Validate additional fields of the energy usage profile.
+    """
+    for field, expected_value in expected_fields.items():
+        actual_value = getattr(energy_usage, field)
+        if isinstance(expected_value, dict):
+            for subfield, subexpected in expected_value.items():
+                sub_attr = getattr(actual_value, subfield)
+                # If sub_attr is an ndarray, use np.sum to get a scalar.
+                actual_subvalue = (
+                    np.sum(sub_attr) if isinstance(sub_attr, np.ndarray) else sub_attr
+                )
+                assert (
+                    actual_subvalue == subexpected
+                ), f"{field}.{subfield} failed for {cooktop_type}"
+        else:
+            assert actual_value == expected_value, f"{field} failed for {cooktop_type}"
 
 
 def test_invalid_cooktop_type():
@@ -65,23 +87,14 @@ def test_cooking_energy_usage():
         "Electric (coil or ceramic)": [176, 264, 352, 440, 528, 617],
     }
 
-    # Expected field values based on cooktop type
+    # Expected field values based on cooktop type.
     expected_values = {
         "Electric induction": {
             "elx_connection_days": DAYS_IN_YEAR,
-            "day_kwh": {
-                "controllable": 0,
-                "solar_self_consumption": 0,
-            },
-            "anytime_kwh": {
-                "uncontrolled": 0,
-                "controllable": 0,
-                "solar_self_consumption": 0,
-            },
-            "night_kwh": {
-                "uncontrolled": 0,
-                "controllable": 0,
-                "solar_self_consumption": 0,
+            "electricity_kwh": {
+                "fixed_time_controllable": 0,
+                "shift_able_uncontrolled": 0,
+                "shift_able_controllable": 0,
             },
             "natural_gas_kwh": 0,
             "lpg_kwh": 0,
@@ -90,59 +103,32 @@ def test_cooking_energy_usage():
         },
         "Piped gas": {
             "elx_connection_days": 0,
-            "day_kwh": {
-                "uncontrolled": 0,
-                "controllable": 0,
-                "solar_self_consumption": 0,
-            },
-            "anytime_kwh": {
-                "uncontrolled": 0,
-                "controllable": 0,
-                "solar_self_consumption": 0,
-            },
-            "night_kwh": {
-                "uncontrolled": 0,
-                "controllable": 0,
-                "solar_self_consumption": 0,
+            "electricity_kwh": {
+                "fixed_time_uncontrolled": 0,
+                "fixed_time_controllable": 0,
+                "shift_able_uncontrolled": 0,
+                "shift_able_controllable": 0,
             },
             "natural_gas_connection_days": DAYS_IN_YEAR,
             "lpg_tanks_rental_days": 0,
         },
         "Bottled gas": {
             "elx_connection_days": 0,
-            "day_kwh": {
-                "uncontrolled": 0,
-                "controllable": 0,
-                "solar_self_consumption": 0,
-            },
-            "anytime_kwh": {
-                "uncontrolled": 0,
-                "controllable": 0,
-                "solar_self_consumption": 0,
-            },
-            "night_kwh": {
-                "uncontrolled": 0,
-                "controllable": 0,
-                "solar_self_consumption": 0,
+            "electricity_kwh": {
+                "fixed_time_uncontrolled": 0,
+                "fixed_time_controllable": 0,
+                "shift_able_uncontrolled": 0,
+                "shift_able_controllable": 0,
             },
             "natural_gas_connection_days": 0,
             "lpg_tanks_rental_days": DAYS_IN_YEAR,
         },
         "Electric (coil or ceramic)": {
             "elx_connection_days": DAYS_IN_YEAR,
-            "day_kwh": {
-                "controllable": 0,
-                "solar_self_consumption": 0,
-            },
-            "anytime_kwh": {
-                "uncontrolled": 0,
-                "controllable": 0,
-                "solar_self_consumption": 0,
-            },
-            "night_kwh": {
-                "uncontrolled": 0,
-                "controllable": 0,
-                "solar_self_consumption": 0,
+            "electricity_kwh": {
+                "fixed_time_controllable": 0,
+                "shift_able_uncontrolled": 0,
+                "shift_able_controllable": 0,
             },
             "natural_gas_kwh": 0,
             "lpg_kwh": 0,
@@ -151,37 +137,28 @@ def test_cooking_energy_usage():
         },
     }
 
+    # Mapping cooktop type to a function that extracts the primary energy use value.
+    energy_usage_getters = {
+        "Electric induction": lambda usage: np.sum(usage.electricity_kwh.fixed_time),
+        "Electric (coil or ceramic)": lambda usage: np.sum(
+            usage.electricity_kwh.fixed_time
+        ),
+        "Piped gas": lambda usage: usage.natural_gas_kwh,
+        "Bottled gas": lambda usage: usage.lpg_kwh,
+    }
+
     for cooktop_type, energy_use_values in expected_energy_use.items():
         cooktop.cooktop = cooktop_type
         for i, expected_kwh in enumerate(energy_use_values):
             your_home.people_in_house = i + 1
             cooktop_energy_use = cooktop.energy_usage_pattern(your_home)
 
-            # Assertions for expected energy usage (day_kwh, lpg_kwh, natural_gas_kwh)
-            if cooktop_type in ["Electric induction", "Electric (coil or ceramic)"]:
-                assert cooktop_energy_use.day_kwh.total == approx(
-                    expected_kwh, rel=1e-2
-                )
-            elif cooktop_type == "Piped gas":
-                assert cooktop_energy_use.natural_gas_kwh == approx(
-                    expected_kwh, rel=1e-2
-                )
-            elif cooktop_type == "Bottled gas":
-                assert cooktop_energy_use.lpg_kwh == approx(expected_kwh, rel=1e-2)
+            energy_value = energy_usage_getters[cooktop_type](cooktop_energy_use)
+            assert energy_value == approx(expected_kwh, rel=1e-2)
 
-            # Verify additional fields using the updated structure.
-            for field, expected_value in expected_values[cooktop_type].items():
-                actual_value = getattr(cooktop_energy_use, field)
-                if isinstance(expected_value, dict):
-                    # For nested ElectricityUsage fields.
-                    for subfield, subexpected in expected_value.items():
-                        assert (
-                            getattr(actual_value, subfield) == subexpected
-                        ), f"{field}.{subfield} failed for {cooktop_type}"
-                else:
-                    assert (
-                        actual_value == expected_value
-                    ), f"{field} failed for {cooktop_type}"
+            validate_energy_usage_fields(
+                cooktop_energy_use, expected_values[cooktop_type], cooktop_type
+            )
 
 
 def manual_cost_calculation_natural_gas():
@@ -202,7 +179,7 @@ def manual_cost_calculation_electric_induction():
     energy_plan = get_energy_plan("6012", "None")
     day_usage = COOKTOP.energy_usage_pattern(
         YOUR_HOME, use_alternative=True
-    ).day_kwh.from_grid
+    ).electricity_kwh.fixed_time_uncontrolled.sum()
     cost_per_kwh_day = energy_plan.electricity_plan.nzd_per_kwh["Day"]
     annual_running_cost = day_usage * cost_per_kwh_day
     return annual_running_cost

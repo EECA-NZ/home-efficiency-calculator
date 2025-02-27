@@ -6,7 +6,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from .usage_profiles import YearlyFuelUsageProfile
+from .usage_profiles import YearlyFuelUsageReport
 
 
 class UserGeography(BaseModel):
@@ -45,8 +45,8 @@ class ComponentSavingsResponse(BaseModel):
 
     alternatives: dict[str, SavingsResponse]
     user_geography: UserGeography
-    current_fuel_use: YearlyFuelUsageProfile
-    alternative_fuel_use: Optional[YearlyFuelUsageProfile]
+    current_fuel_use: YearlyFuelUsageReport
+    alternative_fuel_use: Optional[YearlyFuelUsageReport]
 
 
 class CheckboxData(BaseModel):
@@ -75,5 +75,5 @@ class HouseholdSavingsResponse(BaseModel):
     checkbox: CheckboxData
     total_savings: SavingsResponse
     user_geography: UserGeography
-    current_fuel_use: YearlyFuelUsageProfile
-    alternative_fuel_use: YearlyFuelUsageProfile
+    current_fuel_use: YearlyFuelUsageReport
+    alternative_fuel_use: YearlyFuelUsageReport

@@ -27,7 +27,6 @@ def test_heating_savings_specific_alternative():
             "insulation_quality": "Not well insulated",
         },
     }
-
     response = client.post("/heating/savings", json=profile_data)
     assert response.status_code == 200
     response_data = response.json()
@@ -53,7 +52,6 @@ def test_heating_savings_all_alternatives():
             "insulation_quality": "Not well insulated",
         },
     }
-
     response = client.post("/heating/savings", json=profile_data)
     assert response.status_code == 200
     response_data = response.json()

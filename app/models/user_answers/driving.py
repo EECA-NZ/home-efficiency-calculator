@@ -13,7 +13,8 @@ from ...constants import (
     EV_PUBLIC_CHARGING_FRACTION,
     FUEL_CONSUMPTION_LITRES_PER_100KM,
 )
-from ..usage_profiles import DrivingYearlyFuelUsageProfile, ElectricityUsage
+from ...services.usage_profile_helpers import flat_day_night_profiles
+from ..usage_profiles import DrivingYearlyFuelUsageProfile, ElectricityUsageProfile
 
 
 class DrivingAnswers(BaseModel):
@@ -27,6 +28,22 @@ class DrivingAnswers(BaseModel):
     alternative_vehicle_type: Optional[
         Literal["Petrol", "Diesel", "Hybrid", "Plug-in hybrid", "Electric"]
     ] = None
+
+    def ev_charging_profile(
+        self,
+    ):
+        """
+        Create a default electricity usage profile for electric vehicle charging.
+        The resulting array is normalized so that its sum is 1.
+
+        Returns
+        -------
+        np.ndarray
+            A 1D array of shape (8760,) where each element is 1/8760.
+        Placeholder for a more realistic profile.
+        """
+        _, night_profile = flat_day_night_profiles()
+        return night_profile
 
     # pylint: disable=unused-argument
     def energy_usage_pattern(
@@ -71,11 +88,13 @@ class DrivingAnswers(BaseModel):
             public_charging_kwh = 0
             home_charging_kwh = 0
 
-        anytime_kwh = ElectricityUsage(controllable=home_charging_kwh)
+        anytime_kwh = ElectricityUsageProfile(
+            shift_able_uncontrolled=home_charging_kwh * self.ev_charging_profile()
+        )
 
         return DrivingYearlyFuelUsageProfile(
             elx_connection_days=DAYS_IN_YEAR,
-            anytime_kwh=anytime_kwh,
+            electricity_kwh=anytime_kwh,
             petrol_litres=yearly_fuel_litres if liquid_fuel == "Petrol" else 0,
             diesel_litres=yearly_fuel_litres if liquid_fuel == "Diesel" else 0,
             public_ev_charger_kwh=public_charging_kwh,
