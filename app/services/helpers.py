@@ -78,11 +78,12 @@ def add_gst(plan: BaseModel) -> BaseModel:
     gst_rate = 1.15
     plancopy = plan.model_copy()
     for field, value in plan.model_dump().items():
-        if isinstance(value, dict):
+        # Exclude export rates from GST application
+        if isinstance(value, dict) and field != "export_rates":
             # Apply GST to each value in the dictionary
             adjusted_dict = {k: v * gst_rate for k, v in value.items()}
             setattr(plancopy, field, adjusted_dict)
-        elif "charge" in field or "per_" in field:
+        elif "charge" in field or "nzd_per_" in field or field.endswith("_rate"):
             # Apply GST to flat rate fields
             setattr(plancopy, field, value * gst_rate)
     return plancopy

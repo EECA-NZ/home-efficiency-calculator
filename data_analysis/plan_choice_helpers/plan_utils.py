@@ -103,8 +103,8 @@ def row_to_plan(row: pd.Series) -> ElectricityPlan:
 
     return ElectricityPlan(
         name=str(row["PlanId"]),
-        daily_charge=row["Daily charge"],
-        nzd_per_kwh=pricing_dict,
+        fixed_rate=row["Daily charge"],
+        import_rates=pricing_dict,
     )
 
 
@@ -125,8 +125,8 @@ def add_gst(
         The plan with GST included in the charges.
     """
     gst_multiplier = 1.15
-    plan.daily_charge *= gst_multiplier
-    plan.nzd_per_kwh = {k: v * gst_multiplier for k, v in plan.nzd_per_kwh.items()}
+    plan.fixed_rate *= gst_multiplier
+    plan.import_rates = {k: v * gst_multiplier for k, v in plan.import_rates.items()}
     return plan
 
 
@@ -163,9 +163,9 @@ def extract_plan_details(plan):
     dump = plan.model_dump()
     plan_details = {
         "name": dump.get("name", np.nan),
-        "daily_charge": dump.get("daily_charge", np.nan),
+        "fixed_rate": dump.get("fixed_rate", np.nan),
     }
     expected_rates = ["Controlled", "Uncontrolled", "All inclusive", "Day", "Night"]
     for rate in expected_rates:
-        plan_details[f"nzd_per_kwh.{rate}"] = dump["nzd_per_kwh"].get(rate, np.nan)
+        plan_details[f"import_rates.{rate}"] = dump["import_rates"].get(rate, np.nan)
     return plan_details

@@ -67,10 +67,13 @@ def get_default_electricity_plan():
     """
     return ElectricityPlan(
         name="Default Electricity Plan",
-        daily_charge=2.0,
-        nzd_per_kwh={
+        fixed_rate=2.0,
+        import_rates={
             "Day": 0.242,
             "Night": 0.18,
+        },
+        export_rates={
+            "Uncontrolled": 0.12,
         },
     )
 
@@ -85,8 +88,8 @@ def get_default_natural_gas_plan():
     """
     return NaturalGasPlan(
         name="Default Natural Gas Plan",
-        daily_charge=1.60,
-        nzd_per_kwh={
+        fixed_rate=1.60,
+        import_rates={
             "Uncontrolled": 0.11,
         },
     )
@@ -102,7 +105,7 @@ def get_default_lpg_plan():
             $5.75 per bottle per month ($69 per year per bottle).
     """
     return LPGPlan(
-        name="Default LPG Plan", per_lpg_kwh=0.244, daily_charge=2 * 69 / 365.25
+        name="Default LPG Plan", per_lpg_kwh=0.244, fixed_rate=2 * 69 / 365.25
     )
 
 

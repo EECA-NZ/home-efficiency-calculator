@@ -323,20 +323,20 @@ def calculate_fixed_cost_savings(profile):
     alternative_uses_lpg = uses_lpg(profile, use_alternatives=True)
 
     current_natural_gas_fixed_cost = (
-        your_plan.natural_gas_plan.daily_charge * DAYS_IN_YEAR
+        your_plan.natural_gas_plan.fixed_rate * DAYS_IN_YEAR
         if current_uses_natural_gas
         else 0
     )
     current_lpg_fixed_cost = (
-        your_plan.lpg_plan.daily_charge * DAYS_IN_YEAR if current_uses_lpg else 0
+        your_plan.lpg_plan.fixed_rate * DAYS_IN_YEAR if current_uses_lpg else 0
     )
     alternative_natural_gas_fixed_cost = (
-        your_plan.natural_gas_plan.daily_charge * DAYS_IN_YEAR
+        your_plan.natural_gas_plan.fixed_rate * DAYS_IN_YEAR
         if alternative_uses_natural_gas
         else 0
     )
     alternative_lpg_fixed_cost = (
-        your_plan.lpg_plan.daily_charge * DAYS_IN_YEAR if alternative_uses_lpg else 0
+        your_plan.lpg_plan.fixed_rate * DAYS_IN_YEAR if alternative_uses_lpg else 0
     )
 
     fixed_cost_savings_dict = {}

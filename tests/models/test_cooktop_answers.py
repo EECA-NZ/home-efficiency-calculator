@@ -169,7 +169,7 @@ def manual_cost_calculation_natural_gas():
     """
     energy_plan = get_energy_plan("6012", "None")
     natural_gas_kwh = COOKTOP.energy_usage_pattern(YOUR_HOME).natural_gas_kwh
-    natural_gas_cost_per_kwh = energy_plan.natural_gas_plan.nzd_per_kwh["Uncontrolled"]
+    natural_gas_cost_per_kwh = energy_plan.natural_gas_plan.import_rates["Uncontrolled"]
     annual_running_cost = natural_gas_kwh * natural_gas_cost_per_kwh
     return annual_running_cost
 
@@ -182,7 +182,7 @@ def manual_cost_calculation_electric_induction():
     day_usage = COOKTOP.energy_usage_pattern(
         YOUR_HOME, use_alternative=True
     ).electricity_kwh.fixed_time_uncontrolled_kwh.sum()
-    cost_per_kwh_day = energy_plan.electricity_plan.nzd_per_kwh["Day"]
+    cost_per_kwh_day = energy_plan.electricity_plan.import_rates["Day"]
     annual_running_cost = day_usage * cost_per_kwh_day
     return annual_running_cost
 

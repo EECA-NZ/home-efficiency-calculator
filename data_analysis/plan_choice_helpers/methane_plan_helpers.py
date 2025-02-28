@@ -59,8 +59,8 @@ def row_to_plan(row):
 
     return NaturalGasPlan(
         name=str(row["PlanId"]),
-        daily_charge=row["Daily charge"],
-        nzd_per_kwh=pricing_dict,
+        fixed_rate=row["Daily charge"],
+        import_rates=pricing_dict,
     )
 
 

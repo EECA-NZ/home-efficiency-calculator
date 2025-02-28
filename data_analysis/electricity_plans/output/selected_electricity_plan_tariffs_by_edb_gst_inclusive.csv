@@ -1,4 +1,4 @@
-edb_region,name,daily_charge,nzd_per_kwh.Uncontrolled,nzd_per_kwh.Controlled,nzd_per_kwh.All inclusive,nzd_per_kwh.Day,nzd_per_kwh.Night
+edb_region,name,fixed_rate,import_rates.Uncontrolled,import_rates.Controlled,import_rates.All inclusive,import_rates.Day,import_rates.Night
 Alpine Energy,160969,3.7133499999999997,,,,0.20884,0.13409
 Aurora Energy,161099,2.0723,,,,0.31579,0.14098999999999998
 Buller Electricity,160789,3.0003499999999996,,,,0.3468399999999999,0.18928999999999999

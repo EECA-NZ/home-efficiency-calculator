@@ -1,4 +1,4 @@
-electricity_plan_name,daily_charge,nzd_per_kwh_day,nzd_per_kwh_night,nzd_per_kwh_export,kg_co2e_per_kwh
+electricity_plan_name,fixed_rate,import_rates_day,import_rates_night,import_rates_export,kg_co2e_per_kwh
 Electricity PlanId 91543,3.208,0.239,0.239,0.120,0.107
 Electricity PlanId 160956,3.051,0.313,0.194,0.120,0.107
 Electricity PlanId 160831,2.591,0.213,0.175,0.120,0.107

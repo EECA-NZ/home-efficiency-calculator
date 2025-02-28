@@ -36,12 +36,12 @@ EDB_REGION_SHAPEFILE = "../supplementary_data/EDB_Boundaries/EDBBoundaries.shp"
 OUTPUT_COLUMNS = [
     "edb_region",
     "name",
-    "daily_charge",
-    "nzd_per_kwh.Uncontrolled",
-    "nzd_per_kwh.Controlled",
-    "nzd_per_kwh.All inclusive",
-    "nzd_per_kwh.Day",
-    "nzd_per_kwh.Night",
+    "fixed_rate",
+    "import_rates.Uncontrolled",
+    "import_rates.Controlled",
+    "import_rates.All inclusive",
+    "import_rates.Day",
+    "import_rates.Night",
 ]
 
 

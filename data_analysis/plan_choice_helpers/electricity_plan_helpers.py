@@ -29,7 +29,6 @@ from data_analysis.plan_choice_helpers.plan_filters import (
     is_simple_all_inclusive,
     is_simple_controlled_uncontrolled,
     is_simple_day_night,
-    is_simple_night_all_inclusive,
     is_simple_uncontrolled,
     open_plans,
 )
@@ -61,8 +60,8 @@ def row_to_plan(row):
 
     return ElectricityPlan(
         name=str(row["PlanId"]),
-        daily_charge=row["Daily charge"],
-        nzd_per_kwh=pricing_dict,
+        fixed_rate=row["Daily charge"],
+        import_rates=pricing_dict,
     )
 
 
@@ -150,8 +149,6 @@ def filter_electricity_plans(full_df):
             | full_df.apply(is_simple_controlled_uncontrolled, axis=1)
             | full_df.apply(is_simple_day_night, axis=1)
             | full_df.apply(is_simple_uncontrolled, axis=1)
-            | full_df.apply(is_simple_night_all_inclusive, axis=1)
-            # | full_df.apply(is_simple_night_uncontrolled, axis=1)
         )
     )
     full_df = full_df[filters]

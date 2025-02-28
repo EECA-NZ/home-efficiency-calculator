@@ -230,7 +230,7 @@ def generate_other_electricity_usage_lookup_table(output_dir="."):
 def generate_electricity_plans_lookup_table(output_dir="."):
     """
     Creates electricity_plans_lookup_table.csv with columns:
-      electricity_plan_name, daily_charge, nzd_per_kwh_day, nzd_per_kwh_night,
+      electricity_plan_name, fixed_rate, import_rates_day, import_rates_night,
       kg_co2e_per_kwh
     (The last column is a constant 0.1072 for all plans.)
     """
@@ -243,14 +243,14 @@ def generate_electricity_plans_lookup_table(output_dir="."):
 def transform_plans_to_dataframe():
     """
     Build a DataFrame of electricity plans with columns:
-      electricity_plan_name, daily_charge, nzd_per_kwh_day, nzd_per_kwh_night,
+      electricity_plan_name, fixed_rate, import_rates_day, import_rates_night,
       kg_co2e_per_kwh (all 0.1072).
     """
     modified_plans = {}
     for plan in postcode_to_electricity_plan_dict.values():
         plan_name = plan.name
-        rate_dict = plan.nzd_per_kwh
-        daily_charge = plan.daily_charge
+        rate_dict = plan.import_rates
+        fixed_rate = plan.fixed_rate
 
         if "All inclusive" in rate_dict:
             all_val = rate_dict["All inclusive"]
@@ -261,10 +261,10 @@ def transform_plans_to_dataframe():
             night_rate = rate_dict.get("Night", None)
 
         modified_plans[plan_name] = {
-            "daily_charge": daily_charge,
-            "nzd_per_kwh_day": day_rate,
-            "nzd_per_kwh_night": night_rate,
-            "nzd_per_kwh_export": EXPORT_RATE,
+            "fixed_rate": fixed_rate,
+            "import_rates_day": day_rate,
+            "import_rates_night": night_rate,
+            "import_rates_export": EXPORT_RATE,
         }
 
     df = pd.DataFrame.from_dict(modified_plans, orient="index")
@@ -275,10 +275,10 @@ def transform_plans_to_dataframe():
 
     desired_cols = [
         "electricity_plan_name",
-        "daily_charge",
-        "nzd_per_kwh_day",
-        "nzd_per_kwh_night",
-        "nzd_per_kwh_export",
+        "fixed_rate",
+        "import_rates_day",
+        "import_rates_night",
+        "import_rates_export",
         "kg_co2e_per_kwh",
     ]
     df = df[desired_cols]

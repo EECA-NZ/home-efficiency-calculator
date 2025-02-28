@@ -404,7 +404,7 @@ def generate_natural_gas_fixed_cost_lookup_table():
         my_plan = get_energy_plan_cached(postcode, DEFAULT_VEHICLE_TYPE)
         row = {
             "natural_gas_plan_name": my_plan.natural_gas_plan.name,
-            "natural_gas_daily_charge": my_plan.natural_gas_plan.daily_charge,
+            "natural_gas_fixed_rate": my_plan.natural_gas_plan.fixed_rate,
         }
         natural_gas_fixed_cost_rows.append(row)
     natural_gas_fixed_costs_df = pd.DataFrame(natural_gas_fixed_cost_rows)
@@ -423,7 +423,7 @@ def generate_lpg_fixed_cost_lookup_table():
         my_plan = get_energy_plan_cached(postcode, DEFAULT_VEHICLE_TYPE)
         row = {
             "lpg_plan_name": my_plan.lpg_plan.name,
-            "lpg_daily_charge": my_plan.lpg_plan.daily_charge,
+            "lpg_fixed_rate": my_plan.lpg_plan.fixed_rate,
         }
         lpg_fixed_cost_rows.append(row)
     lpg_fixed_costs_df = pd.DataFrame(lpg_fixed_cost_rows)

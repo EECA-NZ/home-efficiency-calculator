@@ -40,14 +40,14 @@ from .configuration import get_default_plans
 
 logger = logging.getLogger(__name__)
 
-DAILY_CHARGE_COLUMN = "daily_charge"
-NZD_PER_KWH_PREFIX = "nzd_per_kwh."
-NZD_PER_KWH_KEYS = ["Uncontrolled", "Controlled", "All inclusive", "Day", "Night"]
+FIXED_RATE_COLUMN = "fixed_rate"
+IMPORT_RATE_PREFIX = "import_rates."
+IMPORT_RATE_KEYS = ["Uncontrolled", "Controlled", "All inclusive", "Day", "Night"]
 
 
-def create_nzd_per_kwh_tariff_dict(row: pd.Series) -> dict:
+def create_import_rates_tariff_dict(row: pd.Series) -> dict:
     """
-    Construct a dictionary of nzd_per_kwh values from a row of the dataframe.
+    Construct a dictionary of import_rates values from a row of the dataframe.
 
     NaN values are excluded from the dictionary.
 
@@ -59,12 +59,12 @@ def create_nzd_per_kwh_tariff_dict(row: pd.Series) -> dict:
     Returns
     -------
     dict
-        A dictionary of nzd_per_kwh values.
+        A dictionary of import_rates values.
     """
     return {
-        key: row[f"{NZD_PER_KWH_PREFIX}{key}"]
-        for key in NZD_PER_KWH_KEYS
-        if pd.notna(row[f"{NZD_PER_KWH_PREFIX}{key}"])
+        key: row[f"{IMPORT_RATE_PREFIX}{key}"]
+        for key in IMPORT_RATE_KEYS
+        if pd.notna(row[f"{IMPORT_RATE_PREFIX}{key}"])
     }
 
 
@@ -113,8 +113,8 @@ def plan_dictionaries(plan_type: str, plan_class):
             {
                 "edb_region": [],
                 "name": [],
-                DAILY_CHARGE_COLUMN: [],
-                **{f"{NZD_PER_KWH_PREFIX}{key}": [] for key in NZD_PER_KWH_KEYS},
+                FIXED_RATE_COLUMN: [],
+                **{f"{IMPORT_RATE_PREFIX}{key}": [] for key in IMPORT_RATE_KEYS},
             }
         )
 
@@ -129,16 +129,16 @@ def plan_dictionaries(plan_type: str, plan_class):
     postcode_to_plan_dict = {}
 
     for _, row in postcode_to_plan_tariff.iterrows():
-        nzd_per_kwh = create_nzd_per_kwh_tariff_dict(row)
+        import_rates = create_import_rates_tariff_dict(row)
         try:
-            daily_charge = float(row[DAILY_CHARGE_COLUMN])
+            fixed_rate = float(row[FIXED_RATE_COLUMN])
             if plan_type == "methane":
-                daily_charge -= DAILY_DUAL_FUEL_DISCOUNT
+                fixed_rate -= DAILY_DUAL_FUEL_DISCOUNT
 
             plan = plan_class(
                 name=f"{plan_type.capitalize()} PlanId {row['name']}",
-                daily_charge=daily_charge,
-                nzd_per_kwh=nzd_per_kwh,
+                fixed_rate=fixed_rate,
+                import_rates=import_rates,
             )
             edb_to_plan_dict[row["edb_region"]] = plan
             postcode_to_plan_dict[row["postcode"]] = plan
