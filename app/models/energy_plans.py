@@ -6,8 +6,6 @@ from typing import Dict
 
 from pydantic import BaseModel
 
-from app.services.usage_profile_helpers import daytime_total, nighttime_total
-
 
 class ElectricityPlan(BaseModel):
     """
@@ -36,47 +34,49 @@ class ElectricityPlan(BaseModel):
 
         if keys == {"All inclusive"}:
             variable_cost_nzd += (
-                profile.electricity_kwh.total.sum() * self.nzd_per_kwh["All inclusive"]
+                profile.electricity_kwh.total_usage.sum()
+                * self.nzd_per_kwh["All inclusive"]
             )
         elif keys == {"Day", "Night"}:
             # For the time being, put all the anytime usage into night usage
             variable_cost_nzd += (
-                daytime_total(profile.electricity_kwh.total_with_night_shift)
+                profile.electricity_kwh.daytime_total_usage_night_shifted.sum()
                 * self.nzd_per_kwh["Day"]
             )
             variable_cost_nzd += (
-                nighttime_total(profile.electricity_kwh.total_with_night_shift)
+                profile.electricity_kwh.nighttime_total_usage_night_shifted.sum()
                 * self.nzd_per_kwh["Night"]
             )
         elif keys == {"Uncontrolled"}:
             variable_cost_nzd += (
-                profile.electricity_kwh.total.sum() * self.nzd_per_kwh["Uncontrolled"]
+                profile.electricity_kwh.total_usage.sum()
+                * self.nzd_per_kwh["Uncontrolled"]
             )
         elif keys == {"Uncontrolled", "Controlled"}:
             variable_cost_nzd += (
-                profile.electricity_kwh.uncontrolled.sum()
+                profile.electricity_kwh.total_uncontrolled_usage.sum()
                 * self.nzd_per_kwh["Uncontrolled"]
             )
             variable_cost_nzd += (
-                profile.electricity_kwh.controllable.sum()
+                profile.electricity_kwh.total_controllable_usage.sum()
                 * self.nzd_per_kwh["Controlled"]
             )
         elif keys == {"Night", "All inclusive"}:
             variable_cost_nzd += (
-                daytime_total(profile.electricity_kwh.total)
+                profile.electricity_kwh.daytime_total_usage.sum()
                 * self.nzd_per_kwh["All inclusive"]
             )
             variable_cost_nzd += (
-                nighttime_total(profile.electricity_kwh.total)
+                profile.electricity_kwh.nighttime_total_usage.sum()
                 * self.nzd_per_kwh["Night"]
             )
         elif keys == {"Night", "Uncontrolled"}:
             variable_cost_nzd += (
-                daytime_total(profile.electricity_kwh.total)
+                profile.electricity_kwh.daytime_total_usage.sum()
                 * self.nzd_per_kwh["Uncontrolled"]
             )
             variable_cost_nzd += (
-                nighttime_total(profile.electricity_kwh.total)
+                profile.electricity_kwh.nighttime_total_usage.sum()
                 * self.nzd_per_kwh["Night"]
             )
         else:

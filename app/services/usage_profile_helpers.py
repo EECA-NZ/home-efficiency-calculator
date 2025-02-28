@@ -144,10 +144,10 @@ def night_shift(usage_profile: np.ndarray) -> np.ndarray:
     return shifted_profile
 
 
-def daytime_total(usage_profile: np.ndarray) -> np.ndarray:
+def daytime_total_usage(usage_profile: np.ndarray) -> np.ndarray:
     """
     Given an 8760-long 1D numpy array (usage_profile),
-    returns the sum of the daytime usage.
+    returns a copy of the array with all nighttime usage zeroed out.
 
     Parameters
     ----------
@@ -156,17 +156,18 @@ def daytime_total(usage_profile: np.ndarray) -> np.ndarray:
 
     Returns
     -------
-    daytime_profile : float
-       The sum of the daytime usage.
+    daytime_profile : np.ndarray
+        A copy of the original usage profile, but with all nighttime
+        usage zeroed out.
     """
     day_mask = day_night_flag()
-    return np.sum(usage_profile * day_mask)
+    return usage_profile * day_mask
 
 
-def nighttime_total(usage_profile: np.ndarray) -> np.ndarray:
+def nighttime_total_usage(usage_profile: np.ndarray) -> np.ndarray:
     """
     Given an 8760-long 1D numpy array (usage_profile),
-    returns the sum of the nighttime usage.
+    returns a copy of the array with all daytime usage zeroed out.
 
     Parameters
     ----------
@@ -175,8 +176,9 @@ def nighttime_total(usage_profile: np.ndarray) -> np.ndarray:
 
     Returns
     -------
-    nighttime_profile : float
-       The sum of the nighttime usage.
+    nighttime_profile : np.ndarray
+        A copy of the original usage profile, but with all daytime
+        usage zeroed out.
     """
     day_mask = day_night_flag()
-    return np.sum(usage_profile * ~day_mask)
+    return usage_profile * ~day_mask

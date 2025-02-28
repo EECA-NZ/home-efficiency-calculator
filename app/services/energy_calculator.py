@@ -211,7 +211,7 @@ def emissions_kg_co2e(usage_profile: YearlyFuelUsageProfile) -> float:
     components = [
         (-usage_profile.solar_generation_kwh.total, "electricity_kg_co2e_per_kwh"),
         (
-            usage_profile.electricity_kwh.total.sum(),
+            usage_profile.electricity_kwh.total_usage.sum(),
             "electricity_kg_co2e_per_kwh",
         ),
         (usage_profile.natural_gas_kwh, "natural_gas_kg_co2e_per_kwh"),

@@ -11,8 +11,10 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.services.usage_profile_helpers import (
     day_night_flag,
+    daytime_total_usage,
     ensure_8760_array,
     night_shift,
+    nighttime_total_usage,
     zeros_8760,
 )
 
@@ -115,7 +117,7 @@ class ElectricityUsageProfile(BaseModel):
         return self.__add__(other)
 
     @functools.cached_property
-    def total(self) -> np.ndarray:
+    def total_usage(self) -> np.ndarray:
         """
         Total electricity usage timeseries (kWh) for the year.
         """
@@ -127,7 +129,7 @@ class ElectricityUsageProfile(BaseModel):
         )
 
     @functools.cached_property
-    def total_with_night_shift(self) -> np.ndarray:
+    def total_usage_night_shifted(self) -> np.ndarray:
         """
         Total electricity usage timeseries (kWh) for the year,
         if all consumption that can be shifted to night-time is shifted.
@@ -140,14 +142,14 @@ class ElectricityUsageProfile(BaseModel):
         )
 
     @functools.cached_property
-    def uncontrolled(self) -> np.ndarray:
+    def total_uncontrolled_usage(self) -> np.ndarray:
         """
         Total uncontrolled electricity usage (kWh) as an array.
         """
         return self.fixed_time_uncontrolled + self.shift_able_uncontrolled
 
     @functools.cached_property
-    def uncontrolled_with_night_shift(self) -> np.ndarray:
+    def total_uncontrolled_night_shifted(self) -> np.ndarray:
         """
         Total uncontrolled electricity usage (kWh) over the entire year,
         if all consumption that can be shifted to night-time is shifted.
@@ -155,14 +157,14 @@ class ElectricityUsageProfile(BaseModel):
         return self.fixed_time_uncontrolled + night_shift(self.shift_able_uncontrolled)
 
     @functools.cached_property
-    def controllable(self) -> np.ndarray:
+    def total_controllable_usage(self) -> np.ndarray:
         """
         Total controllable electricity usage (kWh) over the entire year.
         """
         return self.fixed_time_controllable + self.shift_able_controllable
 
     @functools.cached_property
-    def controllable_with_night_shift(self) -> np.ndarray:
+    def total_controllable_night_shifted(self) -> np.ndarray:
         """
         Total controllable electricity usage (kWh) over the entire year,
         if all consumption that can be shifted to night-time is shifted.
@@ -170,18 +172,46 @@ class ElectricityUsageProfile(BaseModel):
         return self.fixed_time_controllable + night_shift(self.shift_able_controllable)
 
     @functools.cached_property
-    def shift_able(self) -> np.ndarray:
+    def total_shift_able_usage(self) -> np.ndarray:
         """
         Total electricity usage (kWh) that can be shifted in time.
         """
         return self.shift_able_uncontrolled + self.shift_able_controllable
 
     @functools.cached_property
-    def fixed_time(self) -> np.ndarray:
+    def total_fixed_time_usage(self) -> np.ndarray:
         """
         Total electricity usage (kWh) that is fixed to a specific time.
         """
         return self.fixed_time_uncontrolled + self.fixed_time_controllable
+
+    @functools.cached_property
+    def daytime_total_usage(self) -> np.ndarray:
+        """
+        Daytime electricity usage (kWh) time series.
+        """
+        return daytime_total_usage(self.total_usage)
+
+    @functools.cached_property
+    def daytime_total_usage_night_shifted(self) -> np.ndarray:
+        """
+        Daytime electricity usage (kWh) time series.
+        """
+        return daytime_total_usage(self.total_usage_night_shifted)
+
+    @functools.cached_property
+    def nighttime_total_usage(self) -> np.ndarray:
+        """
+        Nighttime electricity usage (kWh) time series.
+        """
+        return nighttime_total_usage(self.total_usage)
+
+    @functools.cached_property
+    def nighttime_total_usage_night_shifted(self) -> np.ndarray:
+        """
+        Nighttime electricity usage (kWh) time series.
+        """
+        return nighttime_total_usage(self.total_usage_night_shifted)
 
 
 class ElectricityUsageReport(BaseModel):
@@ -225,7 +255,7 @@ class SolarGenerationProfile(BaseModel):
         8760 hours of a non-leap year based on TMY data.
     """
 
-    generation_kwh: np.ndarray = Field(
+    fixed_time_generation_kwh: np.ndarray = Field(
         default_factory=zeros_8760,
         description="Hourly generation timeseries for a year (kWh)",
     )
@@ -236,7 +266,7 @@ class SolarGenerationProfile(BaseModel):
         extra="ignore",
     )
 
-    @field_validator("generation_kwh", mode="before")
+    @field_validator("fixed_time_generation_kwh", mode="before")
     @classmethod
     def validate_arrays(cls, value):
         """
@@ -249,14 +279,15 @@ class SolarGenerationProfile(BaseModel):
         """
         Total electricity usage (kWh) over the entire year.
         """
-        return float(np.sum(self.generation_kwh))
+        return float(np.sum(self.fixed_time_generation_kwh))
 
     def __add__(self, other: "SolarGenerationProfile") -> "SolarGenerationProfile":
         """
         Element-wise addition of two SolarGenerationProfile objects.
         """
         return SolarGenerationProfile(
-            generation_kwh=self.generation_kwh + other.generation_kwh
+            fixed_time_generation_kwh=self.fixed_time_generation_kwh
+            + other.fixed_time_generation_kwh
         )
 
     def __radd__(self, other):
@@ -273,7 +304,7 @@ class SolarGenerationReport(BaseModel):
     Annual electricity generation by solar PV.
     """
 
-    generation_kwh: float = Field(
+    fixed_time_generation_kwh: float = Field(
         0.0, description="Total electricity generated by solar panels (kWh)"
     )
 
@@ -430,7 +461,9 @@ class YearlyFuelUsageReport(BaseModel):
                 ),
             ),
             solar_generation_kwh=SolarGenerationReport(
-                generation_kwh=round_float(profile.solar_generation_kwh.total),
+                fixed_time_generation_kwh=round_float(
+                    profile.solar_generation_kwh.total
+                ),
             ),
             natural_gas_connection_days=round_float(
                 profile.natural_gas_connection_days

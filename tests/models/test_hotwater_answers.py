@@ -67,11 +67,17 @@ def test_water_heating_energy_usage():
             hot_water_energy_use.elx_connection_days
             == expected_energy_profile.elx_connection_days
         )
-        assert hot_water_energy_use.electricity_kwh.fixed_time.sum() == approx(
-            expected_energy_profile.electricity_kwh.fixed_time.sum()
+        assert (
+            hot_water_energy_use.electricity_kwh.total_fixed_time_usage.sum()
+            == approx(
+                expected_energy_profile.electricity_kwh.total_fixed_time_usage.sum()
+            )
         )
-        assert hot_water_energy_use.electricity_kwh.shift_able.sum() == approx(
-            expected_energy_profile.electricity_kwh.shift_able.sum()
+        assert (
+            hot_water_energy_use.electricity_kwh.total_shift_able_usage.sum()
+            == approx(
+                expected_energy_profile.electricity_kwh.total_shift_able_usage.sum()
+            )
         )
         assert (
             hot_water_energy_use.natural_gas_connection_days

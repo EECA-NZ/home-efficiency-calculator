@@ -139,9 +139,11 @@ def test_cooking_energy_usage():
 
     # Mapping cooktop type to a function that extracts the primary energy use value.
     energy_usage_getters = {
-        "Electric induction": lambda usage: np.sum(usage.electricity_kwh.fixed_time),
+        "Electric induction": lambda usage: np.sum(
+            usage.electricity_kwh.total_fixed_time_usage
+        ),
         "Electric (coil or ceramic)": lambda usage: np.sum(
-            usage.electricity_kwh.fixed_time
+            usage.electricity_kwh.total_fixed_time_usage
         ),
         "Piped gas": lambda usage: usage.natural_gas_kwh,
         "Bottled gas": lambda usage: usage.lpg_kwh,
