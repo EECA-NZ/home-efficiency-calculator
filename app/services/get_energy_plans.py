@@ -135,11 +135,22 @@ def plan_dictionaries(plan_type: str, plan_class):
             if plan_type == "methane":
                 fixed_rate -= DAILY_DUAL_FUEL_DISCOUNT
 
-            plan = plan_class(
-                name=f"{plan_type.capitalize()} PlanId {row['name']}",
-                fixed_rate=fixed_rate,
-                import_rates=import_rates,
-            )
+            if plan_class is ElectricityPlan:
+                # We pass a default export_rates for every electricity plan
+                plan = plan_class(
+                    name=f"{plan_type.capitalize()} PlanId {row['name']}",
+                    fixed_rate=fixed_rate,
+                    import_rates=import_rates,
+                    export_rates={"Uncontrolled": 0.12},
+                )
+            else:
+                # e.g. NaturalGasPlan
+                plan = plan_class(
+                    name=f"{plan_type.capitalize()} PlanId {row['name']}",
+                    fixed_rate=fixed_rate,
+                    import_rates=import_rates,
+                )
+
             edb_to_plan_dict[row["edb_region"]] = plan
             postcode_to_plan_dict[row["postcode"]] = plan
         except ValueError as e:

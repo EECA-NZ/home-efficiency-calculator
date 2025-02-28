@@ -35,7 +35,7 @@ class ElectricityPlan(BaseModel):
     name: str
     fixed_rate: float  # NZD per day
     import_rates: Dict[str, float]  # e.g. {"Day": 0.25, "Night": 0.15}, or
-    # {"Controlled":0.1, "Uncontrolled":0.22}, etc.
+    # {"Controlled": 0.1, "Uncontrolled": 0.22}, etc.
     export_rates: Dict[str, float]  # e.g. {"Uncontrolled": 0.12}
 
     def calculate_cost(

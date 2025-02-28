@@ -105,6 +105,7 @@ def row_to_plan(row: pd.Series) -> ElectricityPlan:
         name=str(row["PlanId"]),
         fixed_rate=row["Daily charge"],
         import_rates=pricing_dict,
+        export_rates={"Uncontrolled": 0.12},
     )
 
 
