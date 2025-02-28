@@ -89,7 +89,7 @@ class DrivingAnswers(BaseModel):
             home_charging_kwh = 0
 
         anytime_kwh = ElectricityUsageProfile(
-            shift_able_uncontrolled=home_charging_kwh * self.ev_charging_profile()
+            shift_able_uncontrolled_kwh=home_charging_kwh * self.ev_charging_profile()
         )
 
         return DrivingYearlyFuelUsageProfile(

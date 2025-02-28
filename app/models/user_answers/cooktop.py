@@ -106,7 +106,8 @@ class CooktopAnswers(BaseModel):
         )
         factor["electricity_kwh"] = (
             ElectricityUsageProfile(
-                fixed_time_uncontrolled=total_kwh * self.cooktop_hourly_usage_profile()
+                fixed_time_uncontrolled_kwh=total_kwh
+                * self.cooktop_hourly_usage_profile()
             )
             if "Electric" in cooktop_type
             else ElectricityUsageProfile()

@@ -103,8 +103,10 @@ class HotWaterAnswers(BaseModel):
         fixed_kwh = total_kwh - anytime_kwh
 
         electricity_kwh = ElectricityUsageProfile(
-            fixed_time_controllable=fixed_kwh * self.hot_water_hourly_usage_profile(),
-            shift_able_controllable=anytime_kwh * self.hot_water_hourly_usage_profile(),
+            fixed_time_controllable_kwh=fixed_kwh
+            * self.hot_water_hourly_usage_profile(),
+            shift_able_controllable_kwh=anytime_kwh
+            * self.hot_water_hourly_usage_profile(),
         )
 
         fuel_usage = {

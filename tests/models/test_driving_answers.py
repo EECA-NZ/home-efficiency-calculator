@@ -46,7 +46,7 @@ def test_small_electric_car():
     )
     my_driving_energy_usage = my_driving_answers.energy_usage_pattern(YOUR_HOME)
     assert (
-        my_driving_energy_usage.electricity_kwh.shift_able_uncontrolled.sum()
+        my_driving_energy_usage.electricity_kwh.shift_able_uncontrolled_kwh.sum()
         + my_driving_energy_usage.public_ev_charger_kwh
     ) / DAYS_IN_YEAR == approx(5.114202500144706)
 
@@ -168,7 +168,7 @@ def test_savings_calculations():
         YearlyFuelUsageProfile(
             elx_connection_days=365.25,
             electricity_kwh=ElectricityUsageProfile(
-                shift_able_uncontrolled=anytime_kwh * day_profile
+                shift_able_uncontrolled_kwh=anytime_kwh * day_profile
             ),
             natural_gas_connection_days=0,
             natural_gas_kwh=0,

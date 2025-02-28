@@ -115,14 +115,14 @@ class HeatingAnswers(BaseModel):
             },
             "Heat pump": {
                 "electricity_kwh": ElectricityUsageProfile(
-                    fixed_time_uncontrolled=heating_energy_service_demand
+                    fixed_time_uncontrolled_kwh=heating_energy_service_demand
                     / HEAT_PUMP_COP_BY_CLIMATE_ZONE[climate_zone]
                     * self.heating_hourly_profile()
                 ),
             },
             "Electric heater": {
                 "electricity_kwh": ElectricityUsageProfile(
-                    fixed_time_uncontrolled=heating_energy_service_demand
+                    fixed_time_uncontrolled_kwh=heating_energy_service_demand
                     / ELECTRIC_HEATER_SPACE_HEATING_EFFICIENCY
                     * self.heating_hourly_profile()
                 ),
