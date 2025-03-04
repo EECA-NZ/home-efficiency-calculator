@@ -2,11 +2,11 @@
 Class for storing user answers on solar generation.
 """
 
+import numpy as np
 from pydantic import BaseModel
 
-from ...constants import DAYS_IN_YEAR, SOLAR_RESOURCE_KWH_PER_DAY
-from ...services import get_climate_zone
-from ..usage_profiles import SolarYearlyFuelGenerationProfile
+from ...services import get_climate_zone, get_solar_generation
+from ..usage_profiles import SolarGenerationTimeseries, SolarYearlyFuelGenerationProfile
 
 
 class SolarAnswers(BaseModel):
@@ -36,12 +36,16 @@ class SolarAnswers(BaseModel):
             The yearly fuel usage profile for solar energy generation.
         """
         my_climate_zone = get_climate_zone.climate_zone(your_home.postcode)
-        annual_generation_kwh = 0
         if self.hasSolar:
-            annual_generation_kwh = (
-                SOLAR_RESOURCE_KWH_PER_DAY[my_climate_zone] * DAYS_IN_YEAR
+            hourly_solar_generation_kwh = SolarGenerationTimeseries(
+                fixed_time_generation_kwh=get_solar_generation.hourly_pmax(
+                    my_climate_zone
+                )
             )
-
+        else:
+            hourly_solar_generation_kwh = SolarGenerationTimeseries(
+                fixed_time_generation_kwh=np.zeros(8760)
+            )
         return SolarYearlyFuelGenerationProfile(
-            solar_export_kwh=annual_generation_kwh,
+            solar_generation_kwh=hourly_solar_generation_kwh,
         )

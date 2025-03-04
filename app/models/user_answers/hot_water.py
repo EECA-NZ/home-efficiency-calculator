@@ -15,7 +15,7 @@ from ...services.helpers import (
     standing_loss_kwh_per_year,
 )
 from ...services.usage_profile_helpers import flat_day_night_profiles
-from ..usage_profiles import ElectricityUsageProfile, HotWaterYearlyFuelUsageProfile
+from ..usage_profiles import ElectricityUsageTimeseries, HotWaterYearlyFuelUsageProfile
 
 
 class HotWaterAnswers(BaseModel):
@@ -102,7 +102,7 @@ class HotWaterAnswers(BaseModel):
         anytime_kwh = total_kwh * HOT_WATER_FLEXIBLE_KWH_FRACTION
         fixed_kwh = total_kwh - anytime_kwh
 
-        electricity_kwh = ElectricityUsageProfile(
+        electricity_kwh = ElectricityUsageTimeseries(
             fixed_time_controllable_kwh=fixed_kwh
             * self.hot_water_hourly_usage_profile(),
             shift_able_controllable_kwh=anytime_kwh

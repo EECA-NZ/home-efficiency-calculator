@@ -106,7 +106,7 @@ def night_shift(usage_profile: np.ndarray) -> np.ndarray:
     Given an 8760-long 1D numpy array (usage_profile),
     shifts all daytime usage (7 AM to 9 PM) into the corresponding
     nighttime hours for each day, distributing it evenly among
-    the 10 night hours.
+    the 10 night hours. Vectorized approach (no explicit for-loop).
 
     Parameters
     ----------
@@ -120,28 +120,28 @@ def night_shift(usage_profile: np.ndarray) -> np.ndarray:
         all day usage zeroed out and added (equally) to the
         corresponding night's usage for that same day.
     """
+    # Copy so we don't mutate the original.
     shifted_profile = usage_profile.copy()
 
-    for day in range(365):
-        day_start = day * 24
-        day_end = day_start + 24
+    # Reshape into 365 days x 24 hours
+    profile_2d = shifted_profile.reshape(365, 24)
 
-        # Daytime: 7 AM (07:00) to 9 PM (21:00) => hours [7..20]
-        day_hours = np.arange(day_start + 7, day_start + 21)
+    # Daytime hours: 7..20
+    daytime_hours = np.arange(7, 21)
+    # Nighttime hours: [0..6, 21..23] => 10 hours total
+    nighttime_hours = np.concatenate([np.arange(0, 7), np.arange(21, 24)])
 
-        # Nighttime: 21..23 and 0..6
-        night_hours = np.concatenate(
-            (np.arange(day_start, day_start + 7), np.arange(day_start + 21, day_end))
-        )
+    # Sum the daytime usage for each day
+    day_sums = profile_2d[:, daytime_hours].sum(axis=1)  # shape: (365,)
 
-        # Sum up daytime usage for this day
-        day_usage = shifted_profile[day_hours].sum()
-        # Zero out the original daytime usage
-        shifted_profile[day_hours] = 0.0
-        # Evenly distribute the day's usage across the night hours
-        shifted_profile[night_hours] += day_usage / night_hours.size
+    # Zero out daytime usage
+    profile_2d[:, daytime_hours] = 0.0
 
-    return shifted_profile
+    # Evenly distribute each day's daytime sum across that day's night hours
+    profile_2d[:, nighttime_hours] += day_sums[:, None] / nighttime_hours.size
+
+    # Flatten to return shape (8760,)
+    return profile_2d.ravel()
 
 
 def daytime_total_usage(usage_profile: np.ndarray) -> np.ndarray:

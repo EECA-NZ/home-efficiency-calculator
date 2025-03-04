@@ -135,7 +135,7 @@ class ElectricityPlan(BaseModel):
         For a day/night tariff, do a fully vectorized hour-by-hour net import,
         net export, day vs. night import rates, and subtract export credit.
         """
-        buy_back = self.export_rates.get("Uncontrolled", 0.0)
+        export_rate = self.export_rates.get("Uncontrolled", 0.0)
         day_rate = self.import_rates["Day"]
         night_rate = self.import_rates["Night"]
 
@@ -149,7 +149,7 @@ class ElectricityPlan(BaseModel):
 
         day_cost = day_import * day_rate
         night_cost = night_import * night_rate
-        export_credit = net_export * buy_back
+        export_credit = net_export * export_rate
 
         total_import_cost = day_cost.sum() + night_cost.sum()
         total_export_credit = export_credit.sum()
@@ -166,7 +166,7 @@ class ElectricityPlan(BaseModel):
         Vectorized approach to "allocate solar to uncontrolled first,
         then controlled, leftover is exported," in a single pass.
         """
-        buy_back = self.export_rates.get("Uncontrolled", 0.0)
+        export_rate = self.export_rates.get("Uncontrolled", 0.0)
         unctrl_rate = self.import_rates["Uncontrolled"]
         ctrl_rate = self.import_rates["Controlled"]
 
@@ -188,7 +188,7 @@ class ElectricityPlan(BaseModel):
         ctrl_import = ctrl_kwh - solar_to_controlled
 
         import_cost = unctrl_import * unctrl_rate + ctrl_import * ctrl_rate
-        export_credit = leftover_solar * buy_back
+        export_credit = leftover_solar * export_rate
 
         total_import_cost = import_cost.sum()
         total_export_credit = export_credit.sum()
@@ -204,15 +204,15 @@ class ElectricityPlan(BaseModel):
         """
         Single import rate (e.g. 'All inclusive'), plus optional buy-back export rate.
         """
-        buy_back = self.export_rates.get("Uncontrolled", 0.0)
-        rate = self.import_rates[rate_key]
+        export_rate = self.export_rates.get("Uncontrolled", 0.0)
+        import_rate = self.import_rates[rate_key]
 
         usage_minus_solar = usage_kwh - solar_kwh
         net_import = np.clip(usage_minus_solar, 0, None)
         net_export = np.clip(-usage_minus_solar, 0, None)
 
-        import_cost = (net_import * rate).sum()
-        export_credit = (net_export * buy_back).sum()
+        import_cost = (net_import * import_rate).sum()
+        export_credit = (net_export * export_rate).sum()
 
         return import_cost - export_credit
 

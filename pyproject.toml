@@ -27,7 +27,8 @@ include-package-data = true
 package-data = { "data_analysis" = ["postcode_lookup_tables/output/*.csv",
                                     "electricity_plans/output/*.csv",
                                     "methane_plans/output/*.csv",
-                                    "supplementary_data/tariff_data/*.csv"] }
+                                    "supplementary_data/tariff_data/*.csv",
+                                    "supplementary_data/hourly_solar_generation_by_climate_zone/*.csv"] }
 
 [tool.black]
 line-length = 88

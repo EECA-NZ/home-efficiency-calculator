@@ -6,8 +6,8 @@ import numpy as np
 from pydantic import BaseModel
 
 from app.models.usage_profiles import (
-    ElectricityUsageProfile,
-    HouseholdOtherElectricityUsageProfile,
+    ElectricityUsageTimeseries,
+    HouseholdOtherElectricityUsageTimeseries,
 )
 from app.services.usage_profile_helpers import flat_day_night_profiles
 
@@ -338,7 +338,7 @@ def other_electricity_energy_usage_profile():
     Create an electricity usage profile for appliances not considered by the app.
 
     Returns:
-    - A HouseholdOtherElectricityUsageProfile object.
+    - A HouseholdOtherElectricityUsageTimeseries object.
     """
     day_profile_renamed, night_profile_renamed = flat_day_night_profiles()
     uncontrolled_fixed_kwh = (
@@ -369,7 +369,7 @@ def other_electricity_energy_usage_profile():
         * night_profile_renamed
     )
     uncontrolled_profile_kwh = uncontrolled_fixed_kwh + uncontrolled_night_kwh
-    return HouseholdOtherElectricityUsageProfile(
+    return HouseholdOtherElectricityUsageTimeseries(
         elx_connection_days=DAYS_IN_YEAR,
-        fixed_kwh=ElectricityUsageProfile(uncontrolled=uncontrolled_profile_kwh),
+        fixed_kwh=ElectricityUsageTimeseries(uncontrolled=uncontrolled_profile_kwh),
     )

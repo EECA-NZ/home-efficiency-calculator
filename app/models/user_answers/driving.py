@@ -14,7 +14,7 @@ from ...constants import (
     FUEL_CONSUMPTION_LITRES_PER_100KM,
 )
 from ...services.usage_profile_helpers import flat_day_night_profiles
-from ..usage_profiles import DrivingYearlyFuelUsageProfile, ElectricityUsageProfile
+from ..usage_profiles import DrivingYearlyFuelUsageProfile, ElectricityUsageTimeseries
 
 
 class DrivingAnswers(BaseModel):
@@ -88,7 +88,7 @@ class DrivingAnswers(BaseModel):
             public_charging_kwh = 0
             home_charging_kwh = 0
 
-        anytime_kwh = ElectricityUsageProfile(
+        anytime_kwh = ElectricityUsageTimeseries(
             shift_able_uncontrolled_kwh=home_charging_kwh * self.ev_charging_profile()
         )
 

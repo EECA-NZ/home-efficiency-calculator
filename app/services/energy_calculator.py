@@ -157,7 +157,13 @@ def estimate_usage_from_profile(
         DAYS_IN_YEAR if uses_natural_gas(answers, use_alternatives) else 0
     )
 
-    profiles = [heating_profile, hot_water_profile, cooktop_profile, driving_profile]
+    profiles = [
+        heating_profile,
+        hot_water_profile,
+        cooktop_profile,
+        driving_profile,
+        solar_profile,
+    ]
 
     # Variable electricity usage
     electricity_kwh = sum(profile.electricity_kwh for profile in profiles)

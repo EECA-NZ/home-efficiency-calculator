@@ -10,7 +10,7 @@ from pytest import approx
 from app.constants import DAYS_IN_YEAR
 from app.models.energy_plans import ElectricityPlan
 from app.models.usage_profiles import (
-    ElectricityUsageProfile,
+    ElectricityUsageTimeseries,
     HouseholdYearlyFuelUsageProfile,
 )
 from app.services.get_energy_plans import (
@@ -106,7 +106,7 @@ class TestElectricityPlan(unittest.TestCase):
     def setUp(self):
         self.profile = HouseholdYearlyFuelUsageProfile(
             elx_connection_days=DAYS_IN_YEAR,
-            electricity_kwh=ElectricityUsageProfile(
+            electricity_kwh=ElectricityUsageTimeseries(
                 fixed_time_uncontrolled_kwh=300 * day_profile,
                 shift_able_controllable_kwh=100 * night_profile,
             ),
