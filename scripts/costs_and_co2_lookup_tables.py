@@ -23,6 +23,10 @@ from app.services.energy_calculator import emissions_kg_co2e
 from app.services.get_climate_zone import climate_zone, postcode_dict
 from app.services.get_energy_plans import get_energy_plan
 
+# Round numerical outputs to 3 decimal places.
+FLOAT_FORMAT = "%.14f"
+
+
 logging.basicConfig(level=logging.INFO)
 
 # Constant for the lookup directory. Relative to the script location.
@@ -90,7 +94,7 @@ def uniquify_rows_and_write_to_csv(raw_df, filename):
     """
     final_df = raw_df.drop_duplicates().reset_index(drop=True)
     logging.info("Deduplicating: %s distinct rows.", len(final_df))
-    final_df.to_csv(filename, index=False)
+    final_df.to_csv(filename, float_format=FLOAT_FORMAT, index=False)
     return final_df
 
 

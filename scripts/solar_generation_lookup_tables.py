@@ -7,6 +7,8 @@ import os
 
 import pandas as pd
 
+# CooktopAnswers, HeatingAnswers, HotWaterAnswers,
+from app.models.user_answers import DrivingAnswers, YourHomeAnswers
 from app.services.get_climate_zone import postcode_dict
 from app.services.get_energy_plans import postcode_to_electricity_plan_dict
 
@@ -99,6 +101,20 @@ def generate_vehicle_solar_lookup_table(output_dir="."):
     for vt in vehicle_types:
         for size in vehicle_sizes:
             for km in km_per_week_options:
+                driving = DrivingAnswers(
+                    vehicle_type=vt,
+                    vehicle_size=size,
+                    km_per_week=km,
+                )
+                energy = driving.energy_usage_pattern(
+                    YourHomeAnswers(
+                        people_in_house=3,
+                        postcode="6012",
+                        disconnect_gas=True,
+                    ),
+                    use_alternative=False,
+                )
+                _ = energy
                 row = {
                     "vehicle_type": vt,
                     "vehicle_size": size,

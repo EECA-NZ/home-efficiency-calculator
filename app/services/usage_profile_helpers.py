@@ -7,6 +7,10 @@ from typing import Any, Tuple
 
 import numpy as np
 
+# Create one global zero array for re-use
+_GLOBAL_ZERO_8760 = np.zeros(8760, dtype=float)
+_GLOBAL_ZERO_8760.setflags(write=False)  # Make it read-only.
+
 
 def flat_allday_profile() -> np.ndarray:
     """
@@ -21,16 +25,17 @@ def flat_allday_profile() -> np.ndarray:
     return np.ones(8760, dtype=float) / 8760
 
 
-def zeros_8760() -> np.ndarray:
+def zeros_8760():
     """
-    Returns a zero-filled NumPy array with shape (8760,).
+    Just return a *reference* to the same global array:
+    a zero-filled NumPy array with shape (8760,).
 
     Returns
     -------
     np.ndarray
         A 1D array of shape (8760,) filled with zeros.
     """
-    return np.zeros(8760, dtype=float)
+    return _GLOBAL_ZERO_8760
 
 
 def ensure_8760_array(value: Any) -> np.ndarray:

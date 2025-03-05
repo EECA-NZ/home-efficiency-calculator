@@ -60,15 +60,18 @@ class DrivingAnswers(BaseModel):
         daily_distance_km = ASSUMED_DISTANCES_PER_WEEK[self.km_per_week] / 7
         yearly_distance_thousand_km = daily_distance_km * DAYS_IN_YEAR / 1000
 
-        liquid_fuel = None
+        # Figure out whether we have a petrol or diesel vehicle
+        # (including hybrid/plug-in hybrid),
+        # so that we can compute yearly fuel usage if needed.
         if vehicle_type in ["Petrol", "Hybrid", "Plug-in hybrid"]:
             liquid_fuel = "Petrol"
         elif vehicle_type == "Diesel":
             liquid_fuel = "Diesel"
-        elif vehicle_type != "Electric":
-            raise ValueError(f"Unknown vehicle type: {vehicle_type}")
+        else:
+            liquid_fuel = None  # e.g. pure Electric
 
-        if vehicle_type in ["Petrol", "Diesel", "Hybrid", "Plug-in hybrid"]:
+        # Calculate the litres of liquid fuel if needed
+        if liquid_fuel:
             litres_per_100km = FUEL_CONSUMPTION_LITRES_PER_100KM[vehicle_type][
                 self.vehicle_size
             ]
@@ -76,6 +79,7 @@ class DrivingAnswers(BaseModel):
         else:
             yearly_fuel_litres = 0
 
+        # Calculate the battery usage if needed (i.e. plug-in hybrid or pure electric)
         if vehicle_type in ["Plug-in hybrid", "Electric"]:
             kwh_per_100km = BATTERY_ECONOMY_KWH_PER_100KM[vehicle_type][
                 self.vehicle_size
@@ -83,18 +87,22 @@ class DrivingAnswers(BaseModel):
             yearly_battery_kwh = (yearly_distance_thousand_km * 10) * kwh_per_100km
             public_charging_kwh = yearly_battery_kwh * EV_PUBLIC_CHARGING_FRACTION
             home_charging_kwh = yearly_battery_kwh - public_charging_kwh
+
+            # Only build the 8760 charging profile here
+            charging_profile = self.ev_charging_profile()
+            home_charging_timeseries = ElectricityUsageTimeseries(
+                shift_able_uncontrolled_kwh=home_charging_kwh * charging_profile
+            )
         else:
+            # No battery usage
             yearly_battery_kwh = 0
             public_charging_kwh = 0
-            home_charging_kwh = 0
+            home_charging_timeseries = ElectricityUsageTimeseries()
 
-        anytime_kwh = ElectricityUsageTimeseries(
-            shift_able_uncontrolled_kwh=home_charging_kwh * self.ev_charging_profile()
-        )
-
+        # Finally, return the DrivingYearlyFuelUsageProfile.
         return DrivingYearlyFuelUsageProfile(
             elx_connection_days=DAYS_IN_YEAR,
-            electricity_kwh=anytime_kwh,
+            electricity_kwh=home_charging_timeseries,
             petrol_litres=yearly_fuel_litres if liquid_fuel == "Petrol" else 0,
             diesel_litres=yearly_fuel_litres if liquid_fuel == "Diesel" else 0,
             public_ev_charger_kwh=public_charging_kwh,
