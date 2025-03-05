@@ -2,18 +2,19 @@
 Module for generic helper functions.
 """
 
+import importlib.resources as pkg_resources
+
 import numpy as np
+import pandas as pd
 from pydantic import BaseModel
 
 from app.models.usage_profiles import (
     ElectricityUsageTimeseries,
     HouseholdOtherElectricityUsageTimeseries,
 )
-from app.services.usage_profile_helpers import flat_day_night_profiles
 
 from ..constants import (
     AVERAGE_AIR_TEMPERATURE_BY_CLIMATE_ZONE,
-    DAY_NIGHT_FRAC,
     DAYS_IN_YEAR,
     ELECTRIC_HOT_WATER_CYLINDER_LOSSES_55_DEGREE_DELTA_T_KWH_PER_DAY,
     ELECTRIC_HOT_WATER_CYLINDER_SIZES,
@@ -336,40 +337,27 @@ def heat_pump_cylinder_heat_loss_kwh_per_day(tank_size, delta_t=55):
 def other_electricity_energy_usage_profile():
     """
     Create an electricity usage profile for appliances not considered by the app.
-
-    Returns:
-    - A HouseholdOtherElectricityUsageTimeseries object.
+    This is used for determining the percentage of solar-generated electricity
+    that is consumed by the household.
     """
-    day_profile_renamed, night_profile_renamed = flat_day_night_profiles()
-    uncontrolled_fixed_kwh = (
-        DAYS_IN_YEAR
-        * (
-            OTHER_ELX_KWH_PER_DAY["Refrigeration"]["kWh/day"]
-            * DAY_NIGHT_FRAC["Refrigeration"]["Day"]
-            + OTHER_ELX_KWH_PER_DAY["Lighting"]["kWh/day"]
-            * DAY_NIGHT_FRAC["Lighting"]["Day"]
-            + OTHER_ELX_KWH_PER_DAY["Laundry"]["kWh/day"]
-            * DAY_NIGHT_FRAC["Laundry"]["Day"]
-            + OTHER_ELX_KWH_PER_DAY["Other"]["kWh/day"] * DAY_NIGHT_FRAC["Other"]["Day"]
-        )
-        * day_profile_renamed
+    total_annual_kwh = DAYS_IN_YEAR * (
+        OTHER_ELX_KWH_PER_DAY["Refrigeration"]["kWh/day"]
+        + OTHER_ELX_KWH_PER_DAY["Lighting"]["kWh/day"]
+        + OTHER_ELX_KWH_PER_DAY["Laundry"]["kWh/day"]
+        + OTHER_ELX_KWH_PER_DAY["Other"]["kWh/day"]
     )
-    uncontrolled_night_kwh = (
-        DAYS_IN_YEAR
-        * (
-            OTHER_ELX_KWH_PER_DAY["Refrigeration"]["kWh/day"]
-            * DAY_NIGHT_FRAC["Refrigeration"]["Night"]
-            + OTHER_ELX_KWH_PER_DAY["Lighting"]["kWh/day"]
-            * DAY_NIGHT_FRAC["Lighting"]["Night"]
-            + OTHER_ELX_KWH_PER_DAY["Laundry"]["kWh/day"]
-            * DAY_NIGHT_FRAC["Laundry"]["Night"]
-            + OTHER_ELX_KWH_PER_DAY["Other"]["kWh/day"]
-            * DAY_NIGHT_FRAC["Other"]["Night"]
-        )
-        * night_profile_renamed
+    other_electricity_energy_usage_csv = (
+        pkg_resources.files("data_analysis.supplementary_data.energy_usage_timeseries")
+        / "cook_it_light_other_white_tou_8760.csv"
     )
-    uncontrolled_profile_kwh = uncontrolled_fixed_kwh + uncontrolled_night_kwh
+    with other_electricity_energy_usage_csv.open("r", encoding="utf-8") as csv_file:
+        other_electricity_usage_df = pd.read_csv(csv_file, dtype=str)
+    value_col = "Power Cook IT Light Other White"
+    uncontrolled_fixed_kwh = other_electricity_usage_df[value_col].astype(float)
+    uncontrolled_fixed_kwh *= total_annual_kwh / uncontrolled_fixed_kwh.sum()
     return HouseholdOtherElectricityUsageTimeseries(
         elx_connection_days=DAYS_IN_YEAR,
-        fixed_kwh=ElectricityUsageTimeseries(uncontrolled=uncontrolled_profile_kwh),
+        electricity_kwh=ElectricityUsageTimeseries(
+            fixed_time_uncontrolled_kwh=np.array(uncontrolled_fixed_kwh)
+        ),
     )

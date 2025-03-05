@@ -30,7 +30,7 @@ def hourly_pmax(zone: str) -> pd.Series:
         If no matching CSV file is found.
     """
 
-    # Directory containing your CSV files:
+    # Directory containing generation CSV files:
     data_dir = pkg_resources.files(
         "data_analysis.supplementary_data.hourly_solar_generation_by_climate_zone"
     )
