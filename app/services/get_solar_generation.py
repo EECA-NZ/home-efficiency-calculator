@@ -7,8 +7,10 @@ import importlib.resources as pkg_resources
 
 import pandas as pd
 
+from .get_climate_zone import climate_zone
 
-def hourly_pmax(zone: str) -> pd.Series:
+
+def hourly_pmax(postcode: str) -> pd.Series:
     """
     Return the hourly timeseries for pmax for the given climate zone.
     The CSV is identified by searching the directory for a filename
@@ -16,8 +18,8 @@ def hourly_pmax(zone: str) -> pd.Series:
 
     Parameters
     ----------
-    zone : str
-        The climate zone name (e.g. 'Wellington' or 'Christchurch').
+    postcode : str
+        The postcode. This will be mapped to NIWA climate zone.
 
     Returns
     -------
@@ -35,6 +37,7 @@ def hourly_pmax(zone: str) -> pd.Series:
         "data_analysis.supplementary_data.hourly_solar_generation_by_climate_zone"
     )
 
+    zone = climate_zone(postcode).replace(" ", "_")
     zone_lower = zone.lower()
 
     for csv_file in data_dir.iterdir():

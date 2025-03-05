@@ -1,23 +1,30 @@
 """
 This script generates the lookup tables for the solar generation model.
 """
+# pylint: disable=no-member, too-many-locals
 
 import logging
 import os
 
 import pandas as pd
 
-# CooktopAnswers, HeatingAnswers, HotWaterAnswers,
-from app.models.user_answers import DrivingAnswers, YourHomeAnswers
-from app.services.get_climate_zone import postcode_dict
+from app.models.user_answers import (
+    DrivingAnswers,
+    HeatingAnswers,
+    HotWaterAnswers,
+    YourHomeAnswers,
+)
+from app.services.get_climate_zone import NIWA_TO_NZBC, postcode_dict
 from app.services.get_energy_plans import postcode_to_electricity_plan_dict
+from app.services.get_solar_generation import hourly_pmax
+from app.services.helpers import other_electricity_energy_usage_profile
 
-# Round numerical outputs to 3 decimal places.
-FLOAT_FORMAT = "%.3f"
+# Round numerical outputs
+FLOAT_FORMAT = "%.6f"
 
 # Constants for placeholders
+DEFAULT_POSTCODE = "6012"
 EXPORT_RATE = 0.12  # NZD per kWh for exported electricity
-ANNUAL_TOTAL_KWH_PLACEHOLDER = 9999.0
 TIMESERIES_SUM = 1000.0  # Sum of hour columns for each row
 
 # Constant for the lookup directory. Relative to the script location.
@@ -34,8 +41,14 @@ HOT_WATER_ELECTRIC = "Electric hot water cylinder"
 hot_water_heating_sources = [HOT_WATER_HEAT_PUMP, HOT_WATER_ELECTRIC]
 hot_water_usage_options = ["Low", "Average", "High"]
 people_in_house_options = [1, 2, 3, 4, 5, 6]
-climate_zones = list(set(postcode_dict.values()))
-climate_zones = [1, 2, 3, 4, 5, 6]
+niwa_climate_zones = list(set(postcode_dict.values()))
+branz_climate_zones = list(set(NIWA_TO_NZBC.values()))
+postcode_to_branz = {
+    postcode: NIWA_TO_NZBC[climate_zone]
+    for postcode, climate_zone in postcode_dict.items()
+}
+# use coarser branz climate zones to generate lookup tables to reduce size
+climate_zones = sorted(branz_climate_zones)
 
 HEATING_HEAT_PUMP = "Heat pump"
 HEATING_ELECTRIC = "Electric heater"
@@ -75,17 +88,32 @@ full_climate_zones_for_solar = [
 ]
 
 
-def hourly_values_summing_to_1000() -> dict:
+def representative_postcode_for_niwa_climate_zone(niwa_climate_zone):
     """
-    Returns a dict of hour columns (strings "1".."8760")
-    whose values sum to TIMESERIES_SUM (1000).
-    We'll do a uniform distribution: each hour = 1000 / 8760.
+    Get a representative postcode for a NIWA climate zone.
     """
-    hour_dict = {}
-    per_hour = TIMESERIES_SUM / 8760.0  # e.g. ~0.114155
-    for hour in range(1, 8761):
-        hour_dict[str(hour)] = per_hour
-    return hour_dict
+    for postcode, zone in postcode_dict.items():
+        if zone == niwa_climate_zone:
+            return postcode
+    raise ValueError(f"Could not find postcode for climate zone {niwa_climate_zone}")
+
+
+def representative_postcode_for_climate_zone(branz_climate_zone):
+    """
+    Get a representative postcode for a climate zone.
+    """
+    for postcode, zone in postcode_to_branz.items():
+        if zone == branz_climate_zone:
+            return postcode
+    raise ValueError(f"Could not find postcode for climate zone {branz_climate_zone}")
+
+
+def convert_np_array_to_dict(np_array):
+    """
+    Convert a numpy array (length 8760) to a dictionary
+    with string keys ("0".."8759").
+    """
+    return {str(i): np_array[i] for i in range(len(np_array))}
 
 
 # ----------------------------------------------------------------------
@@ -109,21 +137,28 @@ def generate_vehicle_solar_lookup_table(output_dir="."):
                 energy = driving.energy_usage_pattern(
                     YourHomeAnswers(
                         people_in_house=3,
-                        postcode="6012",
+                        postcode=DEFAULT_POSTCODE,
                         disconnect_gas=True,
                     ),
                     use_alternative=False,
                 )
-                _ = energy
+                total_kwh = energy.electricity_kwh.total_usage.sum()
+
+                if total_kwh > 0:
+                    profile = (
+                        TIMESERIES_SUM / total_kwh
+                    ) * energy.electricity_kwh.total_usage
+                    profile_dict = convert_np_array_to_dict(profile)
+                else:
+                    raise ValueError("Total kWh should be positive")
+
                 row = {
                     "vehicle_type": vt,
                     "vehicle_size": size,
                     "km_per_week": km,
-                    # Place a placeholder for the annual total kWh
-                    "annual_total_kwh": ANNUAL_TOTAL_KWH_PLACEHOLDER,
+                    "annual_total_kwh": total_kwh,
                 }
-                # Add the 8760-hour shape that sums to 1000
-                row.update(hourly_values_summing_to_1000())
+                row.update(profile_dict)
                 rows.append(row)
 
     df = pd.DataFrame(rows)
@@ -144,17 +179,38 @@ def generate_hot_water_solar_lookup_table(output_dir="."):
     """
     rows = []
     for cz in climate_zones:
+        postcode = representative_postcode_for_climate_zone(cz)
         for p in people_in_house_options:
             for usage in hot_water_usage_options:
                 for hw_source in hot_water_heating_sources:
+                    hot_water = HotWaterAnswers(
+                        hot_water_usage=usage,
+                        hot_water_heating_source=hw_source,
+                    )
+                    your_home = YourHomeAnswers(
+                        people_in_house=p,
+                        postcode=postcode,
+                        disconnect_gas=True,
+                    )
+                    energy = hot_water.energy_usage_pattern(your_home)
+                    total_kwh = energy.electricity_kwh.total_usage.sum()
+
+                    if total_kwh > 0:
+                        profile = (
+                            TIMESERIES_SUM / total_kwh
+                        ) * energy.electricity_kwh.total_usage
+                        profile_dict = convert_np_array_to_dict(profile)
+                    else:
+                        raise ValueError("Total kWh should be positive")
+
                     row = {
                         "climate_zone": cz,
                         "people_in_house": p,
                         "hot_water_usage": usage,
                         "hot_water_heating_source": hw_source,
-                        "annual_total_kwh": ANNUAL_TOTAL_KWH_PLACEHOLDER,
+                        "annual_total_kwh": total_kwh,
                     }
-                    row.update(hourly_values_summing_to_1000())
+                    row.update(profile_dict)
                     rows.append(row)
 
     df = pd.DataFrame(rows)
@@ -175,17 +231,40 @@ def generate_space_heating_solar_lookup_table(output_dir="."):
     """
     rows = []
     for cz in climate_zones:
+        postcode = representative_postcode_for_climate_zone(cz)
         for main_source in main_heating_sources:
             for heat_day in heating_during_day_options:
                 for ins_quality in insulation_quality_options:
+                    heating = HeatingAnswers(
+                        main_heating_source=main_source,
+                        heating_during_day=heat_day,
+                        insulation_quality=ins_quality,
+                    )
+                    heating_energy_use = heating.energy_usage_pattern(
+                        YourHomeAnswers(
+                            people_in_house=3,
+                            postcode=postcode,
+                            disconnect_gas=True,
+                        )
+                    )
+                    total_kwh = heating_energy_use.electricity_kwh.total_usage.sum()
+
+                    if total_kwh > 0:
+                        profile = (
+                            TIMESERIES_SUM / total_kwh
+                        ) * heating_energy_use.electricity_kwh.total_usage
+                        profile_dict = convert_np_array_to_dict(profile)
+                    else:
+                        raise ValueError("Total kWh should be positive")
+
                     row = {
                         "climate_zone": cz,
                         "main_heating_source": main_source,
                         "heating_during_day": heat_day,
                         "insulation_quality": ins_quality,
-                        "annual_total_kwh": ANNUAL_TOTAL_KWH_PLACEHOLDER,
+                        "annual_total_kwh": total_kwh,
                     }
-                    row.update(hourly_values_summing_to_1000())
+                    row.update(profile_dict)
                     rows.append(row)
 
     df = pd.DataFrame(rows)
@@ -205,12 +284,17 @@ def generate_solar_generation_lookup_table(output_dir="."):
     One row per climate zone; 18 zones.
     """
     rows = []
-    for zone in full_climate_zones_for_solar:
+    for cz in full_climate_zones_for_solar:
+        postcode = representative_postcode_for_niwa_climate_zone(cz)
+        hourly_pmax_values = hourly_pmax(postcode)
+        total_kwh = sum(hourly_pmax_values)
+        profile = (TIMESERIES_SUM / total_kwh) * hourly_pmax_values
+        profile_dict = convert_np_array_to_dict(profile)
         row = {
-            "climate_zone": zone,
-            "annual_total_kwh": ANNUAL_TOTAL_KWH_PLACEHOLDER,
+            "climate_zone": cz,
+            "annual_total_kwh": total_kwh,
         }
-        row.update(hourly_values_summing_to_1000())
+        row.update(profile_dict)
         rows.append(row)
 
     df = pd.DataFrame(rows)
@@ -229,8 +313,14 @@ def generate_other_electricity_usage_lookup_table(output_dir="."):
       plus 8760 hourly columns (1..8760) summing to 1000.
     This table has just one row (other usage).
     """
-    row = {"annual_total_kwh": ANNUAL_TOTAL_KWH_PLACEHOLDER}
-    row.update(hourly_values_summing_to_1000())
+    other_electricity_usage = other_electricity_energy_usage_profile()
+    total_kwh = other_electricity_usage.electricity_kwh.total_usage.sum()
+    profile = (
+        TIMESERIES_SUM / total_kwh
+    ) * other_electricity_usage.electricity_kwh.total_usage
+    profile_dict = convert_np_array_to_dict(profile)
+    row = {"annual_total_kwh": total_kwh}
+    row.update(profile_dict)
 
     df = pd.DataFrame([row])
     out_path = os.path.join(
@@ -251,7 +341,7 @@ def generate_electricity_plans_lookup_table(output_dir="."):
     (The last column is a constant 0.1072 for all plans.)
     """
     df = transform_plans_to_dataframe()
-    out_path = os.path.join(output_dir, "electricity_plans_lookup_table.csv")
+    out_path = os.path.join(output_dir, "solar_electricity_plans_lookup_table.csv")
     df.to_csv(out_path, float_format=FLOAT_FORMAT, index=False)
     logging.info("Wrote %s rows to %s", len(df), out_path)
 
@@ -260,7 +350,7 @@ def transform_plans_to_dataframe():
     """
     Build a DataFrame of electricity plans with columns:
       electricity_plan_name, fixed_rate, import_rates_day, import_rates_night,
-      kg_co2e_per_kwh (all 0.1072).
+      import_rates_export, kg_co2e_per_kwh.
     """
     modified_plans = {}
     for plan in postcode_to_electricity_plan_dict.values():
@@ -268,13 +358,18 @@ def transform_plans_to_dataframe():
         rate_dict = plan.import_rates
         fixed_rate = plan.fixed_rate
 
-        if "All inclusive" in rate_dict:
+        if rate_dict.keys() == {"All inclusive"}:
             all_val = rate_dict["All inclusive"]
             day_rate = all_val
             night_rate = all_val
-        else:
+        elif rate_dict.keys() == {"Uncontrolled"}:
+            day_rate = rate_dict["Uncontrolled"]
+            night_rate = rate_dict["Uncontrolled"]
+        elif rate_dict.keys() == {"Day", "Night"}:
             day_rate = rate_dict.get("Day", None)
             night_rate = rate_dict.get("Night", None)
+        else:
+            raise ValueError("Unexpected rate_dict keys")
 
         modified_plans[plan_name] = {
             "fixed_rate": fixed_rate,
