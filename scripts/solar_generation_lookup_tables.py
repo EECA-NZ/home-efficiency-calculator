@@ -1,6 +1,7 @@
 """
 This script generates the lookup tables for the solar generation model.
 """
+
 # pylint: disable=no-member, too-many-locals
 
 import logging
@@ -12,6 +13,7 @@ from app.models.user_answers import (
     DrivingAnswers,
     HeatingAnswers,
     HotWaterAnswers,
+    SolarAnswers,
     YourHomeAnswers,
 )
 from app.services.get_climate_zone import NIWA_TO_NZBC, postcode_dict
@@ -26,6 +28,7 @@ FLOAT_FORMAT = "%.6f"
 DEFAULT_POSTCODE = "6012"
 EXPORT_RATE = 0.12  # NZD per kWh for exported electricity
 TIMESERIES_SUM = 1000.0  # Sum of hour columns for each row
+NO_SOLAR = SolarAnswers(hasSolar=False)
 
 # Constant for the lookup directory. Relative to the script location.
 LOOKUP_DIR = os.path.join(os.path.dirname(__file__), "..", "lookup")
@@ -140,6 +143,7 @@ def generate_vehicle_solar_lookup_table(output_dir="."):
                         postcode=DEFAULT_POSTCODE,
                         disconnect_gas=True,
                     ),
+                    solar=NO_SOLAR,
                     use_alternative=False,
                 )
                 total_kwh = energy.electricity_kwh.total_usage.sum()
@@ -165,6 +169,7 @@ def generate_vehicle_solar_lookup_table(output_dir="."):
     out_path = os.path.join(output_dir, "solar_vehicle_lookup_table.csv")
     df.to_csv(out_path, float_format=FLOAT_FORMAT, index=False)
     logging.info("Wrote %s rows to %s", len(df), out_path)
+    return df
 
 
 # ----------------------------------------------------------------------
@@ -174,8 +179,7 @@ def generate_hot_water_solar_lookup_table(output_dir="."):
     """
     Creates solar_hot_water_lookup_table.csv with columns:
       climate_zone, people_in_house, hot_water_usage, hot_water_heating_source,
-      annual_total_kwh,
-      plus 8760 hourly columns (1..8760) summing to 1000.
+      annual_total_kwh, plus 8760 hourly columns (1..8760) summing to 1000.
     """
     rows = []
     for cz in climate_zones:
@@ -192,7 +196,7 @@ def generate_hot_water_solar_lookup_table(output_dir="."):
                         postcode=postcode,
                         disconnect_gas=True,
                     )
-                    energy = hot_water.energy_usage_pattern(your_home)
+                    energy = hot_water.energy_usage_pattern(your_home, NO_SOLAR)
                     total_kwh = energy.electricity_kwh.total_usage.sum()
 
                     if total_kwh > 0:
@@ -217,6 +221,7 @@ def generate_hot_water_solar_lookup_table(output_dir="."):
     out_path = os.path.join(output_dir, "solar_hot_water_lookup_table.csv")
     df.to_csv(out_path, float_format=FLOAT_FORMAT, index=False)
     logging.info("Wrote %s rows to %s", len(df), out_path)
+    return df
 
 
 # ----------------------------------------------------------------------
@@ -226,8 +231,7 @@ def generate_space_heating_solar_lookup_table(output_dir="."):
     """
     Creates solar_space_heating_lookup_table.csv with columns:
       climate_zone, main_heating_source, heating_during_day, insulation_quality,
-      annual_total_kwh,
-      plus 8760 hourly columns (1..8760) summing to 1000.
+      annual_total_kwh, plus 8760 hourly columns (1..8760) summing to 1000.
     """
     rows = []
     for cz in climate_zones:
@@ -245,7 +249,8 @@ def generate_space_heating_solar_lookup_table(output_dir="."):
                             people_in_house=3,
                             postcode=postcode,
                             disconnect_gas=True,
-                        )
+                        ),
+                        solar=NO_SOLAR,
                     )
                     total_kwh = heating_energy_use.electricity_kwh.total_usage.sum()
 
@@ -271,6 +276,7 @@ def generate_space_heating_solar_lookup_table(output_dir="."):
     out_path = os.path.join(output_dir, "solar_space_heating_lookup_table.csv")
     df.to_csv(out_path, float_format=FLOAT_FORMAT, index=False)
     logging.info("Wrote %s rows to %s", len(df), out_path)
+    return df
 
 
 # ----------------------------------------------------------------------
@@ -279,8 +285,7 @@ def generate_space_heating_solar_lookup_table(output_dir="."):
 def generate_solar_generation_lookup_table(output_dir="."):
     """
     Creates solar_generation_lookup_table.csv with columns:
-      climate_zone, annual_total_kwh,
-      plus 8760 columns (1..8760) whose sum = 1000.
+      climate_zone, annual_total_kwh, plus 8760 columns (1..8760) whose sum = 1000.
     One row per climate zone; 18 zones.
     """
     rows = []
@@ -301,6 +306,7 @@ def generate_solar_generation_lookup_table(output_dir="."):
     out_path = os.path.join(output_dir, "solar_generation_lookup_table.csv")
     df.to_csv(out_path, float_format=FLOAT_FORMAT, index=False)
     logging.info("Wrote %s rows to %s", len(df), out_path)
+    return df
 
 
 # ----------------------------------------------------------------------
@@ -309,8 +315,7 @@ def generate_solar_generation_lookup_table(output_dir="."):
 def generate_other_electricity_usage_lookup_table(output_dir="."):
     """
     Creates solar_other_electricity_usage_lookup_table.csv with:
-      annual_total_kwh,
-      plus 8760 hourly columns (1..8760) summing to 1000.
+      annual_total_kwh, plus 8760 hourly columns (1..8760) summing to 1000.
     This table has just one row (other usage).
     """
     other_electricity_usage = other_electricity_energy_usage_profile()
@@ -328,6 +333,7 @@ def generate_other_electricity_usage_lookup_table(output_dir="."):
     )
     df.to_csv(out_path, float_format=FLOAT_FORMAT, index=False)
     logging.info("Wrote 1 row to %s", out_path)
+    return df
 
 
 # ----------------------------------------------------------------------
@@ -337,13 +343,13 @@ def generate_electricity_plans_lookup_table(output_dir="."):
     """
     Creates electricity_plans_lookup_table.csv with columns:
       electricity_plan_name, fixed_rate, import_rates_day, import_rates_night,
-      kg_co2e_per_kwh
-    (The last column is a constant 0.1072 for all plans.)
+      kg_co2e_per_kwh (The last column is a constant 0.1072 for all plans.)
     """
     df = transform_plans_to_dataframe()
     out_path = os.path.join(output_dir, "solar_electricity_plans_lookup_table.csv")
     df.to_csv(out_path, float_format=FLOAT_FORMAT, index=False)
     logging.info("Wrote %s rows to %s", len(df), out_path)
+    return df
 
 
 def transform_plans_to_dataframe():
@@ -404,13 +410,29 @@ def main():
     os.makedirs(LOOKUP_DIR, exist_ok=True)
 
     # Generate each lookup table
-    generate_vehicle_solar_lookup_table(LOOKUP_DIR)
-    generate_hot_water_solar_lookup_table(LOOKUP_DIR)
-    generate_space_heating_solar_lookup_table(LOOKUP_DIR)
-    generate_other_electricity_usage_lookup_table(LOOKUP_DIR)
-    generate_solar_generation_lookup_table(LOOKUP_DIR)
-    generate_electricity_plans_lookup_table(LOOKUP_DIR)
+    vehicle_df = generate_vehicle_solar_lookup_table(LOOKUP_DIR)
+    hot_water_df = generate_hot_water_solar_lookup_table(LOOKUP_DIR)
+    space_heating_df = generate_space_heating_solar_lookup_table(LOOKUP_DIR)
+    other_electricity_df = generate_other_electricity_usage_lookup_table(LOOKUP_DIR)
+    solar_generation_df = generate_solar_generation_lookup_table(LOOKUP_DIR)
+    electricity_plans_df = generate_electricity_plans_lookup_table(LOOKUP_DIR)
+
+    return (
+        vehicle_df,
+        hot_water_df,
+        space_heating_df,
+        other_electricity_df,
+        solar_generation_df,
+        electricity_plans_df,
+    )
 
 
 if __name__ == "__main__":
-    main()
+    (
+        my_vehicle,
+        my_hot_water,
+        my_space_heating,
+        my_other_electricity,
+        my_solar_generation,
+        my_electricity_plans,
+    ) = main()

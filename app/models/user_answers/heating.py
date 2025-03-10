@@ -73,7 +73,7 @@ class HeatingAnswers(BaseModel):
         return day_profile
 
     def energy_usage_pattern(
-        self, your_home, use_alternative: bool = False
+        self, your_home, solar, use_alternative: bool = False
     ) -> HeatingYearlyFuelUsageProfile:
         """
         Return the yearly fuel usage profile for space heating.
@@ -90,6 +90,11 @@ class HeatingAnswers(BaseModel):
         HeatingYearlyFuelUsageProfile
             The yearly fuel usage profile for space heating.
         """
+        # solar is currently unused here but required for signature
+        # compatibility with other components, which are assumed
+        # to alter their electricity consumption patterns based
+        # on presence or absence of solar.
+        _ = solar
         main_heating_source = (
             self.alternative_main_heating_source
             if use_alternative

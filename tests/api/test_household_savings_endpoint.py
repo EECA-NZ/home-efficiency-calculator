@@ -114,7 +114,6 @@ def test_complete_household_energy_profile():
     }
 
     response = client.post("/household-energy-profile/", json=profile_data)
-    print(response.json())
     assert response.status_code == 200
     response_data = response.json()
 

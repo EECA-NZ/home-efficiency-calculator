@@ -5,19 +5,45 @@ Hot water heating profile calculation.
 import numpy as np
 import pandas as pd
 
-from app.services.get_temperatures import hourly_ta
+from ...services.get_temperatures import hourly_ta
+from .general import flat_day_night_profiles
 
 
-def hot_water_electricity_by_day(region: str, annual_kwh: float) -> pd.Series:
+def carnot_cop(temp_hot: float, temp_cold: float) -> float:
+    """
+    Compute the Carnot Coefficient of Performance
+    (COP) for a heat pump. Used to estimate the
+    relative efficiency of a heat pump across the
+    year based on the temperature of the hot and
+    cold reservoirs, so as to distribute total
+    annual energy demand across days.
+
+    Parameters
+    ----------
+    temp_hot : float
+        The temperature of the hot reservoir in Celsius.
+    temp_cold : float
+        The temperature of the cold reservoir in Celsius.
+
+    Returns
+    -------
+    float
+        The Carnot efficiency of a heat pump delivering heat
+        at `temp_hot` and accepting heat at `temp_cold`.
+    """
+    return (temp_hot + 273.15) / (temp_hot - temp_cold)
+
+
+def hot_water_electricity_by_day(postcode: str, annual_kwh: float) -> pd.Series:
     """
     Distribute the annual hot water energy (kWh) across 365 days,
     weighting each day by a load factor based on the ambient temperature.
 
     The load factor is (65 - t_roll), where t_roll is a 30-day rolling average
-    of daily ambient temperature (niwaTA). If t_roll > 65, the factor is 0.
+    of daily ambient temperature.
     """
-    temp_df = hourly_ta(region)
-    daily_temp = temp_df["niwaTA"].resample("D").mean()
+    temp_df = hourly_ta(postcode)
+    daily_temp = temp_df.resample("D").mean()
     t_roll = daily_temp.rolling(window=30, min_periods=1).mean()
     target = 65.0
     load_factor = (target - t_roll).clip(lower=0)
@@ -133,7 +159,7 @@ def normalized_water_heating_profile(
 
 
 def hot_water_heating_profile(
-    region: str,
+    postcode: str,
     annual_kwh: float,
     heater_kw: float,
     desired_day_fraction: float = 0.80,
@@ -147,7 +173,7 @@ def hot_water_heating_profile(
       3. Determine nighttime heating for the residual, up to 3 hours.
       4. Combine into an hourly series via normalized_water_heating_profile().
     """
-    daily_energy = hot_water_electricity_by_day(region, annual_kwh)
+    daily_energy = hot_water_electricity_by_day(postcode, annual_kwh)
     day_hours, delivered_day_energy = daytime_water_heating_duration(
         daily_energy, heater_kw, desired_day_fraction, max_day_hours=5
     )
@@ -157,3 +183,69 @@ def hot_water_heating_profile(
     return normalized_water_heating_profile(
         day_hours, night_hours, delivered_day_energy, delivered_night_energy
     )
+
+
+def solar_friendly_hot_water_electricity_usage_timeseries(
+    postcode: str,
+    heat_demand_kwh_per_year: float,
+    heater_input_kw: float,
+    hot_water_heating_source,
+) -> np.ndarray:
+    """
+    Create a solar friendly electricity usage profile for hot water heating.
+    The resulting array is normalized so that its sum is 1.
+
+    Returns
+    -------
+    np.ndarray
+        A 1D array of shape (8760,) where each element is 1/8760.
+    Placeholder for a more realistic profile.
+    """
+    # Behaviour to implement here:
+    # hot water heating starts at 10am. It goes until
+    # 1pm or until the hot water demand is met.
+    # if it is not met, it continues from 9pm to 12am.
+    # A constant water heating power is assumed,
+    # and a rolling average temperature lift to 65
+    # degrees is used to estimate the heating demand.
+
+    # temps = hourly_ta(postcode)
+    # carnot_cop(65, temps)
+    # Heat pump energy demand is proportional to
+    # (65 - t) / carnot_cop(65, t)
+    # Resistive heating energy demand is proportional to
+    # (65 - t)
+    # Produce a timeseries of 365 daily energy demands
+    # (total demand distributed across days)
+    # Determine the duration required for daytime heating
+    # (up to 5 hours)
+    # Determine the duration required for nighttime heating
+    # to make up the difference (up to 12 hours)
+    # Construct an hourly profile of heating energy demand,
+    # normalized to sum to 1000
+
+    _ = postcode, heat_demand_kwh_per_year, heater_input_kw, hot_water_heating_source
+    day_profile, _ = flat_day_night_profiles()
+    return day_profile
+
+
+def default_hot_water_electricity_usage_timeseries() -> np.ndarray:
+    """
+    Create a default electricity usage profile for hot water heating,
+    for use in the absence of solar panels.
+
+    The resulting array is normalized so that its sum is 1.
+
+    The returned profile is constant daytime usage. Because some
+    usage will be put in a time-shiftable bucket by the calling
+    function, it will end up being shifted to the night when costs
+    are calculated, if the electricity plan has night rates.
+
+    Returns
+    -------
+    np.ndarray
+        A 1D array of shape (8760,) where each element is 1/8760.
+    Placeholder for a more realistic profile.
+    """
+    day_profile, _ = flat_day_night_profiles()
+    return day_profile

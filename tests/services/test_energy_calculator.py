@@ -63,11 +63,12 @@ def test_estimate_usage_from_profile_with_solar():
     """
     energy_usage = estimate_usage_from_profile(household_profile_with_solar)
     assert energy_usage.elx_connection_days == DAYS_IN_YEAR
+    assert energy_usage.electricity_kwh.total_usage.sum() == approx(4889.778593)
     assert energy_usage.electricity_kwh.total_shift_able_usage.sum() == approx(
-        3618.6299
+        1560.819618
     )
     assert energy_usage.electricity_kwh.total_fixed_time_usage.sum() == approx(
-        1271.1487
+        3328.958975
     )
     assert energy_usage.solar_generation_kwh.fixed_time_generation_kwh.sum() == approx(
         6779.137958

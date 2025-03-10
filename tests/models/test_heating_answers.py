@@ -39,7 +39,9 @@ def test_space_heating_energy_usage():
             insulation_quality="Moderately insulated",
         )
         # determine energy usage pattern
-        heating_energy_use = heating.energy_usage_pattern(profile["your_home"])
+        heating_energy_use = heating.energy_usage_pattern(
+            profile["your_home"], profile["solar"]
+        )
 
         # calculate costs by fuel
         _, heating_electricity_variable_cost = plans["electricity_plan"].calculate_cost(

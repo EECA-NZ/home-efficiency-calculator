@@ -2,6 +2,8 @@
 Class for storing user answers on household driving.
 """
 
+# pylint: disable=too-many-locals
+
 from typing import Literal, Optional
 
 from pydantic import BaseModel
@@ -47,7 +49,7 @@ class DrivingAnswers(BaseModel):
 
     # pylint: disable=unused-argument
     def energy_usage_pattern(
-        self, your_home, use_alternative: bool = False
+        self, your_home, solar, use_alternative: bool = False
     ) -> DrivingYearlyFuelUsageProfile:
         """
         Return the yearly fuel usage profile for driving.

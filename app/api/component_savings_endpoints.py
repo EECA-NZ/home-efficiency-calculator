@@ -20,6 +20,7 @@ from ..models.user_answers import (
     DrivingAnswers,
     HeatingAnswers,
     HotWaterAnswers,
+    SolarAnswers,
     YourHomeAnswers,
 )
 from ..services.cost_calculator import generate_savings_options
@@ -35,7 +36,10 @@ app = FastAPI()
 
 # pylint: disable=broad-exception-caught
 async def calculate_component_savings(
-    component_answers: Type, component_name: str, your_home: YourHomeAnswers
+    component_answers: Type,
+    component_name: str,
+    your_home: YourHomeAnswers,
+    solar: SolarAnswers,
 ):
     """
     Calculate the savings for a given component.
@@ -58,9 +62,9 @@ async def calculate_component_savings(
     """
     try:
         options_dict, current_fuel_use = generate_savings_options(
-            component_answers, component_name, your_home
+            component_answers, component_name, your_home, solar
         )
-        current_fuel_use = component_answers.energy_usage_pattern(your_home)
+        current_fuel_use = component_answers.energy_usage_pattern(your_home, solar)
         current_fuel_use_report = YearlyFuelUsageReport(
             current_fuel_use, decimal_places=2
         )
@@ -75,7 +79,7 @@ async def calculate_component_savings(
                 if key == specific_alternative
             }
             alternative_fuel_use = component_answers.energy_usage_pattern(
-                your_home, use_alternative=True
+                your_home, solar, use_alternative=True
             )
             alternative_fuel_use_report = YearlyFuelUsageReport(
                 alternative_fuel_use, decimal_places=2
@@ -159,8 +163,9 @@ async def heating_savings(heating_answers: HeatingAnswers, your_home: YourHomeAn
     SavingsResponse
         The savings for the heating component.
     """
+    solar = SolarAnswers(hasSolar=False)
     data = await calculate_component_savings(
-        heating_answers, "main_heating_source", your_home
+        heating_answers, "main_heating_source", your_home, solar
     )
     return await create_response(data, "heating")
 
@@ -191,8 +196,9 @@ async def hot_water_savings(
     SavingsResponse
         The savings for the hot water component.
     """
+    solar = SolarAnswers(hasSolar=False)
     data = await calculate_component_savings(
-        hot_water_answers, "hot_water_heating_source", your_home
+        hot_water_answers, "hot_water_heating_source", your_home, solar
     )
     return await create_response(data, "hot_water")
 
@@ -220,7 +226,10 @@ async def cooktop_savings(cooktop_answers: CooktopAnswers, your_home: YourHomeAn
     SavingsResponse
         The savings for the cooktop component.
     """
-    data = await calculate_component_savings(cooktop_answers, "cooktop", your_home)
+    solar = SolarAnswers(hasSolar=False)
+    data = await calculate_component_savings(
+        cooktop_answers, "cooktop", your_home, solar
+    )
     return await create_response(data, "cooktop")
 
 
@@ -247,5 +256,8 @@ async def driving_savings(driving_answers: DrivingAnswers, your_home: YourHomeAn
     SavingsResponse
         The savings for the driving component.
     """
-    data = await calculate_component_savings(driving_answers, "vehicle_type", your_home)
+    solar = SolarAnswers(hasSolar=False)
+    data = await calculate_component_savings(
+        driving_answers, "vehicle_type", your_home, solar
+    )
     return await create_response(data, "driving")

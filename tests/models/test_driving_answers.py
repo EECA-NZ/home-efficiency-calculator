@@ -15,7 +15,7 @@ from app.constants import (
 )
 from app.models.energy_plans import HouseholdEnergyPlan
 from app.models.usage_profiles import ElectricityUsageTimeseries, YearlyFuelUsageProfile
-from app.models.user_answers import DrivingAnswers, YourHomeAnswers
+from app.models.user_answers import DrivingAnswers, SolarAnswers, YourHomeAnswers
 from app.services.cost_calculator import calculate_savings_for_option
 from app.services.get_energy_plans import postcode_to_electricity_plan
 from app.services.usage_profile_helpers import flat_day_night_profiles
@@ -36,6 +36,8 @@ DRIVING = DrivingAnswers(
     vehicle_type="Petrol",
 )
 
+SOLAR = SolarAnswers(hasSolar=False)
+
 
 def test_small_electric_car():
     """
@@ -44,7 +46,7 @@ def test_small_electric_car():
     my_driving_answers = DrivingAnswers(
         vehicle_type="Electric", vehicle_size="Small", km_per_week="200"
     )
-    my_driving_energy_usage = my_driving_answers.energy_usage_pattern(YOUR_HOME)
+    my_driving_energy_usage = my_driving_answers.energy_usage_pattern(YOUR_HOME, SOLAR)
     assert (
         my_driving_energy_usage.electricity_kwh.shift_able_uncontrolled_kwh.sum()
         + my_driving_energy_usage.public_ev_charger_kwh
@@ -182,7 +184,7 @@ def test_savings_calculations():
         )
     )
     calculated_savings = calculate_savings_for_option(
-        "Electric", "vehicle_type", DRIVING, YOUR_HOME
+        "Electric", "vehicle_type", DRIVING, YOUR_HOME, SOLAR
     )
 
     assert petrol_energy_costs[1] == approx(

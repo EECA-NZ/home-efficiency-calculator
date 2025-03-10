@@ -6,7 +6,11 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel
 
-from ...constants import DAYS_IN_YEAR, HOT_WATER_FLEXIBLE_KWH_FRACTION
+from ...constants import (
+    DAYS_IN_YEAR,
+    HOT_WATER_FLEXIBLE_KWH_FRACTION,
+    HOT_WATER_POWER_INPUT_KW,
+)
 from ...services import get_climate_zone
 from ...services.helpers import (
     hot_water_heating_efficiency,
@@ -14,8 +18,16 @@ from ...services.helpers import (
     shower_kwh_per_year,
     standing_loss_kwh_per_year,
 )
-from ...services.usage_profile_helpers import flat_day_night_profiles
+from ...services.usage_profile_helpers.hot_water import (
+    default_hot_water_electricity_usage_timeseries,
+    solar_friendly_hot_water_electricity_usage_timeseries,
+)
 from ..usage_profiles import ElectricityUsageTimeseries, HotWaterYearlyFuelUsageProfile
+
+ELECTRIC_SYSTEMS = [
+    "Electric hot water cylinder",
+    "Hot water heat pump",
+]
 
 
 class HotWaterAnswers(BaseModel):
@@ -41,26 +53,8 @@ class HotWaterAnswers(BaseModel):
         ]
     ] = None
 
-    def hot_water_hourly_usage_profile(
-        self,
-    ):
-        """
-        Create a default electricity usage profile for hot water heating.
-        The resulting array is normalized so that its sum is 1.
-
-        Returns
-        -------
-        np.ndarray
-            A 1D array of shape (8760,) where each element is 1/8760.
-        Placeholder for a more realistic profile.
-        """
-        # anytime_kwh can be shifted to daytime for solar self-consumption
-        # or to nighttime for cheaper electricity rates
-        day_profile, _ = flat_day_night_profiles()
-        return day_profile
-
     def energy_usage_pattern(
-        self, your_home, use_alternative: bool = False
+        self, your_home, solar, use_alternative: bool = False
     ) -> HotWaterYearlyFuelUsageProfile:
         """
         Return the yearly fuel usage profile for hot water heating.
@@ -104,18 +98,31 @@ class HotWaterAnswers(BaseModel):
         total_kwh = heat_demand_kwh_per_year / efficiency_factor
 
         # Build the usage profile only for electric systems
-        if hot_water_heating_source in [
-            "Electric hot water cylinder",
-            "Hot water heat pump",
-        ]:
-            anytime_kwh = total_kwh * HOT_WATER_FLEXIBLE_KWH_FRACTION
-            fixed_kwh = total_kwh - anytime_kwh
-
-            hourly_profile = self.hot_water_hourly_usage_profile()
-            electricity_kwh = ElectricityUsageTimeseries(
-                fixed_time_controllable_kwh=fixed_kwh * hourly_profile,
-                shift_able_controllable_kwh=anytime_kwh * hourly_profile,
-            )
+        if hot_water_heating_source in ELECTRIC_SYSTEMS:
+            if solar.hasSolar:
+                # --- Electric systems with solar PV ---
+                synthetic_hourly_profile = (
+                    solar_friendly_hot_water_electricity_usage_timeseries(
+                        your_home.postcode,
+                        heat_demand_kwh_per_year,
+                        HOT_WATER_POWER_INPUT_KW,
+                        hot_water_heating_source,
+                    )
+                )
+                electricity_kwh = ElectricityUsageTimeseries(
+                    fixed_time_uncontrolled_kwh=total_kwh * synthetic_hourly_profile,
+                )
+            else:
+                # --- Electric systems without solar PV ---
+                anytime_kwh = total_kwh * HOT_WATER_FLEXIBLE_KWH_FRACTION
+                fixed_kwh = total_kwh - anytime_kwh
+                synthetic_hourly_profile = (
+                    default_hot_water_electricity_usage_timeseries()
+                )
+                electricity_kwh = ElectricityUsageTimeseries(
+                    fixed_time_uncontrolled_kwh=fixed_kwh * synthetic_hourly_profile,
+                    shift_able_uncontrolled_kwh=anytime_kwh * synthetic_hourly_profile,
+                )
 
             return HotWaterYearlyFuelUsageProfile(
                 elx_connection_days=DAYS_IN_YEAR,

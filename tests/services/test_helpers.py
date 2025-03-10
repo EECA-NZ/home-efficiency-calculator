@@ -11,6 +11,7 @@ from app.models.usage_profiles import (
     ElectricityUsageTimeseries,
     HouseholdOtherElectricityUsageTimeseries,
 )
+from app.models.user_answers import SolarAnswers
 from app.services.configuration import get_default_electricity_plan
 from app.services.helpers import (
     add_gst,
@@ -19,6 +20,7 @@ from app.services.helpers import (
     shower_kwh_per_year,
     standing_loss_kwh_per_year,
 )
+from app.services.solar_helpers import get_solar_answers
 
 
 def test_add_gst():
@@ -217,3 +219,39 @@ def test_other_electricity_energy_usage_profile_2():
     assert actual_annual_kwh == approx(
         expected_annual_kwh, rel=1e-5
     ), f"Expected ~{expected_annual_kwh:.2f} kWh, got {actual_annual_kwh:.2f} kWh"
+
+
+def test_get_solar_answers_with_value():
+    """
+    Test get_solar_answers with a value.
+    """
+
+    # pylint: disable=too-few-public-methods
+    class DummyAnswers:
+        """
+        Dummy class to test get_solar_answers.
+        """
+
+        solar = SolarAnswers(hasSolar=True)
+
+    dummy = DummyAnswers()
+    solar_instance = get_solar_answers(dummy)
+    assert solar_instance.hasSolar is True
+
+
+def test_get_solar_answers_without_value():
+    """
+    Test get_solar_answers with no value.
+    """
+
+    # pylint: disable=too-few-public-methods
+    class DummyAnswers:
+        """
+        Dummy class to test get_solar_answers.
+        """
+
+        solar = None
+
+    dummy = DummyAnswers()
+    solar_instance = get_solar_answers(dummy)
+    assert solar_instance.hasSolar is False

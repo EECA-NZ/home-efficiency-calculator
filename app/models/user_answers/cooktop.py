@@ -49,7 +49,7 @@ class CooktopAnswers(BaseModel):
         return day_profile
 
     def energy_usage_pattern(
-        self, your_home, use_alternative: bool = False
+        self, your_home, solar, use_alternative: bool = False
     ) -> CooktopYearlyFuelUsageProfile:
         """
         Return the yearly fuel usage profile for cooking.
@@ -64,6 +64,11 @@ class CooktopAnswers(BaseModel):
         CooktopYearlyFuelUsageProfile
             The yearly fuel usage profile for cooking.
         """
+        # solar is currently unused here but required for signature
+        # compatibility with other components, which are assumed
+        # to alter their electricity consumption patterns based
+        # on presence or absence of solar.
+        _ = solar
         usage_factors = {
             "Electric induction": {
                 "standard_household_kwh": STANDARD_HOUSEHOLD_COOKTOP_ENERGY_USAGE_KWH[

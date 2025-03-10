@@ -62,7 +62,9 @@ def test_water_heating_energy_usage():
             hot_water_usage=profile["hot_water"].hot_water_usage,
             hot_water_heating_source=hot_water_source,
         )
-        hot_water_energy_use = hot_water.energy_usage_pattern(profile["your_home"])
+        hot_water_energy_use = hot_water.energy_usage_pattern(
+            profile["your_home"], profile["solar"]
+        )
         assert (
             hot_water_energy_use.elx_connection_days
             == expected_energy_profile.elx_connection_days
