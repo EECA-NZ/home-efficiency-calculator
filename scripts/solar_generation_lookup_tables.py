@@ -28,7 +28,7 @@ FLOAT_FORMAT = "%.6f"
 DEFAULT_POSTCODE = "6012"
 EXPORT_RATE = 0.12  # NZD per kWh for exported electricity
 TIMESERIES_SUM = 1000.0  # Sum of hour columns for each row
-NO_SOLAR = SolarAnswers(hasSolar=False)
+SOLAR = SolarAnswers(hasSolar=True)
 
 # Constant for the lookup directory. Relative to the script location.
 LOOKUP_DIR = os.path.join(os.path.dirname(__file__), "..", "lookup")
@@ -143,7 +143,7 @@ def generate_vehicle_solar_lookup_table(output_dir="."):
                         postcode=DEFAULT_POSTCODE,
                         disconnect_gas=True,
                     ),
-                    solar=NO_SOLAR,
+                    solar=SOLAR,
                     use_alternative=False,
                 )
                 total_kwh = energy.electricity_kwh.total_usage.sum()
@@ -196,7 +196,7 @@ def generate_hot_water_solar_lookup_table(output_dir="."):
                         postcode=postcode,
                         disconnect_gas=True,
                     )
-                    energy = hot_water.energy_usage_pattern(your_home, NO_SOLAR)
+                    energy = hot_water.energy_usage_pattern(your_home, SOLAR)
                     total_kwh = energy.electricity_kwh.total_usage.sum()
 
                     if total_kwh > 0:
@@ -250,7 +250,7 @@ def generate_space_heating_solar_lookup_table(output_dir="."):
                             postcode=postcode,
                             disconnect_gas=True,
                         ),
-                        solar=NO_SOLAR,
+                        solar=SOLAR,
                     )
                     total_kwh = heating_energy_use.electricity_kwh.total_usage.sum()
 

@@ -1,6 +1,7 @@
 """
 Module for generic helper functions.
 """
+
 from app.models.user_answers import SolarAnswers
 
 
