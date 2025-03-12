@@ -1,5 +1,5 @@
 """
-Tests for the energy costs module.
+Tests for the enests module.
 """
 
 # pylint: disable=no-member
@@ -142,4 +142,4 @@ def test_create_household_energy_profile_to_cost_with_solar():
     )
     # With the placeholder consumption profiles, the self-consumption
     # fraction comes out at only about 15%.
-    assert self_consumption_percentage == approx(15.844267)
+    assert self_consumption_percentage == approx(15.480805)

@@ -37,3 +37,8 @@ target-version = ['py311']
 
 [tool.isort]
 profile = "black"
+
+[tool.pytest.ini_options]
+markers = [
+    "no_dummy: skip the dummy patch for hourly_ta"
+]

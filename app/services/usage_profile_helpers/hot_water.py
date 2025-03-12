@@ -1,5 +1,13 @@
 """
 Hot water heating profile calculation.
+
+For backward compatibility we use the total annual electricity
+demand for hot water heating to reverse-engineer a daily profile.
+
+Demand is distributed over the year based on ambient temperatures.
+
+The duration of water heating required each day is estimated, and
+used to construct an hourly profile of hot water electricity usage.
 """
 
 # pylint: disable=too-many-arguments, too-many-positional-arguments
@@ -7,7 +15,9 @@ Hot water heating profile calculation.
 import numpy as np
 import pandas as pd
 
-from ...services.get_temperatures import hourly_ta
+from ...constants import HOT_WATER_HEAT_PUMP_COP_BY_CLIMATE_ZONE
+from ..get_climate_zone import climate_zone
+from ..get_temperatures import hourly_ta
 from .general import flat_day_night_profiles
 
 # Default time window constants
@@ -20,6 +30,18 @@ HEATING_WINDOWS = {
     "morning": (MORNING_WINDOW_START, MORNING_WINDOW_END),
     "night": (NIGHT_WINDOW_START, NIGHT_WINDOW_END),
 }
+
+CYLINDER_HOT_WATER_TEMPERATURE = 65  # Celsius - typical hot water temperature.
+DELIVERED_HOT_WATER_TEMPERATURE = 40  # Celsius - typical demand temperature.
+# Although the tank is at 65°C, hot water at the tap is usually 40°C via mixing.
+# The fraction drawn from the tank is given by (40 - T_inlet) / (65 - T_inlet),
+# and the heating per kg to heat from T_inlet to 65°C is proportional to (65 - T_inlet).
+# After multiplying fraction by energy per kg, the (65 - T_inlet) terms cancel out.
+# Hence, the total heating demand is effectively proportional to (40 - T_inlet).
+
+DEFAULT_CARNOT_COP_SCALING_FACTOR = 0.4  # Default scaling factor for COP calculation.
+
+COP_CALCULATION = "constant"  # Use an annual average COP per climate zone
 
 
 def default_hot_water_electricity_usage_timeseries() -> np.ndarray:
@@ -48,7 +70,7 @@ def default_hot_water_electricity_usage_timeseries() -> np.ndarray:
 def carnot_cop(temp_hot: float, temp_cold: float) -> float:
     """
     Compute the Carnot Coefficient of Performance (COP) for a heat pump.
-    This is used to estimate the theoretical upper limit of efficiency.
+    This is the theoretical upper limit of efficiency.
 
     Parameters
     ----------
@@ -66,19 +88,79 @@ def carnot_cop(temp_hot: float, temp_cold: float) -> float:
     return (temp_hot + 273.15) / (temp_hot - temp_cold)
 
 
+def scaled_carnot_cop(
+    temp_hot: float, temp_cold: float, scaling_factor=DEFAULT_CARNOT_COP_SCALING_FACTOR
+) -> float:
+    """
+    Compute a scaled version of the Carnot Coefficient of Performance (COP).
+    This can be used to estimate the efficiency of a heat pump system, with
+    a scaling factor applied to the theoretical maximum COP.
+
+    Parameters
+    ----------
+    temp_hot : float
+        The target hot water temperature in Celsius (e.g., 65°C).
+    temp_cold : float
+        The inlet water temperature (rolling average) in Celsius.
+    scaling_factor : float
+        A factor to scale the theoretical maximum COP.
+
+    Returns
+    -------
+    float
+        The scaled Carnot COP.
+    """
+    assert 0 <= scaling_factor <= 1, "Scaling factor must be between 0 and 1."
+    return carnot_cop(temp_hot, temp_cold) * scaling_factor
+
+
+def get_daily_temp_series_and_cz(postcode: str) -> tuple[pd.Series, str]:
+    """
+    Retrieve the hourly temperature data for a postcode,
+    resample to daily means, and return (daily_temp, climate_zone).
+    """
+    temp_df = hourly_ta(postcode)
+    climate = climate_zone(postcode)
+    daily_temp = temp_df.resample("D").mean()
+    return daily_temp, climate
+
+
+def get_cop_series(daily_temp: pd.Series, climate: str, cop_method: str) -> pd.Series:
+    """
+    Given a daily average temperature Series, the climate zone name,
+    and a cop_method string ("constant" or "scaled_carnot_cop"),
+    return a daily COP Series.
+    """
+    if cop_method == "constant":
+        return pd.Series(
+            HOT_WATER_HEAT_PUMP_COP_BY_CLIMATE_ZONE[climate],
+            index=daily_temp.index,
+        )
+    if cop_method == "scaled_carnot_cop":
+        return daily_temp.apply(
+            lambda T: scaled_carnot_cop(CYLINDER_HOT_WATER_TEMPERATURE, T)
+        )
+    raise ValueError(f"Unknown COP calculation method: {cop_method}")
+
+
 def daily_electricity_kwh(
-    postcode: str, heat_demand_kwh_per_year: float, hot_water_heating_source: str
+    postcode: str,
+    heat_demand_kwh_per_year: float,
+    hot_water_heating_source: str,
+    cop_calculation: str,
 ) -> pd.Series:
     """
     Estimate the daily hot water energy demand (in kWh) for a
     hot water system, based on ambient temperatures and the
     system type.
 
-    For each day, an inlet water temperature is computed as a
+    For each day, an inlet water temperature is estimated as a
     30-day rolling average of the daily ambient temperature
     (from hourly_ta). For a resistive system, demand scales
-    as (65 - T_inlet). For a heat pump system, demand scales
-    as (65 - T_inlet) divided by the COP (computed via carnot_cop).
+    as (DELIVERED_HOT_WATER_TEMPERATURE - T_inlet). For a heat
+    pump system, demand scales as
+    (DELIVERED_HOT_WATER_TEMPERATURE - T_inlet) divided by COP.
+
 
     Parameters
     ----------
@@ -88,22 +170,23 @@ def daily_electricity_kwh(
         The annual hot water energy demand in kWh.
     hot_water_heating_source : str
         System type, e.g. "Heat pump" or "Resistive".
+    cop_calculation : str
+        The method to calculate the COP.
 
     Returns
     -------
     pd.Series
         Daily kWh demand (indexed by date).
     """
-    temp_df = hourly_ta(postcode)
-    daily_temp = temp_df.resample("D").mean()
+    daily_temp, climate = get_daily_temp_series_and_cz(postcode)
     inlet_temp = daily_temp.rolling(window=30, min_periods=1).mean()
 
     if hot_water_heating_source.lower() == "heat pump":
-        demand_factor = (65 - inlet_temp).clip(lower=0)
-        cop = inlet_temp.apply(lambda T: carnot_cop(65, T))
-        effective_factor = demand_factor / cop
+        demand_factor = (DELIVERED_HOT_WATER_TEMPERATURE - inlet_temp).clip(lower=0)
+        realistic_cop = get_cop_series(daily_temp, climate, cop_calculation)
+        effective_factor = demand_factor / realistic_cop
     else:
-        effective_factor = (65 - inlet_temp).clip(lower=0)
+        effective_factor = (DELIVERED_HOT_WATER_TEMPERATURE - inlet_temp).clip(lower=0)
 
     total_factor = effective_factor.sum()
     if total_factor == 0:
@@ -111,44 +194,6 @@ def daily_electricity_kwh(
     normalized_factor = effective_factor / total_factor
     daily_kwh = normalized_factor * heat_demand_kwh_per_year
     return daily_kwh
-
-
-def daily_heat_output_kw(
-    postcode: str,
-    heater_input_kw: float,
-    hot_water_heating_source: str,
-) -> pd.Series:
-    """
-    Compute the daily effective heat output (in kW).
-
-    For a resistive system, this equals heater_input_kw.
-    For a heat pump system, calculate the COP based on
-    the daily average temperature (using carnot_cop)
-    and then compute effective output = heater_input_kw * COP,
-    adjusted by a realism factor (e.g., multiplied by 0.4).
-
-    Parameters
-    ----------
-    postcode : str
-        Postcode for obtaining ambient temperature data.
-    heater_input_kw : float
-        The electrical input power (kW).
-    hot_water_heating_source : str
-        System type (e.g., "Heat pump" or "Resistive").
-
-    Returns
-    -------
-    pd.Series
-        Daily effective heat output (kW), indexed by date.
-    """
-    temp_df = hourly_ta(postcode)
-    daily_temp = temp_df.resample("D").mean()
-
-    if hot_water_heating_source.lower() == "heat pump":
-        cop = daily_temp.apply(lambda T: carnot_cop(65, T))
-        realistic_cop = cop * 0.4
-        return heater_input_kw * realistic_cop
-    return pd.Series(heater_input_kw, index=daily_temp.index)
 
 
 # pylint: disable=too-many-locals, too-many-branches
@@ -276,22 +321,27 @@ def solar_friendly_hot_water_electricity_usage_timeseries(
     heat_demand_kwh_per_year: float,
     heater_input_kw: float,
     hot_water_heating_source,
+    cop_calculation=COP_CALCULATION,
     heating_windows=None,
 ) -> np.ndarray:
     """
     Create a solar-friendly electricity usage profile
     for hot water heating.
+
     The resulting hourly profile (shape (8760,)) is normalized
     so that its sum is 1.
 
+    Typically we would assume the power input is constant,
+    at 3kW for resistive hot water systems and 1kW for hot
+    water heat pumps.
+
     The process is as follows:
-      1. Compute daily energy demand using ambient temperatures.
-         - For resistive systems: demand ∝ (65 - T_inlet).
-         - For heat pumps: demand ∝ (65 - T_inlet) / COP.
-      2. Compute the daily effective heat output (in kW)
-      via daily_heat_output_kw.
-      3. For each day, compute
-      required heating hours = daily_energy / daily_heat_output.
+      1. Compute daily_energy_demand by distributing annual
+      demand using ambient temperatures.
+         - For resistive systems: demand ∝ (40 - T_inlet).
+         - For heat pumps: demand ∝ (40 - T_inlet) / COP(T_amb).
+      2. For each day, compute
+      required heating hours = daily_energy_demand / heater_input_kw.
       4. Allocate the available hours within the morning window
       (e.g., 09:00–13:00) and the night window (e.g.,
       21:00–09:00 of the next day).
@@ -327,16 +377,15 @@ def solar_friendly_hot_water_electricity_usage_timeseries(
     if heating_windows is None:
         heating_windows = HEATING_WINDOWS
     daily_energy = daily_electricity_kwh(
-        postcode, heat_demand_kwh_per_year, hot_water_heating_source
-    )
-    daily_output = daily_heat_output_kw(
         postcode,
-        heater_input_kw,
+        heat_demand_kwh_per_year,
         hot_water_heating_source,
+        cop_calculation=cop_calculation,
     )
+    heater_input_kw_series = pd.Series(heater_input_kw, index=daily_energy.index)
     hourly_profile = normalized_solar_friendly_water_heating_profile(
         daily_energy,
-        daily_output,
+        heater_input_kw_series,
         heating_windows=heating_windows,
     )
     return hourly_profile.to_numpy()

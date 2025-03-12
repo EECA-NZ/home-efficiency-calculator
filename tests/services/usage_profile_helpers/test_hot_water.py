@@ -12,7 +12,6 @@ from app.services.usage_profile_helpers.hot_water import (
     MORNING_WINDOW_START,
     carnot_cop,
     daily_electricity_kwh,
-    daily_heat_output_kw,
     default_hot_water_electricity_usage_timeseries,
     normalized_solar_friendly_water_heating_profile,
     solar_friendly_hot_water_electricity_usage_timeseries,
@@ -29,10 +28,13 @@ def dummy_hourly_ta(postcode):
 
 
 @pytest.fixture(autouse=True)
-def patch_hourly_ta(monkeypatch):
+def patch_hourly_ta(request, monkeypatch):
     """
-    Monkeypatch hourly_ta to use our dummy implementation
+    Monkeypatch hourly_ta to use our dummy implementation,
+    unless the test is marked with @pytest.mark.no_dummy
     """
+    if request.node.get_closest_marker("no_dummy"):
+        return
     monkeypatch.setattr(
         "app.services.usage_profile_helpers.hot_water.hourly_ta", dummy_hourly_ta
     )
@@ -67,47 +69,42 @@ def test_daily_electricity_kwh_resistive():
     """
     postcode = "dummy"
     heat_demand = 365  # kWh per year, so 1 kWh/day if equally distributed
-    series = daily_electricity_kwh(postcode, heat_demand, "Resistive")
+    series = daily_electricity_kwh(
+        postcode, heat_demand, "Resistive", "scaled_carnot_cop"
+    )
     expected = np.full(len(series), 1.0)  # 1 kWh each day
     np.testing.assert_allclose(series.values, expected, rtol=1e-5)
 
 
-def test_daily_electricity_kwh_heatpump():
+def test_daily_electricity_kwh_heatpump_constant_temps():
     """
     Test the daily electricity demand for a heat pump.
     """
     postcode = "dummy"
     heat_demand = 365
-    series = daily_electricity_kwh(postcode, heat_demand, "Heat pump")
-    # Even for a heat pump, the normalized daily demand should be equally distributed.
+    series = daily_electricity_kwh(
+        postcode, heat_demand, "Heat pump", "scaled_carnot_cop"
+    )
+    # With the patched version of hourly_ta, the temperature
+    # is constant. Thus even for a heat pump, the normalized
+    # daily demand should be equally distributed.
     expected = np.full(len(series), 1.0)
     np.testing.assert_allclose(series.values, expected, rtol=1e-5)
 
 
-def test_daily_heat_output_kw_resistive():
+@pytest.mark.no_dummy
+def test_daily_electricity_kwh_heatpump_non_constant_temps():
     """
-    Test the daily heat output for a resistive heater.
-    """
-    postcode = "dummy"
-    heater_input_kw = 3.0
-    series = daily_heat_output_kw(postcode, heater_input_kw, "Resistive")
-    expected = np.full(len(series), 3.0)
-    np.testing.assert_allclose(series.values, expected, rtol=1e-5)
-
-
-def test_daily_heat_output_kw_heatpump():
-    """
-    Test the daily heat output for a heat pump.
+    Test the daily electricity demand for a heat pump.
     """
     postcode = "dummy"
-    heater_input_kw = 3.0
-    # Calculate expected output using the dummy temperature (10°C)
-    cop = carnot_cop(65, 10)
-    realistic_cop = cop * 0.4
-    expected_output = 3.0 * realistic_cop
-    series = daily_heat_output_kw(postcode, heater_input_kw, "Heat pump")
-    expected = np.full(len(series), expected_output)
-    np.testing.assert_allclose(series.values, expected, rtol=1e-5)
+    heat_demand = 365
+    series = daily_electricity_kwh(
+        postcode, heat_demand, "Heat pump", "scaled_carnot_cop"
+    )
+    # Without using the dummy_hourly_ta, the temperature is not constant.
+    # The expected values are not known, but the series should be non-constant.
+    assert not np.allclose(series.values, series.values[0])
 
 
 def test_normalized_solar_friendly_water_heating_profile_morning_only():
