@@ -16,6 +16,7 @@ from ...constants import (
     FUEL_CONSUMPTION_LITRES_PER_100KM,
 )
 from ...services.usage_profile_helpers import flat_day_night_profiles
+from ...services.usage_profile_helpers.driving import ev_charging_profile
 from ..usage_profiles import DrivingYearlyFuelUsageProfile, ElectricityUsageTimeseries
 
 
@@ -91,7 +92,7 @@ class DrivingAnswers(BaseModel):
             home_charging_kwh = yearly_battery_kwh - public_charging_kwh
 
             # Only build the 8760 charging profile here
-            charging_profile = self.ev_charging_profile()
+            charging_profile = ev_charging_profile()
             home_charging_timeseries = ElectricityUsageTimeseries(
                 shift_able_uncontrolled_kwh=home_charging_kwh * charging_profile
             )

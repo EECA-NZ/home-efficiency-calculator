@@ -1,5 +1,5 @@
 """
-Hot water heating profile calculation.
+Driving (EV charging) electricity usage profile calculation.
 """
 
 import numpy as np

@@ -21,7 +21,7 @@ from ...constants import (
 )
 from ...services import get_climate_zone
 from ...services.helpers import heating_frequency_factor
-from ...services.usage_profile_helpers import flat_day_night_profiles
+from ...services.usage_profile_helpers.heating import heating_hourly_profile
 from ..usage_profiles import ElectricityUsageTimeseries, HeatingYearlyFuelUsageProfile
 
 
@@ -55,22 +55,6 @@ class HeatingAnswers(BaseModel):
     insulation_quality: Literal[
         "Not well insulated", "Moderately insulated", "Well insulated"
     ]
-
-    def heating_hourly_profile(
-        self,
-    ):
-        """
-        Create a default electricity usage profile for space heating.
-        The resulting array is normalized so that its sum is 1.
-
-        Returns
-        -------
-        np.ndarray
-            A 1D array of shape (8760,) where each element is 1/8760.
-        Placeholder for a more realistic profile.
-        """
-        day_profile, _ = flat_day_night_profiles()
-        return day_profile
 
     def energy_usage_pattern(
         self, your_home, solar, use_alternative: bool = False
@@ -122,14 +106,14 @@ class HeatingAnswers(BaseModel):
                 "electricity_kwh": ElectricityUsageTimeseries(
                     fixed_time_uncontrolled_kwh=heating_energy_service_demand
                     / HEAT_PUMP_COP_BY_CLIMATE_ZONE[climate_zone]
-                    * self.heating_hourly_profile()
+                    * heating_hourly_profile()
                 ),
             },
             "Electric heater": {
                 "electricity_kwh": ElectricityUsageTimeseries(
                     fixed_time_uncontrolled_kwh=heating_energy_service_demand
                     / ELECTRIC_HEATER_SPACE_HEATING_EFFICIENCY
-                    * self.heating_hourly_profile()
+                    * heating_hourly_profile()
                 ),
             },
             "Wood burner": {

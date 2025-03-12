@@ -17,6 +17,7 @@ from app.models.user_answers import (
     DrivingAnswers,
     HeatingAnswers,
     HotWaterAnswers,
+    SolarAnswers,
     YourHomeAnswers,
 )
 from app.services.energy_calculator import emissions_kg_co2e
@@ -36,6 +37,8 @@ REPORT_EVERY_N_ROWS = 1e5
 
 # Ensure the directory exists
 os.makedirs(LOOKUP_DIR, exist_ok=True)
+
+NO_SOLAR = SolarAnswers(hasSolar=False)
 
 people_in_house = [1, 2, 3, 4, 5, 6]
 # Post-MVP, exclude postcodes - requires coordination with web team
@@ -135,7 +138,7 @@ def calculate_cost_and_emissions(your_home, answers):
     if cache_key in cost_emissions_cache:
         return cost_emissions_cache[cache_key]
 
-    energy_usage_profile = answers.energy_usage_pattern(your_home)
+    energy_usage_profile = answers.energy_usage_pattern(your_home, NO_SOLAR)
     if answers.__class__.__name__ == "DrivingAnswers":
         vehicle_type = answers.vehicle_type
     else:
