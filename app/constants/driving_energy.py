@@ -4,7 +4,6 @@ Constants for driving cost and energy calculations
 Note: a 'documentation' excel workbook is to be created, and we
 intend to add it into the repository and link to it from this
 docstring. Links to supporting literature will be added here.
-
 """
 
 EV_PUBLIC_CHARGING_FRACTION = 0.2

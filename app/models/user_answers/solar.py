@@ -2,6 +2,8 @@
 Class for storing user answers on solar generation.
 """
 
+from typing import Optional
+
 import numpy as np
 from pydantic import BaseModel
 
@@ -15,6 +17,7 @@ class SolarAnswers(BaseModel):
     """
 
     has_solar: bool
+    alternative_has_solar: Optional[bool] = None
 
     def energy_generation(
         self,

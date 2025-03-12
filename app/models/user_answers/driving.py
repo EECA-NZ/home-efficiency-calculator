@@ -16,8 +16,14 @@ from ...constants import (
     FUEL_CONSUMPTION_LITRES_PER_100KM,
 )
 from ...services.usage_profile_helpers import flat_day_night_profiles
-from ...services.usage_profile_helpers.driving import ev_charging_profile
+from ...services.usage_profile_helpers.driving import (
+    ev_charging_profile,
+    solar_friendly_ev_charging_profile,
+)
 from ..usage_profiles import DrivingYearlyFuelUsageProfile, ElectricityUsageTimeseries
+
+DEFAULT_CHARGER_KW = 3.0
+CALENDAR_YEAR = 2019
 
 
 class DrivingAnswers(BaseModel):
@@ -87,18 +93,22 @@ class DrivingAnswers(BaseModel):
             kwh_per_100km = BATTERY_ECONOMY_KWH_PER_100KM[vehicle_type][
                 self.vehicle_size
             ]
-            yearly_battery_kwh = (yearly_distance_thousand_km * 10) * kwh_per_100km
-            public_charging_kwh = yearly_battery_kwh * EV_PUBLIC_CHARGING_FRACTION
-            home_charging_kwh = yearly_battery_kwh - public_charging_kwh
+            yearly_total_kwh = (yearly_distance_thousand_km * 10) * kwh_per_100km
+            public_charging_kwh = yearly_total_kwh * EV_PUBLIC_CHARGING_FRACTION
+            home_charging_kwh = yearly_total_kwh - public_charging_kwh
 
-            # Only build the 8760 charging profile here
-            charging_profile = ev_charging_profile()
+            if solar.has_solar:
+                charging_profile = solar_friendly_ev_charging_profile(
+                    home_charging_kwh, charger_kw=DEFAULT_CHARGER_KW, year=CALENDAR_YEAR
+                )
+            else:
+                charging_profile = ev_charging_profile()
             home_charging_timeseries = ElectricityUsageTimeseries(
                 shift_able_uncontrolled_kwh=home_charging_kwh * charging_profile
             )
         else:
             # No battery usage
-            yearly_battery_kwh = 0
+            yearly_total_kwh = 0
             public_charging_kwh = 0
             home_charging_timeseries = ElectricityUsageTimeseries()
 
