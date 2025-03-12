@@ -14,7 +14,7 @@ class SolarAnswers(BaseModel):
     Does the house include solar panels?
     """
 
-    hasSolar: bool
+    has_solar: bool
 
     def energy_generation(
         self,
@@ -36,7 +36,7 @@ class SolarAnswers(BaseModel):
             The yearly fuel usage profile for solar energy generation.
         """
         my_climate_zone = get_climate_zone.climate_zone(your_home.postcode)
-        if self.hasSolar:
+        if self.has_solar:
             hourly_solar_generation_kwh = SolarGenerationTimeseries(
                 fixed_time_generation_kwh=get_solar_generation.hourly_pmax(
                     my_climate_zone

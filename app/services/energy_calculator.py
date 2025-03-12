@@ -147,8 +147,6 @@ def estimate_usage_from_profile(
         and (not use_alternatives or driving.alternative_vehicle_type is not None)
         else YearlyFuelUsageProfile()
     )
-    # Assume solar_profile is handled similarly if needed
-    # pylint: disable=unused-variable
     solar_profile = (
         solar.energy_generation(your_home) if solar else YearlyFuelUsageProfile()
     )

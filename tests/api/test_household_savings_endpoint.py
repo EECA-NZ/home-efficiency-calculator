@@ -54,7 +54,7 @@ def test_household_energy_profile():
             "km_per_week": "200",
         },
         "solar": {
-            "hasSolar": False,
+            "has_solar": False,
         },
     }
 
@@ -110,7 +110,7 @@ def test_complete_household_energy_profile():
             "vehicle_size": "Small",
             "km_per_week": "50 or less",
         },
-        "solar": {"hasSolar": True},
+        "solar": {"has_solar": True},
     }
 
     response = client.post("/household-energy-profile/", json=profile_data)

@@ -232,11 +232,11 @@ def test_get_solar_answers_with_value():
         Dummy class to test get_solar_answers.
         """
 
-        solar = SolarAnswers(hasSolar=True)
+        solar = SolarAnswers(has_solar=True)
 
     dummy = DummyAnswers()
     solar_instance = get_solar_answers(dummy)
-    assert solar_instance.hasSolar is True
+    assert solar_instance.has_solar is True
 
 
 def test_get_solar_answers_without_value():
@@ -254,4 +254,4 @@ def test_get_solar_answers_without_value():
 
     dummy = DummyAnswers()
     solar_instance = get_solar_answers(dummy)
-    assert solar_instance.hasSolar is False
+    assert solar_instance.has_solar is False

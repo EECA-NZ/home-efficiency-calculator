@@ -163,7 +163,7 @@ async def heating_savings(heating_answers: HeatingAnswers, your_home: YourHomeAn
     SavingsResponse
         The savings for the heating component.
     """
-    solar = SolarAnswers(hasSolar=False)
+    solar = SolarAnswers(has_solar=False)
     data = await calculate_component_savings(
         heating_answers, "main_heating_source", your_home, solar
     )
@@ -196,7 +196,7 @@ async def hot_water_savings(
     SavingsResponse
         The savings for the hot water component.
     """
-    solar = SolarAnswers(hasSolar=False)
+    solar = SolarAnswers(has_solar=False)
     data = await calculate_component_savings(
         hot_water_answers, "hot_water_heating_source", your_home, solar
     )
@@ -226,7 +226,7 @@ async def cooktop_savings(cooktop_answers: CooktopAnswers, your_home: YourHomeAn
     SavingsResponse
         The savings for the cooktop component.
     """
-    solar = SolarAnswers(hasSolar=False)
+    solar = SolarAnswers(has_solar=False)
     data = await calculate_component_savings(
         cooktop_answers, "cooktop", your_home, solar
     )
@@ -256,7 +256,7 @@ async def driving_savings(driving_answers: DrivingAnswers, your_home: YourHomeAn
     SavingsResponse
         The savings for the driving component.
     """
-    solar = SolarAnswers(hasSolar=False)
+    solar = SolarAnswers(has_solar=False)
     data = await calculate_component_savings(
         driving_answers, "vehicle_type", your_home, solar
     )

@@ -18,7 +18,7 @@ YOUR_HOME = YourHomeAnswers(
 )
 
 SOLAR = SolarAnswers(
-    hasSolar=True,
+    has_solar=True,
 )
 
 
@@ -31,5 +31,5 @@ def test_total_generation():
     total_generation = SOLAR.energy_generation(
         YOUR_HOME
     ).solar_generation_kwh.fixed_time_generation_kwh.sum()
-    assert SOLAR.hasSolar
+    assert SOLAR.has_solar
     assert total_generation == approx(6779.137958683977)

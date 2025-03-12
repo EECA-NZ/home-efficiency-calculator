@@ -38,7 +38,7 @@ REPORT_EVERY_N_ROWS = 1e5
 # Ensure the directory exists
 os.makedirs(LOOKUP_DIR, exist_ok=True)
 
-NO_SOLAR = SolarAnswers(hasSolar=False)
+NO_SOLAR = SolarAnswers(has_solar=False)
 
 people_in_house = [1, 2, 3, 4, 5, 6]
 # Post-MVP, exclude postcodes - requires coordination with web team

@@ -99,7 +99,7 @@ class HotWaterAnswers(BaseModel):
 
         # Build the usage profile only for electric systems
         if hot_water_heating_source in ELECTRIC_SYSTEMS:
-            if solar.hasSolar:
+            if solar.has_solar:
                 # --- Electric systems with solar PV ---
                 synthetic_hourly_profile = (
                     solar_friendly_hot_water_electricity_usage_timeseries(

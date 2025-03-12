@@ -182,7 +182,7 @@ def load_gas_using_household_energy_usage_profile():
             vehicle_type="Petrol",
         ),
         solar=SolarAnswers(
-            hasSolar=False,
+            has_solar=False,
         ),
     )
     return estimate_usage_from_profile(household_profile)
