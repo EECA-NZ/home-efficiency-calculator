@@ -1,6 +1,6 @@
 """
-This script calculates the optimal methane plan for a household by comparing
-different methane plans against a household's yearly fuel usage profile and
+This script calculates the optimal electricity plan for a household by comparing
+different electricity plans against a household's yearly fuel usage profile and
 produces a final lookup table mapping EDB regions to the optimal plans.
 """
 
@@ -10,12 +10,12 @@ import logging
 import pandas as pd
 
 from app.services.helpers import add_gst
-from data_analysis.plan_choice_helpers.data_loading import load_tariff_data
-from data_analysis.plan_choice_helpers.methane_plan_helpers import (
-    filter_methane_plans,
-    load_gas_using_household_energy_usage_profile,
+from resources.plan_choice_helpers.data_loading import load_tariff_data
+from resources.plan_choice_helpers.electricity_plan_helpers import (
+    filter_electricity_plans,
+    load_electrified_household_energy_usage_profile,
 )
-from data_analysis.plan_choice_helpers.plan_utils import (
+from resources.plan_choice_helpers.plan_utils import (
     calculate_optimal_plan_by_edb,
     extract_plan_details,
     show_plan,
@@ -25,10 +25,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 LOCAL_TARIFF_DATA_PATH = "../supplementary_data/tariff_data/tariffDataReport_240903.csv"
-OUTPUT_FILE = "output/selected_methane_plan_tariffs_by_edb_gst_inclusive.csv"
+OUTPUT_FILE = "output/selected_electricity_plan_tariffs_by_edb_gst_inclusive.csv"
 
 POSTCODE_TO_EDB_CSV = (
-    pkg_resources.files("data_analysis.postcode_lookup_tables.output")
+    pkg_resources.files("resources.postcode_lookup_tables.output")
     / "postcode_to_edb_region.csv"
 )
 EDB_REGION_SHAPEFILE = "../supplementary_data/EDB_Boundaries/EDBBoundaries.shp"
@@ -49,17 +49,17 @@ def main():
     """
     Main function to calculate optimal plans and generate a lookup table.
     """
-    logger.info("Loading and filtering methane plans")
+    logger.info("Loading and filtering electricity plans")
     all_plans = load_tariff_data(LOCAL_TARIFF_DATA_PATH)
-    filtered_df = filter_methane_plans(all_plans)
+    filtered_df = filter_electricity_plans(all_plans)
 
     logger.info("Loading household profiles")
-    profile = load_gas_using_household_energy_usage_profile()
+    profile = load_electrified_household_energy_usage_profile()
 
-    logger.info("Calculating the optimal methane plan for each EDB")
+    logger.info("Calculating the optimal electricity plan for each EDB")
     optimal_plan_results = calculate_optimal_plan_by_edb(profile, filtered_df)
 
-    logger.info("Generating EDB-to-methane-plan lookup table")
+    logger.info("Generating EDB-to-electricity-plan lookup table")
     optimal_plans = []
 
     for edb, _, plan, _ in optimal_plan_results:
@@ -75,7 +75,7 @@ def main():
     lookup_table = lookup_table[OUTPUT_COLUMNS]
     lookup_table.to_csv(OUTPUT_FILE, index=False)
 
-    logger.info("Output the optimal methane plans")
+    logger.info("Output the optimal electricity plans")
     for edb, profile, plan, cost in optimal_plan_results:
         if plan:
             print("--------------------")

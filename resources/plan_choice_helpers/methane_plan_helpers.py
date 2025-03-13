@@ -2,15 +2,13 @@
 Helper functions for analyzing and optimizing electricity plans.
 """
 
-# pylint: disable=no-member
-
 import logging
 
 import numpy as np
 import pandas as pd
 
 # import app.services.configuration as cfg
-from app.models.energy_plans import ElectricityPlan
+from app.models.energy_plans import NaturalGasPlan
 from app.models.user_answers import (
     CooktopAnswers,
     DrivingAnswers,
@@ -21,18 +19,19 @@ from app.models.user_answers import (
     YourHomeAnswers,
 )
 from app.services.energy_calculator import estimate_usage_from_profile
-from app.services.helpers import other_electricity_energy_usage_profile
-from data_analysis.plan_choice_helpers.constants import NUMERICAL_COLUMNS
-from data_analysis.plan_choice_helpers.data_loading import eval_or_return
-from data_analysis.plan_choice_helpers.plan_filters import (
+from resources.plan_choice_helpers.constants import NUMERICAL_COLUMNS
+from resources.plan_choice_helpers.data_loading import eval_or_return
+from resources.plan_choice_helpers.plan_filters import (
     is_big_four_retailer,
     is_simple_all_inclusive,
     is_simple_controlled_uncontrolled,
     is_simple_day_night,
+    is_simple_night_all_inclusive,
+    is_simple_night_uncontrolled,
     is_simple_uncontrolled,
     open_plans,
 )
-from data_analysis.plan_choice_helpers.plan_utils import map_locations_to_edb
+from resources.plan_choice_helpers.plan_utils import map_locations_to_edb
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -40,12 +39,12 @@ logger = logging.getLogger(__name__)
 
 def row_to_plan(row):
     """
-    Converts a DataFrame row to an ElectricityPlan instance.
+    Converts a DataFrame row to an NaturalGasPlan instance.
     Args:
         row: pd.Series, a row from the electricity plan DataFrame
 
     Returns:
-        ElectricityPlan: an instantiated object of ElectricityPlan
+        NaturalGasPlan: an instantiated object of NaturalGasPlan
     """
     pricing_dict = {}
     for key in [
@@ -57,16 +56,15 @@ def row_to_plan(row):
     ]:
         if not pd.isna(row.get(key)):
             pricing_dict[key] = row[key]
-    export_rates = {"Uncontrolled": 0.12}
-    return ElectricityPlan(
+
+    return NaturalGasPlan(
         name=str(row["PlanId"]),
         fixed_rate=row["Daily charge"],
         import_rates=pricing_dict,
-        export_rates=export_rates,
     )
 
 
-def filter_electricity_plans(full_df):
+def filter_methane_plans(full_df):
     """
     Load, process, and return a filtered DataFrame based
     on the tariff data. This allows us to focus on the most
@@ -76,31 +74,11 @@ def filter_electricity_plans(full_df):
     assumptions to filter the plans. This limitation must be
     made clear in the disclaimers on the public-facing tool.
 
-    We only include electricity plans for networks that are
-    identified in the 'edb_to_locations' dictionary in
-    plan_choice_helpers/constants.py, excluding, for
-    instance, plans for rural / small capacity / low density
-    network locations. We also exclude plans that are not
-    accepting new customers.
-
-    We apply filters to remove complex / ambiguous plans:
-      * Fixed term plans which lock in a user;
-      * Low-user plans which are being phased out;
-      * "No electric hot water cylinder" plans;
-      * Plans that are bundled with Broadband.
-
-    We also exclude plans that don't conform to straightforward
-    pricing structures, e.g. plans with complex controlled
-    rates that are season-dependent and dual-fuel plans.
-    Note however that we make a separate assumption that a
-    dual-fuel discount applies to natural gas plans (all
-    users assumed to be connected to the electricity grid).
-
     Returns:
     --------
     pd.DataFrame : The filtered DataFrame after applying the filters.
     """
-    full_df = full_df.loc[full_df["Energy type"] == "electricity"].copy()
+    full_df = full_df.loc[full_df["Energy type"] == "gas"].copy()
 
     for col in NUMERICAL_COLUMNS:
         full_df[col] = full_df[col].apply(
@@ -117,6 +95,10 @@ def filter_electricity_plans(full_df):
     ].str.strip()
     full_df = full_df.reset_index(drop=True)
 
+    # Assemble full set of unique retailer and network locations
+    all_retailer_locs = full_df["Retailer location name"].unique()
+    all_network_locs = full_df["Network location names"].unique()
+
     full_df["EDB"] = full_df["Network location names"].apply(map_locations_to_edb)
 
     # Drop tariffs for low density network locations
@@ -128,28 +110,19 @@ def filter_electricity_plans(full_df):
         logger.info("    Dropping tariffs for %s", network)
     full_df = full_df[full_df["EDB"] != "Ignore"]
 
-    # Assemble full set of unique retailer and network locations
-    all_retailer_locs = full_df["Retailer location name"].unique()
-    all_network_locs = full_df["Network location names"].unique()
-
     # Exclude plans where retailer is not accepting new customers
     full_df = full_df[full_df.apply(open_plans, axis=1)]
 
     filters = (
         (~full_df["Fixed term"])
         & (full_df.apply(is_big_four_retailer, axis=1))
-        & (~full_df["Low user"])
-        & (
-            ~full_df["Name"]
-            .str.lower()
-            .str.contains("no electric hot water cylinder", na=False)
-        )
-        & (~full_df["Name"].str.lower().str.contains("broadband", na=False))
         & (
             full_df.apply(is_simple_all_inclusive, axis=1)
             | full_df.apply(is_simple_controlled_uncontrolled, axis=1)
             | full_df.apply(is_simple_day_night, axis=1)
             | full_df.apply(is_simple_uncontrolled, axis=1)
+            | full_df.apply(is_simple_night_all_inclusive, axis=1)
+            | full_df.apply(is_simple_night_uncontrolled, axis=1)
         )
     )
     full_df = full_df[filters]
@@ -174,12 +147,12 @@ def filter_electricity_plans(full_df):
     return full_df
 
 
-def load_electrified_household_energy_usage_profile():
+def load_gas_using_household_energy_usage_profile():
     """
     Load household fuel usage profile reflecting a typical
-    *electrified household*. This energy profile is
-    used to select a representative electricity plan available
-    in each EDB region.
+    *gas-using household*. This energy profile is used to
+    select a representative natural gas plan available in each
+    EDB region.
 
     Returns:
     YearlyFuelUsageProfile object representing the household's
@@ -198,32 +171,18 @@ def load_electrified_household_energy_usage_profile():
         ),
         hot_water=HotWaterAnswers(
             hot_water_usage="Average",
-            hot_water_heating_source="Electric hot water cylinder",
+            hot_water_heating_source="Piped gas instantaneous",
         ),
         cooktop=CooktopAnswers(
-            cooktop="Electric (coil or ceramic)",
+            cooktop="Piped gas",
         ),
         driving=DrivingAnswers(
             vehicle_size="Small",
             km_per_week="200",
-            vehicle_type="Electric",
+            vehicle_type="Petrol",
         ),
         solar=SolarAnswers(
             has_solar=False,
         ),
     )
-    household_energy_use = estimate_usage_from_profile(household_profile)
-    other_electricity_use = other_electricity_energy_usage_profile()
-    household_energy_use.fixed_kwh.uncontrolled += (
-        other_electricity_use.fixed_kwh.uncontrolled
-    )
-    household_energy_use.anytime_kwh.uncontrolled += (
-        other_electricity_use.anytime_kwh.uncontrolled
-    )
-    household_energy_use.fixed_kwh.controllable += (
-        other_electricity_use.fixed_kwh.controllable
-    )
-    household_energy_use.anytime_kwh.controllable += (
-        other_electricity_use.anytime_kwh.controllable
-    )
-    return household_energy_use
+    return estimate_usage_from_profile(household_profile)

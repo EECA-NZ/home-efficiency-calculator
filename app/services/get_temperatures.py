@@ -38,7 +38,7 @@ def hourly_ta(postcode: str) -> pd.Series:
     """
     # Directory containing generation CSV files:
     data_dir = pkg_resources.files(
-        "data_analysis.supplementary_data.hourly_solar_generation_by_climate_zone"
+        "resources.supplementary_data.hourly_solar_generation_by_climate_zone"
     )
 
     zone = climate_zone(postcode).replace(" ", "_")

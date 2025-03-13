@@ -21,16 +21,16 @@ would require more detailed spatial data than we currently have access to:
 
 import logging
 
-from data_analysis.plan_choice_helpers.data_loading import load_tariff_data
-from data_analysis.plan_choice_helpers.electricity_plan_helpers import (
+from resources.plan_choice_helpers.data_loading import load_tariff_data
+from resources.plan_choice_helpers.electricity_plan_helpers import (
     filter_electricity_plans,
 )
-from data_analysis.plan_choice_helpers.general_helpers import (
+from resources.plan_choice_helpers.general_helpers import (
     clear_output_dir,
     generate_pdf_from_png,
     plot_subset,
 )
-from data_analysis.postcode_lookup_tables.geo_utils import load_and_transform_shapefile
+from resources.postcode_lookup_tables.geo_utils import load_and_transform_shapefile
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

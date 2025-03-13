@@ -112,10 +112,10 @@ cd ..
 ## Output files
 
 The above steps will ultimately update the following CSV files:
-* `home-efficiency-calculator-dev/data_analysis/postcode_lookup_tables/output/postcode_to_climate_zone.csv`
-* `home-efficiency-calculator-dev/data_analysis/postcode_lookup_tables/output/postcode_to_edb_region.csv`
-* `home-efficiency-calculator-dev/data_analysis/electricity_plans/output/selected_electricity_plan_tariffs_by_edb_gst_inclusive.csv`
-* `home-efficiency-calculator-dev/data_analysis/methane_plans/output/selected_methane_plan_tariffs_by_edb_gst_inclusive.csv`
+* `home-efficiency-calculator-dev/resources/postcode_lookup_tables/output/postcode_to_climate_zone.csv`
+* `home-efficiency-calculator-dev/resources/postcode_lookup_tables/output/postcode_to_edb_region.csv`
+* `home-efficiency-calculator-dev/resources/electricity_plans/output/selected_electricity_plan_tariffs_by_edb_gst_inclusive.csv`
+* `home-efficiency-calculator-dev/resources/methane_plans/output/selected_methane_plan_tariffs_by_edb_gst_inclusive.csv`
 
 Make sure to commit any changes to these files. After updating, return to the root directory and reinstall the package with:
 ```

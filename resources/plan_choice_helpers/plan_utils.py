@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 from app.models.energy_plans import ElectricityPlan, NaturalGasPlan
-from data_analysis.plan_choice_helpers.constants import locations_to_edb
+from resources.plan_choice_helpers.constants import locations_to_edb
 
 logger = logging.getLogger(__name__)
 

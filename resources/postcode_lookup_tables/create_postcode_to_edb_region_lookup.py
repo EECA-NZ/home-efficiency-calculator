@@ -7,12 +7,12 @@ As a side effect, generate some data visualizations.
 import pandas as pd
 
 from app.constants import EXCLUDE_POSTCODES
-from data_analysis.postcode_lookup_tables.geo_utils import (
+from resources.postcode_lookup_tables.geo_utils import (
     load_and_transform_shapefile,
     plot_maps,
     reproject_gdf,
 )
-from data_analysis.postcode_lookup_tables.helpers import (
+from resources.postcode_lookup_tables.helpers import (
     plot_histogram,
     process_postcodes,
     save_results,

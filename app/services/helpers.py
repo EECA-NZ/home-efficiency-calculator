@@ -347,7 +347,7 @@ def other_electricity_energy_usage_profile():
         + OTHER_ELX_KWH_PER_DAY["Other"]["kWh/day"]
     )
     other_electricity_energy_usage_csv = (
-        pkg_resources.files("data_analysis.supplementary_data.energy_usage_timeseries")
+        pkg_resources.files("resources.supplementary_data.energy_usage_timeseries")
         / "cook_it_light_other_white_tou_8760.csv"
     )
     with other_electricity_energy_usage_csv.open("r", encoding="utf-8") as csv_file:

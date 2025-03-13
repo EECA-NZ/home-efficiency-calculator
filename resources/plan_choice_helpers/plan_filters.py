@@ -8,7 +8,7 @@ import logging
 
 import pandas as pd
 
-from data_analysis.plan_choice_helpers.constants import NUMERICAL_COLUMNS
+from resources.plan_choice_helpers.constants import NUMERICAL_COLUMNS
 
 logger = logging.getLogger(__name__)
 

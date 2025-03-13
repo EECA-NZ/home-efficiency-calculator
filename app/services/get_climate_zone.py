@@ -47,7 +47,7 @@ NIWA_TO_NZBC = {
 }
 
 csv_path = (
-    pkg_resources.files("data_analysis.postcode_lookup_tables.output")
+    pkg_resources.files("resources.postcode_lookup_tables.output")
     / "postcode_to_climate_zone.csv"
 )
 

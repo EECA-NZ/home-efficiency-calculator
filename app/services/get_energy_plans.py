@@ -6,7 +6,7 @@ Postcodes are mapped to EDB zones, which are then mapped
 to electricity plans. The mapping from EDB to electricity
 plan is based on a pre-computed search for a plan available
 in the EDB zone and favorable to an electrified household: see
-(data_analysis.electricity_plans.optimal_electricity_plans.py).
+(resources.electricity_plans.optimal_electricity_plans.py).
 
 Note that this is approximate as not all addresses within a
 given EDB zone are eligible for all plans. However, it
@@ -18,14 +18,14 @@ Natural gas is treated the same way, with postcodes mapped
 to EDB zones, which are then mapped to natural gas plans
 based on a search for a plan available in the EDB zone that
 is favorable to a household that uses natural gas: see
-(data_analysis.methane_plans.optimal_methane_plans.py).
+(resources.methane_plans.optimal_methane_plans.py).
 
 For other types of household fuels, a default plan is used.
 
 External Dependencies:
 - Data files located in
-  'data_analysis.postcode_lookup_tables.output' and
-  'data_analysis.{plan_type}_plans.output', where {plan_type}
+  'resources.postcode_lookup_tables.output' and
+  'resources.{plan_type}_plans.output', where {plan_type}
   is 'electricity' or 'methane'.
 """
 
@@ -89,7 +89,7 @@ def plan_dictionaries(plan_type: str, plan_class):
         - dict mapping postcodes to plans.
     """
     postcode_to_edb_csv_path = (
-        pkg_resources.files("data_analysis.postcode_lookup_tables.output")
+        pkg_resources.files("resources.postcode_lookup_tables.output")
         / "postcode_to_edb_region.csv"
     )
 
@@ -102,7 +102,7 @@ def plan_dictionaries(plan_type: str, plan_class):
 
     try:
         selected_plans_csv_path = (
-            pkg_resources.files(f"data_analysis.{plan_type}_plans.output")
+            pkg_resources.files(f"resources.{plan_type}_plans.output")
             / f"selected_{plan_type}_plan_tariffs_by_edb_gst_inclusive.csv"
         )
         with selected_plans_csv_path.open("r", encoding="utf-8") as csv_file:
