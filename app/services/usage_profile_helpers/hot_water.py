@@ -88,32 +88,6 @@ def carnot_cop(temp_hot: float, temp_cold: float) -> float:
     return (temp_hot + 273.15) / (temp_hot - temp_cold)
 
 
-def scaled_carnot_cop(
-    temp_hot: float, temp_cold: float, scaling_factor=DEFAULT_CARNOT_COP_SCALING_FACTOR
-) -> float:
-    """
-    Compute a scaled version of the Carnot Coefficient of Performance (COP).
-    This can be used to estimate the efficiency of a heat pump system, with
-    a scaling factor applied to the theoretical maximum COP.
-
-    Parameters
-    ----------
-    temp_hot : float
-        The target hot water temperature in Celsius (e.g., 65°C).
-    temp_cold : float
-        The inlet water temperature (rolling average) in Celsius.
-    scaling_factor : float
-        A factor to scale the theoretical maximum COP.
-
-    Returns
-    -------
-    float
-        The scaled Carnot COP.
-    """
-    assert 0 <= scaling_factor <= 1, "Scaling factor must be between 0 and 1."
-    return carnot_cop(temp_hot, temp_cold) * scaling_factor
-
-
 def get_daily_temp_series_and_cz(postcode: str) -> tuple[pd.Series, str]:
     """
     Retrieve the hourly temperature data for a postcode,
@@ -137,9 +111,13 @@ def get_cop_series(daily_temp: pd.Series, climate: str, cop_method: str) -> pd.S
             index=daily_temp.index,
         )
     if cop_method == "scaled_carnot_cop":
-        return daily_temp.apply(
-            lambda T: scaled_carnot_cop(CYLINDER_HOT_WATER_TEMPERATURE, T)
+        # first evaluate the carnot COP for each day
+        daily_cop = daily_temp.apply(
+            lambda T: carnot_cop(CYLINDER_HOT_WATER_TEMPERATURE, T)
         )
+        # then rescale so that it matches the annual average COP
+        annual_cop = HOT_WATER_HEAT_PUMP_COP_BY_CLIMATE_ZONE[climate]
+        return daily_cop * annual_cop / daily_cop.mean()
     raise ValueError(f"Unknown COP calculation method: {cop_method}")
 
 

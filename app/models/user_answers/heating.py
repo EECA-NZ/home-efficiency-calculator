@@ -21,7 +21,7 @@ from ...constants import (
 )
 from ...services import get_climate_zone
 from ...services.helpers import heating_frequency_factor
-from ...services.usage_profile_helpers.heating import heating_hourly_profile
+from ...services.usage_profile_helpers.heating import space_heating_profile
 from ..usage_profiles import ElectricityUsageTimeseries, HeatingYearlyFuelUsageProfile
 
 
@@ -106,14 +106,22 @@ class HeatingAnswers(BaseModel):
                 "electricity_kwh": ElectricityUsageTimeseries(
                     fixed_time_uncontrolled_kwh=heating_energy_service_demand
                     / HEAT_PUMP_COP_BY_CLIMATE_ZONE[climate_zone]
-                    * heating_hourly_profile()
+                    * space_heating_profile(
+                        postcode=your_home.postcode,
+                        heating_during_day=self.heating_during_day,
+                        setpoint=21.0,
+                    )
                 ),
             },
             "Electric heater": {
                 "electricity_kwh": ElectricityUsageTimeseries(
                     fixed_time_uncontrolled_kwh=heating_energy_service_demand
                     / ELECTRIC_HEATER_SPACE_HEATING_EFFICIENCY
-                    * heating_hourly_profile()
+                    * space_heating_profile(
+                        postcode=your_home.postcode,
+                        heating_during_day=self.heating_during_day,
+                        setpoint=21.0,
+                    )
                 ),
             },
             "Wood burner": {

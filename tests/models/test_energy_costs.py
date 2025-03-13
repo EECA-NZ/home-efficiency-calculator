@@ -142,4 +142,6 @@ def test_create_household_energy_profile_to_cost_with_solar():
     )
     # With the placeholder consumption profiles, the self-consumption
     # fraction comes out at only about 15%.
-    assert self_consumption_percentage == approx(17.156672)
+    # This result has changed in a directionally consistent way with
+    # changes to the model, but hasn't been verified against a reference.
+    assert self_consumption_percentage == approx(15.378649)
