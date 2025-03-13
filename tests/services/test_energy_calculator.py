@@ -71,7 +71,7 @@ def test_estimate_usage_from_profile_with_solar():
         3328.958975
     )
     assert energy_usage.solar_generation_kwh.fixed_time_generation_kwh.sum() == approx(
-        6779.137958
+        6779.145125
     )
     assert energy_usage.natural_gas_connection_days == approx(0.0)
     assert energy_usage.natural_gas_kwh == approx(0.0)
@@ -97,4 +97,4 @@ def test_emissions_kg_co2e_with_solar():
     """
     energy_usage = estimate_usage_from_profile(household_profile_with_solar)
     co2_emissions = emissions_kg_co2e(usage_profile=energy_usage)
-    assert co2_emissions == approx(566.0142 - 6779.137958 * 0.1072, rel=1e-4)
+    assert co2_emissions == approx(-160.710126476441, rel=1e-4)

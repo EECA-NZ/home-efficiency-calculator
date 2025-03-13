@@ -3,6 +3,7 @@ Map climate zones to hourly temperature profiles.
 """
 
 import importlib.resources as pkg_resources
+import os
 
 import pandas as pd
 
@@ -36,10 +37,18 @@ def hourly_ta(postcode: str) -> pd.Series:
     ValueError
         If no matching CSV file is found.
     """
+    # Get test_mode from environment variable
+    test_mode = os.getenv("TEST_MODE", "False").lower() == "true"
+
     # Directory containing generation CSV files:
-    data_dir = pkg_resources.files(
-        "resources.supplementary_data.hourly_solar_generation_by_climate_zone"
-    )
+    if test_mode:
+        data_dir = pkg_resources.files(
+            "resources.test_data.hourly_solar_generation_by_climate_zone"
+        )
+    else:
+        data_dir = pkg_resources.files(
+            "resources.supplementary_data.hourly_solar_generation_by_climate_zone"
+        )
 
     zone = climate_zone(postcode).replace(" ", "_")
     zone_lower = zone.lower()

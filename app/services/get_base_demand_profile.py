@@ -3,13 +3,14 @@ Map climate zones to hourly 'other' electricity demand profiles.
 """
 
 import importlib.resources as pkg_resources
+import os
 
 import pandas as pd
 
 from .get_climate_zone import climate_zone
 
 
-def base_demand(postcode: str) -> pd.Series:
+def base_demand(postcode: str, test_mode: bool = False) -> pd.Series:
     """
     Return a Typical Meteorological Year hourly 'other' electricity demand
     timeseries for the given climate zone. The CSV is identified by
@@ -36,10 +37,18 @@ def base_demand(postcode: str) -> pd.Series:
     ValueError
         If no matching CSV file is found.
     """
-    # Directory containing the CSV files:
-    data_dir = pkg_resources.files(
-        "resources.supplementary_data.hourly_solar_generation_by_climate_zone"
-    )
+    # Get test_mode from environment variable
+    test_mode = os.getenv("TEST_MODE", "False").lower() == "true"
+
+    # Directory containing generation CSV files:
+    if test_mode:
+        data_dir = pkg_resources.files(
+            "resources.test_data.hourly_solar_generation_by_climate_zone"
+        )
+    else:
+        data_dir = pkg_resources.files(
+            "resources.supplementary_data.hourly_solar_generation_by_climate_zone"
+        )
 
     zone = climate_zone(postcode).replace(" ", "_")
     zone_lower = zone.lower()

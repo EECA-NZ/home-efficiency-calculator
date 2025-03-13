@@ -4,13 +4,14 @@ hourly generation profiles.
 """
 
 import importlib.resources as pkg_resources
+import os
 
 import pandas as pd
 
 from .get_climate_zone import climate_zone
 
 
-def hourly_pmax(postcode: str) -> pd.Series:
+def hourly_pmax(postcode: str, test_mode: bool = False) -> pd.Series:
     """
     Return the hourly timeseries for pmax for the given climate zone.
     The CSV is identified by searching the directory for a filename
@@ -31,11 +32,18 @@ def hourly_pmax(postcode: str) -> pd.Series:
     ValueError
         If no matching CSV file is found.
     """
+    # Get test_mode from environment variable
+    test_mode = os.getenv("TEST_MODE", "False").lower() == "true"
 
     # Directory containing generation CSV files:
-    data_dir = pkg_resources.files(
-        "resources.supplementary_data.hourly_solar_generation_by_climate_zone"
-    )
+    if test_mode:
+        data_dir = pkg_resources.files(
+            "resources.test_data.hourly_solar_generation_by_climate_zone"
+        )
+    else:
+        data_dir = pkg_resources.files(
+            "resources.supplementary_data.hourly_solar_generation_by_climate_zone"
+        )
 
     zone = climate_zone(postcode).replace(" ", "_")
     zone_lower = zone.lower()

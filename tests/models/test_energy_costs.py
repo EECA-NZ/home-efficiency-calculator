@@ -132,7 +132,7 @@ def test_create_household_energy_profile_to_cost_with_solar():
         / (total_solar_savings_if_self_consumed - total_solar_revenue_if_exported)
     )
 
-    assert total_solar_generation == approx(6779.137958)
+    assert total_solar_generation == approx(6779.145125)
     assert day_tariff == approx(0.242)
     assert export_tariff == approx(0.12)
     assert (
@@ -144,4 +144,4 @@ def test_create_household_energy_profile_to_cost_with_solar():
     # fraction comes out at only about 15%.
     # This result has changed in a directionally consistent way with
     # changes to the model, but hasn't been verified against a reference.
-    assert self_consumption_percentage == approx(15.378649)
+    assert self_consumption_percentage == approx(14.32820634345451)

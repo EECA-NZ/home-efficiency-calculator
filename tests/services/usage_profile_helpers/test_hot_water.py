@@ -2,6 +2,8 @@
 Tests for the hot water usage profile helper functions.
 """
 
+import os
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -16,6 +18,17 @@ from app.services.usage_profile_helpers.hot_water import (
     normalized_solar_friendly_water_heating_profile,
     solar_friendly_hot_water_electricity_usage_timeseries,
 )
+
+
+@pytest.fixture(autouse=True, scope="session")
+def set_test_environment_variable():
+    """
+    Set the TEST_MODE environment variable to True.
+    This will ensure that the test data is used, allowing
+    the tests to run without the need for data files that
+    are not licensed for sharing publicly.
+    """
+    os.environ["TEST_MODE"] = "True"
 
 
 def dummy_hourly_ta(postcode):
@@ -33,7 +46,8 @@ def patch_hourly_ta(request, monkeypatch):
     Monkeypatch hourly_ta to use our dummy implementation,
     unless the test is marked with @pytest.mark.no_dummy
     """
-    if request.node.get_closest_marker("no_dummy"):
+    # Use the new-style call
+    if any(request.node.iter_markers("no_dummy")):
         return
     monkeypatch.setattr(
         "app.services.usage_profile_helpers.hot_water.hourly_ta", dummy_hourly_ta

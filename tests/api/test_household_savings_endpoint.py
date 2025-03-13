@@ -2,12 +2,27 @@
 Tests for the API
 """
 
+import os
+
+import pytest
 from fastapi.testclient import TestClient
 
 import app.services.configuration as cfg
 from app.api.household_savings_endpoint import household_energy_profile
 from app.main import app
 from app.models.user_answers import HouseholdAnswers
+
+
+@pytest.fixture(autouse=True, scope="session")
+def set_test_environment_variable():
+    """
+    Set the TEST_MODE environment variable to True.
+    This will ensure that the test data is used, allowing
+    the tests to run without the need for data files that
+    are not licensed for sharing publicly.
+    """
+    os.environ["TEST_MODE"] = "True"
+
 
 client = TestClient(app)
 
