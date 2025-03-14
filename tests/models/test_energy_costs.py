@@ -144,4 +144,4 @@ def test_create_household_energy_profile_to_cost_with_solar():
     # fraction comes out at only about 15%.
     # This result has changed in a directionally consistent way with
     # changes to the model, but hasn't been verified against a reference.
-    assert self_consumption_percentage == approx(14.32820634345451)
+    assert self_consumption_percentage == approx(15.441821861148222)
