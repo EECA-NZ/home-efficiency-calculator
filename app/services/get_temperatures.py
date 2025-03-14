@@ -64,4 +64,6 @@ def hourly_ta(postcode: str) -> pd.Series:
                 return df["TA"]
 
     # If no matching CSV file is found, raise an error
-    raise ValueError(f"No CSV file found for climate zone containing '{zone}'.")
+    raise ValueError(
+        f"No CSV file found in {data_dir} for climate zone containing '{zone}'."
+    )

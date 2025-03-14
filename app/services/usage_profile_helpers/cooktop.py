@@ -8,20 +8,30 @@ electricity usage.
 
 import numpy as np
 
-from .general import flat_day_night_profiles
-
 
 def cooktop_hourly_usage_profile() -> np.ndarray:
     """
-    Create a default electricity usage profile for electric vehicle charging.
-    The resulting array is normalized so that its sum is 1.
+    Creates an 8760-long 1D numpy array representing a cooktop usage profile.
+    The profile is constant between 7 and 9 AM and twice as high between 6 PM and 8 PM.
 
     Returns
     -------
     np.ndarray
-        A 1D array of shape (8760,), with constant non-zero values in night-time
-        hours.
-    Placeholder for a more realistic profile.
+        A 1D array of shape (8760,) with the cooktop usage profile.
     """
-    day_profile, _ = flat_day_night_profiles()
-    return day_profile
+    profile = np.zeros(8760, dtype=float)
+    hours = np.arange(8760)
+    hour_of_day = hours % 24
+
+    # Set usage for 7 AM to 9 AM
+    morning_mask = (hour_of_day >= 7) & (hour_of_day < 9)
+    profile[morning_mask] = 1.0
+
+    # Set usage for 6 PM to 8 PM (twice as high)
+    evening_mask = (hour_of_day >= 18) & (hour_of_day < 20)
+    profile[evening_mask] = 2.0
+
+    # Normalize the profile
+    profile /= profile.sum()
+
+    return profile

@@ -10,13 +10,14 @@ import os
 import pandas as pd
 
 from app.models.user_answers import (
+    CooktopAnswers,
     DrivingAnswers,
     HeatingAnswers,
     HotWaterAnswers,
     SolarAnswers,
     YourHomeAnswers,
 )
-from app.services.get_climate_zone import NIWA_TO_NZBC, postcode_dict
+from app.services.get_climate_zone import postcode_dict
 from app.services.get_energy_plans import postcode_to_electricity_plan_dict
 from app.services.get_solar_generation import hourly_pmax
 from app.services.helpers import other_electricity_energy_usage_profile
@@ -45,13 +46,7 @@ hot_water_heating_sources = [HOT_WATER_HEAT_PUMP, HOT_WATER_ELECTRIC]
 hot_water_usage_options = ["Low", "Average", "High"]
 people_in_house_options = [1, 2, 3, 4, 5, 6]
 niwa_climate_zones = list(set(postcode_dict.values()))
-branz_climate_zones = list(set(NIWA_TO_NZBC.values()))
-postcode_to_branz = {
-    postcode: NIWA_TO_NZBC[climate_zone]
-    for postcode, climate_zone in postcode_dict.items()
-}
-# use coarser branz climate zones to generate lookup tables to reduce size
-climate_zones = sorted(branz_climate_zones)
+climate_zones = sorted(niwa_climate_zones)
 
 HEATING_HEAT_PUMP = "Heat pump"
 HEATING_ELECTRIC = "Electric heater"
@@ -67,6 +62,10 @@ insulation_quality_options = [
     "Moderately insulated",
     "Well insulated",
 ]
+
+COOKTOP_ELECTRIC = "Electric induction"
+COOKTOP_CERAMIC = "Electric (coil or ceramic)"
+cooktop_types = [COOKTOP_ELECTRIC, COOKTOP_CERAMIC]
 
 # Climate zones for the solar_generation_lookup_table
 full_climate_zones_for_solar = [
@@ -90,25 +89,16 @@ full_climate_zones_for_solar = [
     "Invercargill",
 ]
 
-
-def representative_postcode_for_niwa_climate_zone(niwa_climate_zone):
-    """
-    Get a representative postcode for a NIWA climate zone.
-    """
+representative_postcode_for_niwa_climate_zone = {}
+for niwa_climate_zone in niwa_climate_zones:
     for postcode, zone in postcode_dict.items():
         if zone == niwa_climate_zone:
-            return postcode
-    raise ValueError(f"Could not find postcode for climate zone {niwa_climate_zone}")
-
-
-def representative_postcode_for_climate_zone(branz_climate_zone):
-    """
-    Get a representative postcode for a climate zone.
-    """
-    for postcode, zone in postcode_to_branz.items():
-        if zone == branz_climate_zone:
-            return postcode
-    raise ValueError(f"Could not find postcode for climate zone {branz_climate_zone}")
+            representative_postcode_for_niwa_climate_zone[zone] = postcode
+            break
+    else:
+        raise ValueError(
+            f"Could not find postcode for climate zone {niwa_climate_zone}"
+        )
 
 
 def convert_np_array_to_dict(np_array):
@@ -130,6 +120,7 @@ def generate_vehicle_solar_lookup_table(output_dir="."):
     """
     rows = []
     for vt in vehicle_types:
+        print(f"Generating vehicle lookups for {vt}")
         for size in vehicle_sizes:
             for km in km_per_week_options:
                 driving = DrivingAnswers(
@@ -183,7 +174,8 @@ def generate_hot_water_solar_lookup_table(output_dir="."):
     """
     rows = []
     for cz in climate_zones:
-        postcode = representative_postcode_for_climate_zone(cz)
+        print(f"Generating hot water lookups for {cz}")
+        pc = representative_postcode_for_niwa_climate_zone[cz]
         for p in people_in_house_options:
             for usage in hot_water_usage_options:
                 for hw_source in hot_water_heating_sources:
@@ -193,7 +185,7 @@ def generate_hot_water_solar_lookup_table(output_dir="."):
                     )
                     your_home = YourHomeAnswers(
                         people_in_house=p,
-                        postcode=postcode,
+                        postcode=pc,
                         disconnect_gas=True,
                     )
                     energy = hot_water.energy_usage_pattern(your_home, SOLAR)
@@ -235,7 +227,8 @@ def generate_space_heating_solar_lookup_table(output_dir="."):
     """
     rows = []
     for cz in climate_zones:
-        postcode = representative_postcode_for_climate_zone(cz)
+        print(f"Generating space heating lookups for {cz}")
+        pc = representative_postcode_for_niwa_climate_zone[cz]
         for main_source in main_heating_sources:
             for heat_day in heating_during_day_options:
                 for ins_quality in insulation_quality_options:
@@ -247,7 +240,7 @@ def generate_space_heating_solar_lookup_table(output_dir="."):
                     heating_energy_use = heating.energy_usage_pattern(
                         YourHomeAnswers(
                             people_in_house=3,
-                            postcode=postcode,
+                            postcode=pc,
                             disconnect_gas=True,
                         ),
                         solar=SOLAR,
@@ -280,7 +273,55 @@ def generate_space_heating_solar_lookup_table(output_dir="."):
 
 
 # ----------------------------------------------------------------------
-# 4) Generate Solar Generation Table
+# 4) Generate Cooktop Table
+# ----------------------------------------------------------------------
+def generate_cooktop_solar_lookup_table(output_dir="."):
+    """
+    Creates solar_cooktop_lookup_table.csv with columns:
+        climate_zone, cooktop, annual_total_kwh,
+        plus 8760 hourly columns (1..8760) summing to 1000.
+    """
+    rows = []
+
+    for p in people_in_house_options:
+        print(f"Generating cooktop lookups for {p} people")
+        for c in cooktop_types:
+            cooktop = CooktopAnswers(
+                cooktop=c,
+            )
+            your_home = YourHomeAnswers(
+                people_in_house=p,
+                postcode=DEFAULT_POSTCODE,
+                disconnect_gas=True,
+            )
+            energy = cooktop.energy_usage_pattern(your_home, SOLAR)
+            total_kwh = energy.electricity_kwh.total_usage.sum()
+
+            if total_kwh > 0:
+                profile = (
+                    TIMESERIES_SUM / total_kwh
+                ) * energy.electricity_kwh.total_usage
+                profile_dict = convert_np_array_to_dict(profile)
+            else:
+                raise ValueError("Total kWh should be positive")
+
+            row = {
+                "people_in_house": p,
+                "cooktop_type": c,
+                "annual_total_kwh": total_kwh,
+            }
+            row.update(profile_dict)
+            rows.append(row)
+
+    df = pd.DataFrame(rows)
+    out_path = os.path.join(output_dir, "solar_cooktop_lookup_table.csv")
+    df.to_csv(out_path, float_format=FLOAT_FORMAT, index=False)
+    logging.info("Wrote %s rows to %s", len(df), out_path)
+    return df
+
+
+# ----------------------------------------------------------------------
+# 5) Generate Solar Generation Table
 # ----------------------------------------------------------------------
 def generate_solar_generation_lookup_table(output_dir="."):
     """
@@ -290,8 +331,9 @@ def generate_solar_generation_lookup_table(output_dir="."):
     """
     rows = []
     for cz in full_climate_zones_for_solar:
-        postcode = representative_postcode_for_niwa_climate_zone(cz)
-        hourly_pmax_values = hourly_pmax(postcode)
+        print(f"Generating solar generation lookups for {cz}")
+        pc = representative_postcode_for_niwa_climate_zone[cz]
+        hourly_pmax_values = hourly_pmax(pc)
         total_kwh = sum(hourly_pmax_values)
         profile = (TIMESERIES_SUM / total_kwh) * hourly_pmax_values
         profile_dict = convert_np_array_to_dict(profile)
@@ -411,6 +453,7 @@ def main():
 
     # Generate each lookup table
     vehicle_df = generate_vehicle_solar_lookup_table(LOOKUP_DIR)
+    cooktop_df = generate_cooktop_solar_lookup_table(LOOKUP_DIR)
     hot_water_df = generate_hot_water_solar_lookup_table(LOOKUP_DIR)
     space_heating_df = generate_space_heating_solar_lookup_table(LOOKUP_DIR)
     other_electricity_df = generate_other_electricity_usage_lookup_table(LOOKUP_DIR)
@@ -419,6 +462,7 @@ def main():
 
     return (
         vehicle_df,
+        cooktop_df,
         hot_water_df,
         space_heating_df,
         other_electricity_df,
@@ -430,6 +474,7 @@ def main():
 if __name__ == "__main__":
     (
         my_vehicle,
+        my_cooktop,
         my_hot_water,
         my_space_heating,
         my_other_electricity,
