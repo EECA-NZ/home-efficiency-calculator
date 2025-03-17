@@ -70,7 +70,7 @@ def _ev_charging_windows(day_of_week: int) -> list[tuple[str, str]]:
     return windows
 
 
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-locals, too-many-branches
 def solar_friendly_ev_charging_profile(
     annual_kwh: float, charger_kw: float, year: int = 2019
 ) -> np.ndarray:
@@ -175,6 +175,9 @@ def solar_friendly_ev_charging_profile(
             for i in range(full_hours):
                 if i < window_hours:
                     h_ts = window_range[i]
+                    if h_ts > profile.index[-1]:
+                        # This can happen if the window crosses midnight
+                        continue
                     profile[h_ts] += charger_kw
 
             # Then if there's a partial hour:
@@ -182,6 +185,9 @@ def solar_friendly_ev_charging_profile(
                 # The partial hour index is 'full_hours' into the window
                 if full_hours < window_hours:
                     h_ts = window_range[full_hours]
+                    if h_ts > profile.index[-1]:
+                        # This can happen if the window crosses midnight
+                        continue
                     profile[h_ts] += charger_kw * fraction_hour
 
             # Subtract out what we allocated:

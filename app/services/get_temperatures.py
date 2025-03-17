@@ -20,7 +20,11 @@ def hourly_ta(postcode: str) -> pd.Series:
     The first matching file is read and the hourly ambient temperature
     is returned as a pandas Series.
 
-    Assumes that the data is from 2019.
+    Assumes that the data is from 2019. Specification of the 2019
+    calendar year means that the 1st of January is a Tuesday. This
+    alignment between day number (1) and day type (Tuesday) is
+    relevant to demand patterns, which vary between weekdays and
+    weekends.
 
     Parameters
     ----------

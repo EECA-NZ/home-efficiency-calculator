@@ -29,6 +29,7 @@ package-data = { "resources" = ["postcode_lookup_tables/output/*.csv",
                                  "methane_plans/output/*.csv",
                                  "supplementary_data/tariff_data/*.csv",
                                  "supplementary_data/energy_usage_timeseries/*.csv",
+                                 "power_demand_by_time_of_use_data/output/*.csv",
                                  "supplementary_data/hourly_solar_generation_by_climate_zone/*.csv",
                                  "test_data/hourly_solar_generation_by_climate_zone/*.csv"] }
 

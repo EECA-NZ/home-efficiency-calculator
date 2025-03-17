@@ -96,9 +96,22 @@ async def calculate_component_savings(
             current_fuel_use_report,
             alternative_fuel_use_report,
         )
-    except Exception as e:
-        logger.error("Error calculating %s savings: %s", component_name, e)
-        return {"error": f"Error calculating {component_name} savings: {e}"}
+    except (KeyError, ValueError) as err:
+        logger.exception(
+            "Validation or lookup error when calculating %s savings", component_name
+        )
+        return {"error": f"Validation error for {component_name}: {str(err)}"}
+
+    except AttributeError as err:
+        logger.exception(
+            "Missing attribute when calculating %s savings", component_name
+        )
+        return {"error": f"Attribute missing for {component_name}: {str(err)}"}
+
+    except Exception as err:
+        # Unexpected errors
+        logger.exception("Unexpected error calculating %s savings", component_name)
+        return {"error": f"Unexpected error calculating {component_name}: {str(err)}"}
 
 
 # Common function to handle the response creation

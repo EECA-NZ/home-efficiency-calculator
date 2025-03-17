@@ -22,7 +22,7 @@ from ...services.usage_profile_helpers.driving import (
 )
 from ..usage_profiles import DrivingYearlyFuelUsageProfile, ElectricityUsageTimeseries
 
-DEFAULT_CHARGER_KW = 3.0
+DEFAULT_CHARGER_KW = 3.0  # See https://www.standards.govt.nz/shop/snz-pas-60112023
 CALENDAR_YEAR = 2019
 
 

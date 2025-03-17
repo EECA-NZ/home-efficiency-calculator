@@ -37,7 +37,7 @@ from .hot_water import carnot_cop
 FULL_DAY_WINDOW = (7, 21)  # "full day" means 7am–9pm
 BASELINE_WINDOWS = [(7, 9), (17, 21)]  # "baseline" means 7–9am and 5–9pm
 
-DEFAULT_THERMOSTAT_SETPOINT = 21.0
+DEFAULT_SPACE_HEATING_SETPOINT = 20.0
 
 
 def _days_for_week(week_num: int, option: str) -> int:
@@ -70,7 +70,7 @@ def _get_heating_cop_series(
     postcode: str,
     temperature_series: pd.Series,
     cop_calculation: str = "constant",
-    setpoint: float = DEFAULT_THERMOSTAT_SETPOINT,
+    setpoint: float = DEFAULT_SPACE_HEATING_SETPOINT,
 ) -> pd.Series:
     """
     Return an hourly COP series for space heating.
@@ -122,7 +122,7 @@ def _get_heating_cop_series(
 def space_heating_profile(
     postcode: str,
     heating_during_day: str,
-    setpoint: float = DEFAULT_THERMOSTAT_SETPOINT,
+    setpoint: float = DEFAULT_SPACE_HEATING_SETPOINT,
     main_heating_source: str = "Heat pump",
     cop_calculation: str = "constant",
 ) -> pd.Series:

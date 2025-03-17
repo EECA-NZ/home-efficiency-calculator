@@ -73,6 +73,9 @@ def day_night_flag() -> np.ndarray:
     Creates a binary array of shape (8760,) where each element is 1 for daytime hours
     (07:00–21:00) and 0 for nighttime hours (21:00–07:00).
 
+    We use the same definition as the Vector Electricity Pricing Methodology 2025: see
+    https://blob-static.vector.co.nz/blob/vector/media/vector-2024/electricity-pricing-methodology-2025.pdf
+
     Returns
     -------
     np.ndarray

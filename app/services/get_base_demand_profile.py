@@ -12,8 +12,14 @@ from .get_climate_zone import climate_zone
 
 def base_demand(postcode: str, test_mode: bool = False) -> pd.Series:
     """
-    Return a Typical Meteorological Year hourly 'other' electricity demand
-    timeseries for the given climate zone. The CSV is identified by
+    Return an hourly 'other' electricity demand timeseries.
+
+    Here 'other' electricity demand covers household electricity
+    demand for appliances/uses not covered by the home efficiency
+    calculator. This includes home electronics, lighting, white
+    goods (including refrigeration) and other uses.
+
+    The CSV is identified by
     searching the directory for a filename that *contains* the `zone`
     substring (case-insensitive).
 

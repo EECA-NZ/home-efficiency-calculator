@@ -4,11 +4,16 @@ hourly generation profiles.
 """
 
 import importlib.resources as pkg_resources
+import logging
 import os
 
 import pandas as pd
 
 from .get_climate_zone import climate_zone
+
+logging.basicConfig(level=logging.INFO)
+
+logger = logging.getLogger(__name__)
 
 
 def hourly_pmax(postcode: str, test_mode: bool = False) -> pd.Series:
@@ -53,8 +58,10 @@ def hourly_pmax(postcode: str, test_mode: bool = False) -> pd.Series:
             # If the zone text appears in the filename (case-insensitive)
             if zone_lower in csv_file.stem.lower():
                 df = pd.read_csv(csv_file, dtype={"Hour": int, "pmax": float})
+                logger.info("Found CSV file '%s' for '%s'.", csv_file, zone)
                 # Adjust pmax values: assume a 5kW system instead of 4kW
                 df["pmax"] = 5 / 4 * df["pmax"]
+                logger.info("Adjusted pmax values to rescale for a 5kW system")
                 return df["pmax"]
 
     # If we exhaust the directory without finding a match, raise an error

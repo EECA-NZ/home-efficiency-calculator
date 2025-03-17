@@ -12,7 +12,7 @@ from ...constants import (
     HOT_WATER_POWER_INPUT_KW,
 )
 from ...services import get_climate_zone
-from ...services.helpers import (
+from ...services.hot_water_helpers import (
     hot_water_heating_efficiency,
     other_water_kwh_per_year,
     shower_kwh_per_year,

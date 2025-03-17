@@ -89,7 +89,9 @@ class ElectricityUsageTimeseries(BaseModel):
     @classmethod
     def validate_arrays(cls, value):
         """
-        Ensure that the arrays are the correct shape.
+        Ensure that the value is an array of correct shape.
+        Raises a ValueError if not an array or if the array
+        is not of shape (8760,).
         """
         return ensure_8760_array(value)
 
@@ -99,16 +101,26 @@ class ElectricityUsageTimeseries(BaseModel):
         """
         Element-wise addition of two ElectricityUsageTimeseries objects.
         """
-        return ElectricityUsageTimeseries(
-            fixed_time_uncontrolled_kwh=self.fixed_time_uncontrolled_kwh
-            + other.fixed_time_uncontrolled_kwh,
-            fixed_time_controllable_kwh=self.fixed_time_controllable_kwh
-            + other.fixed_time_controllable_kwh,
-            shift_able_uncontrolled_kwh=self.shift_able_uncontrolled_kwh
-            + other.shift_able_uncontrolled_kwh,
-            shift_able_controllable_kwh=self.shift_able_controllable_kwh
-            + other.shift_able_controllable_kwh,
-        )
+        if not isinstance(other, ElectricityUsageTimeseries):
+            raise TypeError(
+                f"Cannot add 'ElectricityUsageTimeseries' to '{type(other).__name__}'. "
+                "Ensure 'other' is an ElectricityUsageTimeseries."
+            )
+        try:
+            return ElectricityUsageTimeseries(
+                fixed_time_uncontrolled_kwh=self.fixed_time_uncontrolled_kwh
+                + other.fixed_time_uncontrolled_kwh,
+                fixed_time_controllable_kwh=self.fixed_time_controllable_kwh
+                + other.fixed_time_controllable_kwh,
+                shift_able_uncontrolled_kwh=self.shift_able_uncontrolled_kwh
+                + other.shift_able_uncontrolled_kwh,
+                shift_able_controllable_kwh=self.shift_able_controllable_kwh
+                + other.shift_able_controllable_kwh,
+            )
+        except ValueError as e:
+            raise ValueError(
+                f"Cannot add 'ElectricityUsageTimeseries' objects: {e}"
+            ) from e
 
     def __radd__(self, other):
         """
@@ -283,7 +295,9 @@ class SolarGenerationTimeseries(BaseModel):
     @classmethod
     def validate_arrays(cls, value):
         """
-        Ensure that the arrays are the correct shape.
+        Ensure that the value is an array of correct shape.
+        Raises a ValueError if not an array or if the array
+        is not of shape (8760,).
         """
         return ensure_8760_array(value)
 
