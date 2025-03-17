@@ -16,8 +16,44 @@ from app.models.usage_profiles import (
 from ..constants import DAYS_IN_YEAR, OTHER_ELX_KWH_PER_DAY
 from .get_climate_zone import climate_zone
 
+# --------------------------------------------------------------------------------
+# In-memory cache for base demands from CSV files. We build two dictionaries:
+# one for production data, one for test data. Each dictionary's keys are the
+# lowercase filename stems. We then do a substring match to find the correct zone.
+# --------------------------------------------------------------------------------
 
-def base_demand(postcode: str, test_mode: bool = False) -> pd.Series:
+
+def _load_all_zone_data(data_dir) -> dict[str, pd.Series]:
+    """
+    Load all CSV files in 'data_dir' and return a dict mapping each file's
+    lowercase stem (filename without extension) -> pd.Series of hourly base demand.
+    """
+    zone_data = {}
+    for csv_file in data_dir.iterdir():
+        if csv_file.suffix.lower() == ".csv":
+            df = pd.read_csv(csv_file, dtype={"Hour": int, "power_model": float})
+            df.rename(columns={"power_model": "base_demand"}, inplace=True)
+            df["datetime"] = pd.date_range("2019-01-01", periods=len(df), freq="h")
+            df.set_index("datetime", inplace=True)
+            zone_data[csv_file.stem.lower()] = df["base_demand"]
+    return zone_data
+
+
+# ------------------------------------------------------------------------------
+# Pre-load all CSV data for production and test modes:
+# ------------------------------------------------------------------------------
+_prod_data_dir = pkg_resources.files(
+    "resources.supplementary_data.hourly_solar_generation_by_climate_zone"
+)
+_test_data_dir = pkg_resources.files(
+    "resources.test_data.hourly_solar_generation_by_climate_zone"
+)
+
+_prod_mode_data = _load_all_zone_data(_prod_data_dir)
+_test_mode_data = _load_all_zone_data(_test_data_dir)
+
+
+def base_demand(postcode: str) -> pd.Series:
     """
     Return an hourly 'other' electricity demand timeseries.
 
@@ -26,14 +62,14 @@ def base_demand(postcode: str, test_mode: bool = False) -> pd.Series:
     calculator. This includes home electronics, lighting, white
     goods (including refrigeration) and other uses.
 
-    The CSV is identified by
-    searching the directory for a filename that *contains* the `zone`
-    substring (case-insensitive).
+    The CSV is identified by searching the dictionary of loaded zone data
+    for a filename that *contains* the `zone` substring (case-insensitive).
 
-    The first matching file is read and the hourly base demand
-    is returned as a pandas Series.
-
-    Assumes that the data is from 2019.
+    Assumes that the data is from 2019. Specification of the 2019
+    calendar year means that the 1st of January is a Tuesday. This
+    alignment between day number (1) and day type (Tuesday) is
+    relevant to demand patterns, which vary between weekdays and
+    weekends.
 
     Parameters
     ----------
@@ -50,33 +86,16 @@ def base_demand(postcode: str, test_mode: bool = False) -> pd.Series:
     ValueError
         If no matching CSV file is found.
     """
-    # Get test_mode from environment variable
     test_mode = os.getenv("TEST_MODE", "False").lower() == "true"
 
-    # Directory containing generation CSV files:
-    if test_mode:
-        data_dir = pkg_resources.files(
-            "resources.test_data.hourly_solar_generation_by_climate_zone"
-        )
-    else:
-        data_dir = pkg_resources.files(
-            "resources.supplementary_data.hourly_solar_generation_by_climate_zone"
-        )
+    zone = climate_zone(postcode).replace(" ", "_").lower()
+    data_lookup = _test_mode_data if test_mode else _prod_mode_data
 
-    zone = climate_zone(postcode).replace(" ", "_")
-    zone_lower = zone.lower()
+    # Perform partial (substring) matching on the filename keys:
+    for zone_key, base_dem_series in data_lookup.items():
+        if zone in zone_key:
+            return base_dem_series
 
-    for csv_file in data_dir.iterdir():
-        if csv_file.suffix.lower() == ".csv":
-            # Check if the zone text appears in the filename (case-insensitive)
-            if zone_lower in csv_file.stem.lower():
-                df = pd.read_csv(csv_file, dtype={"Hour": int, "power_model": float})
-                df.rename(columns={"power_model": "base_demand"}, inplace=True)
-                df["datetime"] = pd.date_range("2019-01-01", periods=len(df), freq="h")
-                df.set_index("datetime", inplace=True)
-                return df["base_demand"]
-
-    # If no matching CSV file is found, raise an error
     raise ValueError(
         f"No CSV file found for base demand for climate zone containing '{zone}'."
     )
@@ -100,9 +119,11 @@ def other_electricity_energy_usage_profile():
     )
     with other_electricity_energy_usage_csv.open("r", encoding="utf-8") as csv_file:
         other_electricity_usage_df = pd.read_csv(csv_file, dtype=str)
+
     value_col = "Power IT Light Other White"
     uncontrolled_fixed_kwh = other_electricity_usage_df[value_col].astype(float)
     uncontrolled_fixed_kwh *= total_annual_kwh / uncontrolled_fixed_kwh.sum()
+
     return HouseholdOtherElectricityUsageTimeseries(
         elx_connection_days=DAYS_IN_YEAR,
         electricity_kwh=ElectricityUsageTimeseries(
