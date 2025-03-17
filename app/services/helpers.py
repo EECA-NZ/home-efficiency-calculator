@@ -2,18 +2,10 @@
 Module for generic helper functions.
 """
 
-import importlib.resources as pkg_resources
-
 import numpy as np
-import pandas as pd
 from pydantic import BaseModel
 
-from app.models.usage_profiles import (
-    ElectricityUsageTimeseries,
-    HouseholdOtherElectricityUsageTimeseries,
-)
-
-from ..constants import DAYS_IN_YEAR, HEATING_PERIOD_FACTOR, OTHER_ELX_KWH_PER_DAY
+from ..constants import HEATING_PERIOD_FACTOR
 
 
 def answer_options(my_object, field):
@@ -89,32 +81,3 @@ def safe_percentage_reduction(current: float, alternative: float) -> float:
     if current == 0:
         return np.nan if alternative != 0 else 0
     return 100 * (current - alternative) / current
-
-
-def other_electricity_energy_usage_profile():
-    """
-    Create an electricity usage profile for appliances not considered by the app.
-    This is used for determining the percentage of solar-generated electricity
-    that is consumed by the household.
-    """
-    total_annual_kwh = DAYS_IN_YEAR * (
-        OTHER_ELX_KWH_PER_DAY["Refrigeration"]["kWh/day"]
-        + OTHER_ELX_KWH_PER_DAY["Lighting"]["kWh/day"]
-        + OTHER_ELX_KWH_PER_DAY["Laundry"]["kWh/day"]
-        + OTHER_ELX_KWH_PER_DAY["Other"]["kWh/day"]
-    )
-    other_electricity_energy_usage_csv = (
-        pkg_resources.files("resources.power_demand_by_time_of_use_data.output")
-        / "it_light_other_white_tou_8760.csv"
-    )
-    with other_electricity_energy_usage_csv.open("r", encoding="utf-8") as csv_file:
-        other_electricity_usage_df = pd.read_csv(csv_file, dtype=str)
-    value_col = "Power IT Light Other White"
-    uncontrolled_fixed_kwh = other_electricity_usage_df[value_col].astype(float)
-    uncontrolled_fixed_kwh *= total_annual_kwh / uncontrolled_fixed_kwh.sum()
-    return HouseholdOtherElectricityUsageTimeseries(
-        elx_connection_days=DAYS_IN_YEAR,
-        electricity_kwh=ElectricityUsageTimeseries(
-            fixed_time_uncontrolled_kwh=np.array(uncontrolled_fixed_kwh)
-        ),
-    )

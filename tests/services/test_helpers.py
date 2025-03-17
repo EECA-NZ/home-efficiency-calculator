@@ -13,7 +13,8 @@ from app.models.usage_profiles import (
 )
 from app.models.user_answers import SolarAnswers
 from app.services.configuration import get_default_electricity_plan
-from app.services.helpers import add_gst, other_electricity_energy_usage_profile
+from app.services.get_base_demand_profile import other_electricity_energy_usage_profile
+from app.services.helpers import add_gst
 from app.services.hot_water_helpers import (
     other_water_kwh_per_year,
     shower_kwh_per_year,

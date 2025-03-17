@@ -17,10 +17,10 @@ from app.models.user_answers import (
     SolarAnswers,
     YourHomeAnswers,
 )
+from app.services.get_base_demand_profile import other_electricity_energy_usage_profile
 from app.services.get_climate_zone import postcode_dict
 from app.services.get_energy_plans import postcode_to_electricity_plan_dict
 from app.services.get_solar_generation import hourly_pmax
-from app.services.helpers import other_electricity_energy_usage_profile
 
 # Round numerical outputs
 FLOAT_FORMAT = "%.6f"
