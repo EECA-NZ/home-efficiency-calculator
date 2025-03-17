@@ -6,16 +6,28 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel
 
-from ...constants import DAYS_IN_YEAR, HOT_WATER_FLEXIBLE_KWH_FRACTION
+from ...constants import (
+    DAYS_IN_YEAR,
+    HOT_WATER_FLEXIBLE_KWH_FRACTION,
+    HOT_WATER_POWER_INPUT_KW,
+)
 from ...services import get_climate_zone
-from ...services.helpers import (
+from ...services.hot_water_helpers import (
     hot_water_heating_efficiency,
     other_water_kwh_per_year,
     shower_kwh_per_year,
     standing_loss_kwh_per_year,
 )
-from ...services.usage_profile_helpers import flat_day_night_profiles
-from ..usage_profiles import ElectricityUsageProfile, HotWaterYearlyFuelUsageProfile
+from ...services.usage_profile_helpers.hot_water import (
+    default_hot_water_electricity_usage_timeseries,
+    solar_friendly_hot_water_electricity_usage_timeseries,
+)
+from ..usage_profiles import ElectricityUsageTimeseries, HotWaterYearlyFuelUsageProfile
+
+ELECTRIC_SYSTEMS = [
+    "Electric hot water cylinder",
+    "Hot water heat pump",
+]
 
 
 class HotWaterAnswers(BaseModel):
@@ -41,26 +53,8 @@ class HotWaterAnswers(BaseModel):
         ]
     ] = None
 
-    def hot_water_hourly_usage_profile(
-        self,
-    ):
-        """
-        Create a default electricity usage profile for hot water heating.
-        The resulting array is normalized so that its sum is 1.
-
-        Returns
-        -------
-        np.ndarray
-            A 1D array of shape (8760,) where each element is 1/8760.
-        Placeholder for a more realistic profile.
-        """
-        # anytime_kwh can be shifted to daytime for solar self-consumption
-        # or to nighttime for cheaper electricity rates
-        day_profile, _ = flat_day_night_profiles()
-        return day_profile
-
     def energy_usage_pattern(
-        self, your_home, use_alternative: bool = False
+        self, your_home, solar, use_alternative: bool = False
     ) -> HotWaterYearlyFuelUsageProfile:
         """
         Return the yearly fuel usage profile for hot water heating.
@@ -83,52 +77,75 @@ class HotWaterAnswers(BaseModel):
             else self.hot_water_heating_source
         )
         climate_zone = get_climate_zone.climate_zone(your_home.postcode)
+
+        # 1) How much hot water energy the household needs, before heater efficiency
         energy_service_demand_kwh_per_year = shower_kwh_per_year(
             self.hot_water_usage, climate_zone, your_home.people_in_house
         ) + other_water_kwh_per_year(climate_zone, your_home.people_in_house)
+
+        # 2) Add standing losses
         heat_demand_kwh_per_year = (
             energy_service_demand_kwh_per_year
             + standing_loss_kwh_per_year(
                 hot_water_heating_source, your_home.people_in_house, climate_zone
             )
         )
+
+        # 3) Factor in heater efficiency (or COP for heat pumps)
         efficiency_factor = hot_water_heating_efficiency(
             hot_water_heating_source, climate_zone
         )
         total_kwh = heat_demand_kwh_per_year / efficiency_factor
 
-        # Following breakdown is used if the hot water heating
-        # source is electric (hot water cylinder or heat pump)
-        anytime_kwh = total_kwh * HOT_WATER_FLEXIBLE_KWH_FRACTION
-        fixed_kwh = total_kwh - anytime_kwh
+        # Build the usage profile only for electric systems
+        if hot_water_heating_source in ELECTRIC_SYSTEMS:
+            if solar.has_solar:
+                # --- Electric systems with solar PV ---
+                synthetic_hourly_profile = (
+                    solar_friendly_hot_water_electricity_usage_timeseries(
+                        your_home.postcode,
+                        heat_demand_kwh_per_year,
+                        HOT_WATER_POWER_INPUT_KW,
+                        hot_water_heating_source,
+                    )
+                )
+                electricity_kwh = ElectricityUsageTimeseries(
+                    fixed_time_uncontrolled_kwh=total_kwh * synthetic_hourly_profile,
+                )
+            else:
+                # --- Electric systems without solar PV ---
+                anytime_kwh = total_kwh * HOT_WATER_FLEXIBLE_KWH_FRACTION
+                fixed_kwh = total_kwh - anytime_kwh
+                synthetic_hourly_profile = (
+                    default_hot_water_electricity_usage_timeseries()
+                )
+                electricity_kwh = ElectricityUsageTimeseries(
+                    fixed_time_uncontrolled_kwh=fixed_kwh * synthetic_hourly_profile,
+                    shift_able_uncontrolled_kwh=anytime_kwh * synthetic_hourly_profile,
+                )
 
-        electricity_kwh = ElectricityUsageProfile(
-            fixed_time_controllable_kwh=fixed_kwh
-            * self.hot_water_hourly_usage_profile(),
-            shift_able_controllable_kwh=anytime_kwh
-            * self.hot_water_hourly_usage_profile(),
+            return HotWaterYearlyFuelUsageProfile(
+                elx_connection_days=DAYS_IN_YEAR,
+                electricity_kwh=electricity_kwh,
+            )
+
+        # --- Gas-based systems ---
+        if hot_water_heating_source in [
+            "Piped gas hot water cylinder",
+            "Piped gas instantaneous",
+        ]:
+            return HotWaterYearlyFuelUsageProfile(
+                natural_gas_connection_days=DAYS_IN_YEAR,
+                natural_gas_kwh=total_kwh,
+            )
+        if hot_water_heating_source in [
+            "Bottled gas instantaneous",
+        ]:
+            return HotWaterYearlyFuelUsageProfile(
+                lpg_tanks_rental_days=DAYS_IN_YEAR,
+                lpg_kwh=total_kwh,
+            )
+
+        raise ValueError(
+            f"Unsupported hot water heating source: {hot_water_heating_source}"
         )
-
-        fuel_usage = {
-            "Electric hot water cylinder": {
-                "elx_connection_days": DAYS_IN_YEAR,
-                "electricity_kwh": electricity_kwh,
-            },
-            "Hot water heat pump": {
-                "elx_connection_days": DAYS_IN_YEAR,
-                "electricity_kwh": electricity_kwh,
-            },
-            "Piped gas hot water cylinder": {
-                "natural_gas_connection_days": DAYS_IN_YEAR,
-                "natural_gas_kwh": total_kwh,
-            },
-            "Piped gas instantaneous": {
-                "natural_gas_connection_days": DAYS_IN_YEAR,
-                "natural_gas_kwh": total_kwh,
-            },
-            "Bottled gas instantaneous": {
-                "lpg_tanks_rental_days": DAYS_IN_YEAR,
-                "lpg_kwh": total_kwh,
-            },
-        }
-        return HotWaterYearlyFuelUsageProfile(**fuel_usage[hot_water_heating_source])

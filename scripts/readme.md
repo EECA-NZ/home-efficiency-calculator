@@ -4,4 +4,5 @@ Usage (first ensure that you are in the virtual environment as described in [../
 ```
 python costs_and_co2_lookup_tables.py
 python gas_connection_lookup_table.py
+python solar_generation_lookup_tables.py
 ```

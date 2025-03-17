@@ -24,7 +24,7 @@ def calculate_solar_savings(your_home, heating, hot_water, driving):
     :return: A dictionary with the calculated solar benefit metrics:
              - 'annual_kwh_generated'
              - 'annual_kg_co2e_saving'
-             - 'annual_savings_solar_export'
+             - 'annual_earnings_solar_export'
              - 'annual_savings_solar_self_consumption'
     """
     _ = (your_home, heating, hot_water, driving)
@@ -36,6 +36,6 @@ def calculate_solar_savings(your_home, heating, hot_water, driving):
     return {
         "annual_kwh_generated": annual_kwh_generated,
         "annual_kg_co2e_saving": annual_kg_co2e_saving,
-        "annual_savings_solar_export": 123.45,
+        "annual_earnings_solar_export": 123.45,
         "annual_savings_solar_self_consumption": 678.90,
     }

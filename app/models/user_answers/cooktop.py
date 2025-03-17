@@ -11,8 +11,8 @@ from ...constants import (
     DAYS_IN_YEAR,
     STANDARD_HOUSEHOLD_COOKTOP_ENERGY_USAGE_KWH,
 )
-from ...services.usage_profile_helpers import flat_day_night_profiles
-from ..usage_profiles import CooktopYearlyFuelUsageProfile, ElectricityUsageProfile
+from ...services.usage_profile_helpers.cooktop import cooktop_hourly_usage_profile
+from ..usage_profiles import CooktopYearlyFuelUsageProfile, ElectricityUsageTimeseries
 
 
 class CooktopAnswers(BaseModel):
@@ -32,24 +32,8 @@ class CooktopAnswers(BaseModel):
         ]
     ] = None
 
-    def cooktop_hourly_usage_profile(
-        self,
-    ):
-        """
-        Create a default electricity usage profile for cooking.
-        The resulting array is normalized so that its sum is 1.
-
-        Returns
-        -------
-        np.ndarray
-            A 1D array of shape (8760,) where each element is 1/8760.
-        Placeholder for a more realistic profile.
-        """
-        day_profile, _ = flat_day_night_profiles()
-        return day_profile
-
     def energy_usage_pattern(
-        self, your_home, use_alternative: bool = False
+        self, your_home, solar, use_alternative: bool = False
     ) -> CooktopYearlyFuelUsageProfile:
         """
         Return the yearly fuel usage profile for cooking.
@@ -64,6 +48,11 @@ class CooktopAnswers(BaseModel):
         CooktopYearlyFuelUsageProfile
             The yearly fuel usage profile for cooking.
         """
+        # solar is currently unused here but required for signature
+        # compatibility with other components, which are assumed
+        # to alter their electricity consumption patterns based
+        # on presence or absence of solar.
+        _ = solar
         usage_factors = {
             "Electric induction": {
                 "standard_household_kwh": STANDARD_HOUSEHOLD_COOKTOP_ENERGY_USAGE_KWH[
@@ -105,12 +94,11 @@ class CooktopAnswers(BaseModel):
             / (1 + AVERAGE_HOUSEHOLD_SIZE)
         )
         factor["electricity_kwh"] = (
-            ElectricityUsageProfile(
-                fixed_time_uncontrolled_kwh=total_kwh
-                * self.cooktop_hourly_usage_profile()
+            ElectricityUsageTimeseries(
+                fixed_time_uncontrolled_kwh=total_kwh * cooktop_hourly_usage_profile()
             )
             if "Electric" in cooktop_type
-            else ElectricityUsageProfile()
+            else ElectricityUsageTimeseries()
         )
         factor["natural_gas_kwh"] = total_kwh if cooktop_type == "Piped gas" else 0
         factor["lpg_kwh"] = total_kwh if cooktop_type == "Bottled gas" else 0

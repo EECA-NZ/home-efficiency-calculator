@@ -2,15 +2,24 @@
 Tests for the helpers module.
 """
 
+# pylint: disable=no-member
+
 from pytest import approx
 
+from app.constants import DAY_NIGHT_FRAC, DAYS_IN_YEAR, OTHER_ELX_KWH_PER_DAY
+from app.models.usage_profiles import (
+    ElectricityUsageTimeseries,
+    HouseholdOtherElectricityUsageTimeseries,
+)
+from app.models.user_answers import SolarAnswers
 from app.services.configuration import get_default_electricity_plan
-from app.services.helpers import (
-    add_gst,
+from app.services.helpers import add_gst, other_electricity_energy_usage_profile
+from app.services.hot_water_helpers import (
     other_water_kwh_per_year,
     shower_kwh_per_year,
     standing_loss_kwh_per_year,
 )
+from app.services.solar_helpers import get_solar_answers
 
 
 def test_add_gst():
@@ -111,3 +120,137 @@ def test_standing_loss_kwh_per_year():
                 hot_water_heating_source, household_size, climate_zone
             )
             assert standing_loss_kwh == approx(expected_kwh, abs=10)
+
+
+def test_other_electricity_energy_usage_profile_1():
+    """
+    Test that other_electricity_energy_usage_profile() returns
+    a HouseholdOtherElectricityUsageTimeseries with the correct
+    allocation of day vs. night usage and total kWh.
+    """
+    profile = other_electricity_energy_usage_profile()
+
+    # 1. Check that the returned object is the correct type
+    assert isinstance(profile, HouseholdOtherElectricityUsageTimeseries)
+
+    # 2. Check connection days
+    assert profile.elx_connection_days == DAYS_IN_YEAR
+
+    # 3. The .electricity_kwh attribute should be an ElectricityUsageTimeseries
+    assert isinstance(profile.electricity_kwh, ElectricityUsageTimeseries)
+
+    # 4. The usage array should have 8760 elements
+    usage_array = profile.electricity_kwh.fixed_time_uncontrolled_kwh
+    assert usage_array.shape == (8760,)
+
+    # 5. Calculate the expected total annual usage
+    #    (sum of day portion + night portion) * 365
+    day_daily_sum = (
+        OTHER_ELX_KWH_PER_DAY["Refrigeration"]["kWh/day"]
+        * DAY_NIGHT_FRAC["Refrigeration"]["Day"]
+        + OTHER_ELX_KWH_PER_DAY["Lighting"]["kWh/day"]
+        * DAY_NIGHT_FRAC["Lighting"]["Day"]
+        + OTHER_ELX_KWH_PER_DAY["Laundry"]["kWh/day"] * DAY_NIGHT_FRAC["Laundry"]["Day"]
+        + OTHER_ELX_KWH_PER_DAY["Other"]["kWh/day"] * DAY_NIGHT_FRAC["Other"]["Day"]
+    )
+    night_daily_sum = (
+        OTHER_ELX_KWH_PER_DAY["Refrigeration"]["kWh/day"]
+        * DAY_NIGHT_FRAC["Refrigeration"]["Night"]
+        + OTHER_ELX_KWH_PER_DAY["Lighting"]["kWh/day"]
+        * DAY_NIGHT_FRAC["Lighting"]["Night"]
+        + OTHER_ELX_KWH_PER_DAY["Laundry"]["kWh/day"]
+        * DAY_NIGHT_FRAC["Laundry"]["Night"]
+        + OTHER_ELX_KWH_PER_DAY["Other"]["kWh/day"] * DAY_NIGHT_FRAC["Other"]["Night"]
+    )
+    expected_annual_kwh = (day_daily_sum + night_daily_sum) * DAYS_IN_YEAR
+
+    # 6. Compare to the actual sum from the returned profile
+    actual_annual_kwh = usage_array.sum()
+    assert actual_annual_kwh == approx(
+        expected_annual_kwh, rel=1e-5
+    ), f"Expected ~{expected_annual_kwh:.2f} kWh, got {actual_annual_kwh:.2f} kWh"
+
+
+def test_other_electricity_energy_usage_profile_2():
+    """
+    Test that other_electricity_energy_usage_profile() returns
+    a HouseholdOtherElectricityUsageTimeseries with the correct
+    allocation of day vs. night usage and total kWh.
+    """
+    profile = other_electricity_energy_usage_profile()
+
+    # 1. Check that the returned object is the correct type
+    assert isinstance(profile, HouseholdOtherElectricityUsageTimeseries)
+
+    # 2. Check connection days
+    assert profile.elx_connection_days == DAYS_IN_YEAR
+
+    # 3. The .electricity_kwh attribute should be an ElectricityUsageTimeseries
+    assert isinstance(profile.electricity_kwh, ElectricityUsageTimeseries)
+
+    # 4. The usage array should have 8760 elements
+    usage_array = profile.electricity_kwh.fixed_time_uncontrolled_kwh
+    assert usage_array.shape == (8760,)
+
+    # 5. Calculate the expected total annual usage
+    #    (sum of day portion + night portion) * 365
+    day_daily_sum = (
+        OTHER_ELX_KWH_PER_DAY["Refrigeration"]["kWh/day"]
+        * DAY_NIGHT_FRAC["Refrigeration"]["Day"]
+        + OTHER_ELX_KWH_PER_DAY["Lighting"]["kWh/day"]
+        * DAY_NIGHT_FRAC["Lighting"]["Day"]
+        + OTHER_ELX_KWH_PER_DAY["Laundry"]["kWh/day"] * DAY_NIGHT_FRAC["Laundry"]["Day"]
+        + OTHER_ELX_KWH_PER_DAY["Other"]["kWh/day"] * DAY_NIGHT_FRAC["Other"]["Day"]
+    )
+    night_daily_sum = (
+        OTHER_ELX_KWH_PER_DAY["Refrigeration"]["kWh/day"]
+        * DAY_NIGHT_FRAC["Refrigeration"]["Night"]
+        + OTHER_ELX_KWH_PER_DAY["Lighting"]["kWh/day"]
+        * DAY_NIGHT_FRAC["Lighting"]["Night"]
+        + OTHER_ELX_KWH_PER_DAY["Laundry"]["kWh/day"]
+        * DAY_NIGHT_FRAC["Laundry"]["Night"]
+        + OTHER_ELX_KWH_PER_DAY["Other"]["kWh/day"] * DAY_NIGHT_FRAC["Other"]["Night"]
+    )
+    expected_annual_kwh = (day_daily_sum + night_daily_sum) * DAYS_IN_YEAR
+
+    # 6. Compare to the actual sum from the returned profile
+    actual_annual_kwh = usage_array.sum()
+    assert actual_annual_kwh == approx(
+        expected_annual_kwh, rel=1e-5
+    ), f"Expected ~{expected_annual_kwh:.2f} kWh, got {actual_annual_kwh:.2f} kWh"
+
+
+def test_get_solar_answers_with_value():
+    """
+    Test get_solar_answers with a value.
+    """
+
+    # pylint: disable=too-few-public-methods
+    class DummyAnswers:
+        """
+        Dummy class to test get_solar_answers.
+        """
+
+        solar = SolarAnswers(has_solar=True)
+
+    dummy = DummyAnswers()
+    solar_instance = get_solar_answers(dummy)
+    assert solar_instance.has_solar is True
+
+
+def test_get_solar_answers_without_value():
+    """
+    Test get_solar_answers with no value.
+    """
+
+    # pylint: disable=too-few-public-methods
+    class DummyAnswers:
+        """
+        Dummy class to test get_solar_answers.
+        """
+
+        solar = None
+
+    dummy = DummyAnswers()
+    solar_instance = get_solar_answers(dummy)
+    assert solar_instance.has_solar is False

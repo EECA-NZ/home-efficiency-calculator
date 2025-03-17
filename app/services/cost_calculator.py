@@ -2,6 +2,8 @@
 This module provides functions to optimize the cost of energy for a household.
 """
 
+# pylint: disable=too-many-locals
+
 import numpy as np
 
 from ..constants import CHECKBOX_BEHAVIOUR, DAYS_IN_YEAR
@@ -13,9 +15,10 @@ from ..services.helpers import round_floats_to_2_dp, safe_percentage_reduction
 from .energy_calculator import emissions_kg_co2e
 from .get_energy_plans import get_energy_plan
 from .helpers import safe_percentage_reduction
+from .solar_helpers import get_solar_answers
 
 
-def costs_and_emissions(answers, your_plan, your_home):
+def costs_and_emissions(answers, your_plan, solar, your_home):
     """
     Calculate the current household energy costs and emissions.
 
@@ -29,14 +32,16 @@ def costs_and_emissions(answers, your_plan, your_home):
     for the household. Units are NZD, NZD, and kg CO2e, respectively.
     """
     energy_use = (
-        answers.energy_usage_pattern(your_home) if answers else YearlyFuelUsageProfile()
+        answers.energy_usage_pattern(your_home, solar)
+        if answers
+        else YearlyFuelUsageProfile()
     )
     (fixed_cost_nzd, variable_cost_nzd) = your_plan.calculate_cost(energy_use)
     my_emissions_kg_co2e = emissions_kg_co2e(energy_use)
     return fixed_cost_nzd, variable_cost_nzd, my_emissions_kg_co2e
 
 
-def calculate_savings_for_option(option, field, answers, your_home):
+def calculate_savings_for_option(option, field, answers, your_home, solar):
     """
     Calculate the savings and emissions reduction for a given option.
 
@@ -44,6 +49,8 @@ def calculate_savings_for_option(option, field, answers, your_home):
     - A dictionary structured to fit into the SavingsData model.
     """
     if type(answers).__name__ == "DrivingAnswers":
+        # The vehicle type affects the Road User Charges part of the energy
+        # plan, so we need to get a plan for the current and alternative vehicle types
         current_plan = get_energy_plan(your_home.postcode, answers.vehicle_type)
         alternative_plan = get_energy_plan(your_home.postcode, option)
     else:
@@ -54,7 +61,7 @@ def calculate_savings_for_option(option, field, answers, your_home):
 
     # Calculate the current energy use, costs, and emissions
     _, current_variable_costs, current_emissions_kg_co2e = costs_and_emissions(
-        answers, current_plan, your_home
+        answers, current_plan, solar, your_home
     )
 
     # Create a copy of the answers and set the new option for the specified field
@@ -63,7 +70,7 @@ def calculate_savings_for_option(option, field, answers, your_home):
 
     # Calculate the energy use, costs, and emissions for the alternative option
     _, alternative_variable_costs, alternative_emissions_kg_co2e = costs_and_emissions(
-        alternative_answers, alternative_plan, your_home
+        alternative_answers, alternative_plan, solar, your_home
     )
 
     # Calculate the absolute and percentage savings and emissions reduction
@@ -94,7 +101,7 @@ def calculate_savings_for_option(option, field, answers, your_home):
     }
 
 
-def generate_savings_options(answers, field, your_home):
+def generate_savings_options(answers, field, your_home, solar):
     """
     For each fuel switching option, calculate the savings in dollars and the
     percentage reduction in emissions, formatted to fit directly into a Pydantic model.
@@ -110,15 +117,15 @@ def generate_savings_options(answers, field, your_home):
     return_dictionary = {}
     for option in options:
         return_dictionary[option] = calculate_savings_for_option(
-            option, field, answers, your_home
+            option, field, answers, your_home, solar
         )
 
-    current_fuel_use = answers.energy_usage_pattern(your_home)
+    current_fuel_use = answers.energy_usage_pattern(your_home, solar)
 
     return return_dictionary, current_fuel_use
 
 
-def calculate_savings_for_option_provided(answers, your_home):
+def calculate_savings_for_option_provided(answers, your_home, solar):
     """
     Calculate the savings and emissions reduction for a given option.
     """
@@ -136,7 +143,7 @@ def calculate_savings_for_option_provided(answers, your_home):
         field = "vehicle_type"
     else:
         raise ValueError("Invalid answers type")
-    return calculate_savings_for_option(option, field, answers, your_home)
+    return calculate_savings_for_option(option, field, answers, your_home, solar)
 
 
 def calculate_component_savings(profile):
@@ -159,6 +166,8 @@ def calculate_component_savings(profile):
         ("driving", "vehicle_type"),
     ]
 
+    solar = get_solar_answers(profile)
+
     for component, field in household_components:
         component_attr = getattr(profile, component, None)
         if component_attr is None:
@@ -172,7 +181,7 @@ def calculate_component_savings(profile):
             and getattr(component_attr, alternative_field) is not None
         ):
             savings_dict = calculate_savings_for_option_provided(
-                component_attr, profile.your_home
+                component_attr, profile.your_home, solar
             )
 
             savings_dict = round_floats_to_2_dp(savings_dict)

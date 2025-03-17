@@ -2,6 +2,8 @@
 Class for storing user answers on household driving.
 """
 
+# pylint: disable=too-many-locals
+
 from typing import Literal, Optional
 
 from pydantic import BaseModel
@@ -14,7 +16,14 @@ from ...constants import (
     FUEL_CONSUMPTION_LITRES_PER_100KM,
 )
 from ...services.usage_profile_helpers import flat_day_night_profiles
-from ..usage_profiles import DrivingYearlyFuelUsageProfile, ElectricityUsageProfile
+from ...services.usage_profile_helpers.driving import (
+    ev_charging_profile,
+    solar_friendly_ev_charging_profile,
+)
+from ..usage_profiles import DrivingYearlyFuelUsageProfile, ElectricityUsageTimeseries
+
+DEFAULT_CHARGER_KW = 3.0  # See https://www.standards.govt.nz/shop/snz-pas-60112023
+CALENDAR_YEAR = 2019
 
 
 class DrivingAnswers(BaseModel):
@@ -47,7 +56,7 @@ class DrivingAnswers(BaseModel):
 
     # pylint: disable=unused-argument
     def energy_usage_pattern(
-        self, your_home, use_alternative: bool = False
+        self, your_home, solar, use_alternative: bool = False
     ) -> DrivingYearlyFuelUsageProfile:
         """
         Return the yearly fuel usage profile for driving.
@@ -60,15 +69,18 @@ class DrivingAnswers(BaseModel):
         daily_distance_km = ASSUMED_DISTANCES_PER_WEEK[self.km_per_week] / 7
         yearly_distance_thousand_km = daily_distance_km * DAYS_IN_YEAR / 1000
 
-        liquid_fuel = None
+        # Figure out whether we have a petrol or diesel vehicle
+        # (including hybrid/plug-in hybrid),
+        # so that we can compute yearly fuel usage if needed.
         if vehicle_type in ["Petrol", "Hybrid", "Plug-in hybrid"]:
             liquid_fuel = "Petrol"
         elif vehicle_type == "Diesel":
             liquid_fuel = "Diesel"
-        elif vehicle_type != "Electric":
-            raise ValueError(f"Unknown vehicle type: {vehicle_type}")
+        else:
+            liquid_fuel = None  # e.g. pure Electric
 
-        if vehicle_type in ["Petrol", "Diesel", "Hybrid", "Plug-in hybrid"]:
+        # Calculate the litres of liquid fuel if needed
+        if liquid_fuel:
             litres_per_100km = FUEL_CONSUMPTION_LITRES_PER_100KM[vehicle_type][
                 self.vehicle_size
             ]
@@ -76,25 +88,34 @@ class DrivingAnswers(BaseModel):
         else:
             yearly_fuel_litres = 0
 
+        # Calculate the battery usage if needed (i.e. plug-in hybrid or pure electric)
         if vehicle_type in ["Plug-in hybrid", "Electric"]:
             kwh_per_100km = BATTERY_ECONOMY_KWH_PER_100KM[vehicle_type][
                 self.vehicle_size
             ]
-            yearly_battery_kwh = (yearly_distance_thousand_km * 10) * kwh_per_100km
-            public_charging_kwh = yearly_battery_kwh * EV_PUBLIC_CHARGING_FRACTION
-            home_charging_kwh = yearly_battery_kwh - public_charging_kwh
+            yearly_total_kwh = (yearly_distance_thousand_km * 10) * kwh_per_100km
+            public_charging_kwh = yearly_total_kwh * EV_PUBLIC_CHARGING_FRACTION
+            home_charging_kwh = yearly_total_kwh - public_charging_kwh
+
+            if solar.has_solar:
+                charging_profile = solar_friendly_ev_charging_profile(
+                    home_charging_kwh, charger_kw=DEFAULT_CHARGER_KW, year=CALENDAR_YEAR
+                )
+            else:
+                charging_profile = ev_charging_profile()
+            home_charging_timeseries = ElectricityUsageTimeseries(
+                shift_able_uncontrolled_kwh=home_charging_kwh * charging_profile
+            )
         else:
-            yearly_battery_kwh = 0
+            # No battery usage
+            yearly_total_kwh = 0
             public_charging_kwh = 0
-            home_charging_kwh = 0
+            home_charging_timeseries = ElectricityUsageTimeseries()
 
-        anytime_kwh = ElectricityUsageProfile(
-            shift_able_uncontrolled_kwh=home_charging_kwh * self.ev_charging_profile()
-        )
-
+        # Finally, return the DrivingYearlyFuelUsageProfile.
         return DrivingYearlyFuelUsageProfile(
             elx_connection_days=DAYS_IN_YEAR,
-            electricity_kwh=anytime_kwh,
+            electricity_kwh=home_charging_timeseries,
             petrol_litres=yearly_fuel_litres if liquid_fuel == "Petrol" else 0,
             diesel_litres=yearly_fuel_litres if liquid_fuel == "Diesel" else 0,
             public_ev_charger_kwh=public_charging_kwh,

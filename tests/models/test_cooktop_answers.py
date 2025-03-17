@@ -8,7 +8,7 @@ import numpy as np
 from pytest import approx, raises
 
 from app.constants import DAYS_IN_YEAR
-from app.models.user_answers import CooktopAnswers, YourHomeAnswers
+from app.models.user_answers import CooktopAnswers, SolarAnswers, YourHomeAnswers
 from app.services.configuration import (
     get_default_cooktop_answers,
     get_default_your_home_answers,
@@ -28,6 +28,8 @@ COOKTOP = CooktopAnswers(
     cooktop="Piped gas",
     alternative_cooktop="Electric induction",
 )
+
+SOLAR = SolarAnswers(has_solar=False)
 
 
 def validate_energy_usage_fields(energy_usage, expected_fields, cooktop_type):
@@ -66,7 +68,7 @@ def test_invalid_cooktop_type():
     setattr(cooktop_answers, "cooktop", "Invalid type")
     setattr(cooktop_answers, "alternative_cooktop", "Invalid type")
     with raises(ValueError, match="Unknown cooktop type: Invalid type"):
-        cooktop_answers.energy_usage_pattern(your_home)
+        cooktop_answers.energy_usage_pattern(your_home, SOLAR)
 
 
 def test_cooking_energy_usage():
@@ -153,7 +155,7 @@ def test_cooking_energy_usage():
         cooktop.cooktop = cooktop_type
         for i, expected_kwh in enumerate(energy_use_values):
             your_home.people_in_house = i + 1
-            cooktop_energy_use = cooktop.energy_usage_pattern(your_home)
+            cooktop_energy_use = cooktop.energy_usage_pattern(your_home, SOLAR)
 
             energy_value = energy_usage_getters[cooktop_type](cooktop_energy_use)
             assert energy_value == approx(expected_kwh, rel=1e-2)
@@ -168,7 +170,7 @@ def manual_cost_calculation_natural_gas():
     A manual calculation of the annual running cost for a natural gas cooktop.
     """
     energy_plan = get_energy_plan("6012", "None")
-    natural_gas_kwh = COOKTOP.energy_usage_pattern(YOUR_HOME).natural_gas_kwh
+    natural_gas_kwh = COOKTOP.energy_usage_pattern(YOUR_HOME, SOLAR).natural_gas_kwh
     natural_gas_cost_per_kwh = energy_plan.natural_gas_plan.import_rates["Uncontrolled"]
     annual_running_cost = natural_gas_kwh * natural_gas_cost_per_kwh
     return annual_running_cost
@@ -180,7 +182,7 @@ def manual_cost_calculation_electric_induction():
     """
     energy_plan = get_energy_plan("6012", "None")
     day_usage = COOKTOP.energy_usage_pattern(
-        YOUR_HOME, use_alternative=True
+        YOUR_HOME, SOLAR, use_alternative=True
     ).electricity_kwh.fixed_time_uncontrolled_kwh.sum()
     cost_per_kwh_day = energy_plan.electricity_plan.import_rates["Day"]
     annual_running_cost = day_usage * cost_per_kwh_day
@@ -192,13 +194,13 @@ def test_cost_savings_calculations():
     Test the savings calculations for a cooktop, comparing with a manual calculation.
     """
     gas_energy_costs = MY_ENERGY_PLAN.calculate_cost(
-        COOKTOP.energy_usage_pattern(YOUR_HOME)
+        COOKTOP.energy_usage_pattern(YOUR_HOME, SOLAR)
     )
     induction_energy_costs = MY_ENERGY_PLAN.calculate_cost(
-        COOKTOP.energy_usage_pattern(YOUR_HOME, use_alternative=True)
+        COOKTOP.energy_usage_pattern(YOUR_HOME, SOLAR, use_alternative=True)
     )
     calculated_savings = calculate_savings_for_option(
-        "Electric induction", "cooktop", COOKTOP, YOUR_HOME
+        "Electric induction", "cooktop", COOKTOP, YOUR_HOME, SOLAR
     )
     assert gas_energy_costs[1] == approx(
         calculated_savings["variable_cost_nzd"]["current"]

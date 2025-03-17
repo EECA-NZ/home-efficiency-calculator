@@ -11,6 +11,7 @@ from app.models.usage_profiles import (
 )
 from app.models.user_answers import HouseholdAnswers
 from app.services.helpers import round_floats_to_2_dp
+from app.services.solar_helpers import get_solar_answers
 
 
 def uses_electricity(profile: HouseholdAnswers) -> bool:
@@ -112,11 +113,11 @@ def estimate_usage_from_profile(
     hot_water = answers.hot_water
     cooktop = answers.cooktop
     driving = answers.driving
-    solar = answers.solar
+    solar = get_solar_answers(answers)
 
     # Initialize the profiles with default empty profiles to handle None scenarios
     heating_profile = (
-        heating.energy_usage_pattern(your_home, use_alternative=use_alternatives)
+        heating.energy_usage_pattern(your_home, solar, use_alternative=use_alternatives)
         if heating is not None
         and (
             not use_alternatives or heating.alternative_main_heating_source is not None
@@ -124,7 +125,9 @@ def estimate_usage_from_profile(
         else YearlyFuelUsageProfile()
     )
     hot_water_profile = (
-        hot_water.energy_usage_pattern(your_home, use_alternative=use_alternatives)
+        hot_water.energy_usage_pattern(
+            your_home, solar, use_alternative=use_alternatives
+        )
         if hot_water is not None
         and (
             not use_alternatives
@@ -133,19 +136,17 @@ def estimate_usage_from_profile(
         else YearlyFuelUsageProfile()
     )
     cooktop_profile = (
-        cooktop.energy_usage_pattern(your_home, use_alternative=use_alternatives)
+        cooktop.energy_usage_pattern(your_home, solar, use_alternative=use_alternatives)
         if cooktop is not None
         and (not use_alternatives or cooktop.alternative_cooktop is not None)
         else YearlyFuelUsageProfile()
     )
     driving_profile = (
-        driving.energy_usage_pattern(your_home, use_alternative=use_alternatives)
+        driving.energy_usage_pattern(your_home, solar, use_alternative=use_alternatives)
         if driving is not None
         and (not use_alternatives or driving.alternative_vehicle_type is not None)
         else YearlyFuelUsageProfile()
     )
-    # Assume solar_profile is handled similarly if needed
-    # pylint: disable=unused-variable
     solar_profile = (
         solar.energy_generation(your_home) if solar else YearlyFuelUsageProfile()
     )
@@ -157,7 +158,13 @@ def estimate_usage_from_profile(
         DAYS_IN_YEAR if uses_natural_gas(answers, use_alternatives) else 0
     )
 
-    profiles = [heating_profile, hot_water_profile, cooktop_profile, driving_profile]
+    profiles = [
+        heating_profile,
+        hot_water_profile,
+        cooktop_profile,
+        driving_profile,
+        solar_profile,
+    ]
 
     # Variable electricity usage
     electricity_kwh = sum(profile.electricity_kwh for profile in profiles)

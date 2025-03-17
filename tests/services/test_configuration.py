@@ -93,4 +93,4 @@ def test_get_default_solar_answers():
     Test the get_default_solar_answers function.
     """
     solar_answers = get_default_solar_answers()
-    assert solar_answers.hasSolar is False
+    assert solar_answers.has_solar is False

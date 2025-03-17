@@ -1,0 +1,73 @@
+"""
+Map climate zones to hourly temperature profiles.
+"""
+
+import importlib.resources as pkg_resources
+import os
+
+import pandas as pd
+
+from .get_climate_zone import climate_zone
+
+
+def hourly_ta(postcode: str) -> pd.Series:
+    """
+    Return a Typical Meteorological Year hourly ambient temperature
+    timeseries for the given climate zone. The CSV is identified by
+    searching the directory for a filename that *contains* the `zone`
+    substring (case-insensitive).
+
+    The first matching file is read and the hourly ambient temperature
+    is returned as a pandas Series.
+
+    Assumes that the data is from 2019. Specification of the 2019
+    calendar year means that the 1st of January is a Tuesday. This
+    alignment between day number (1) and day type (Tuesday) is
+    relevant to demand patterns, which vary between weekdays and
+    weekends.
+
+    Parameters
+    ----------
+    postcode : str
+        The postcode. This will be mapped to NIWA climate zone.
+
+    Returns
+    -------
+    pd.Series
+        Hourly ambient temperature values (one row per hour).
+
+    Raises
+    ------
+    ValueError
+        If no matching CSV file is found.
+    """
+    # Get test_mode from environment variable
+    test_mode = os.getenv("TEST_MODE", "False").lower() == "true"
+
+    # Directory containing generation CSV files:
+    if test_mode:
+        data_dir = pkg_resources.files(
+            "resources.test_data.hourly_solar_generation_by_climate_zone"
+        )
+    else:
+        data_dir = pkg_resources.files(
+            "resources.supplementary_data.hourly_solar_generation_by_climate_zone"
+        )
+
+    zone = climate_zone(postcode).replace(" ", "_")
+    zone_lower = zone.lower()
+
+    for csv_file in data_dir.iterdir():
+        if csv_file.suffix.lower() == ".csv":
+            # Check if the zone text appears in the filename (case-insensitive)
+            if zone_lower in csv_file.stem.lower():
+                df = pd.read_csv(csv_file, dtype={"Hour": int, "niwaTA": float})
+                df.rename(columns={"niwaTA": "TA"}, inplace=True)
+                df["datetime"] = pd.date_range("2019-01-01", periods=len(df), freq="h")
+                df.set_index("datetime", inplace=True)
+                return df["TA"]
+
+    # If no matching CSV file is found, raise an error
+    raise ValueError(
+        f"No CSV file found in {data_dir} for climate zone containing '{zone}'."
+    )

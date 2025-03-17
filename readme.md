@@ -230,7 +230,7 @@ curl -Method 'POST' `
             "km_per_week": "200",
         },
         "solar": {
-            "hasSolar": true,
+            "has_solar": true,
         }
     }' `
     -OutFile 'response.json'

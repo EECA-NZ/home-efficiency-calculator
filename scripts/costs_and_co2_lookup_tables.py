@@ -17,11 +17,16 @@ from app.models.user_answers import (
     DrivingAnswers,
     HeatingAnswers,
     HotWaterAnswers,
+    SolarAnswers,
     YourHomeAnswers,
 )
 from app.services.energy_calculator import emissions_kg_co2e
 from app.services.get_climate_zone import climate_zone, postcode_dict
 from app.services.get_energy_plans import get_energy_plan
+
+# Round numerical outputs to 3 decimal places.
+FLOAT_FORMAT = "%.14f"
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -32,6 +37,8 @@ REPORT_EVERY_N_ROWS = 1e5
 
 # Ensure the directory exists
 os.makedirs(LOOKUP_DIR, exist_ok=True)
+
+NO_SOLAR = SolarAnswers(has_solar=False)
 
 people_in_house = [1, 2, 3, 4, 5, 6]
 # Post-MVP, exclude postcodes - requires coordination with web team
@@ -90,7 +97,7 @@ def uniquify_rows_and_write_to_csv(raw_df, filename):
     """
     final_df = raw_df.drop_duplicates().reset_index(drop=True)
     logging.info("Deduplicating: %s distinct rows.", len(final_df))
-    final_df.to_csv(filename, index=False)
+    final_df.to_csv(filename, float_format=FLOAT_FORMAT, index=False)
     return final_df
 
 
@@ -131,7 +138,7 @@ def calculate_cost_and_emissions(your_home, answers):
     if cache_key in cost_emissions_cache:
         return cost_emissions_cache[cache_key]
 
-    energy_usage_profile = answers.energy_usage_pattern(your_home)
+    energy_usage_profile = answers.energy_usage_pattern(your_home, NO_SOLAR)
     if answers.__class__.__name__ == "DrivingAnswers":
         vehicle_type = answers.vehicle_type
     else:

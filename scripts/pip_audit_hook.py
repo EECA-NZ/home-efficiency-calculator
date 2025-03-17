@@ -16,7 +16,12 @@ def main():
     """
     # 1) Check if we are inside a virtual environment
     if "VIRTUAL_ENV" not in os.environ:
-        print("ERROR: You must activate a local .venv before committing.")
+        print(
+            "ERROR: You must activate a local .venv before committing."
+            " In WSL, run 'python -m venv .venv' and 'source .venv/bin/activate'."
+            " In Windows, run 'python -m venv .venv' and '.venv\\Scripts\\activate'."
+            " See README.md for more information."
+        )
         sys.exit(1)
     # 2) Install/Update requirements-dev.txt
     try:

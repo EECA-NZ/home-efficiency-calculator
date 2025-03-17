@@ -24,10 +24,14 @@ Homepage = "https://github.com/EECA-NZ/home-efficiency-calculator"
 [tool.setuptools]
 packages = { find = { exclude = ["build*", "dist*", "*egg-info*", "__pycache__*", "*__pycache__*", "lookup", "lookup.*"] } }
 include-package-data = true
-package-data = { "data_analysis" = ["postcode_lookup_tables/output/*.csv",
-                                    "electricity_plans/output/*.csv",
-                                    "methane_plans/output/*.csv",
-                                    "supplementary_data/tariff_data/*.csv"] }
+package-data = { "resources" = ["postcode_lookup_tables/output/*.csv",
+                                 "electricity_plans/output/*.csv",
+                                 "methane_plans/output/*.csv",
+                                 "supplementary_data/tariff_data/*.csv",
+                                 "supplementary_data/energy_usage_timeseries/*.csv",
+                                 "power_demand_by_time_of_use_data/output/*.csv",
+                                 "supplementary_data/hourly_solar_generation_by_climate_zone/*.csv",
+                                 "test_data/hourly_solar_generation_by_climate_zone/*.csv"] }
 
 [tool.black]
 line-length = 88
@@ -35,3 +39,8 @@ target-version = ['py311']
 
 [tool.isort]
 profile = "black"
+
+[tool.pytest.ini_options]
+markers = [
+    "no_dummy: skip the dummy patch for hourly_ta"
+]

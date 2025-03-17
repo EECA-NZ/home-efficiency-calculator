@@ -21,11 +21,11 @@ from app.services.usage_profile_helpers import (
 day_mask = day_night_flag()
 
 
-class ElectricityUsageProfile(BaseModel):
+class ElectricityUsageTimeseries(BaseModel):
     """
     Annual electricity usage for a time-slice,
-    stored as NumPy arrays. Each entry represents
-    the usage in a specific hour of the year.
+    stored as NumPy arrays, representing each hour of the year
+    (not as a pandas Series).
 
     Attributes:
       fixed_time_uncontrolled_kwh: Usage that is fixed to time of use
@@ -89,24 +89,38 @@ class ElectricityUsageProfile(BaseModel):
     @classmethod
     def validate_arrays(cls, value):
         """
-        Ensure that the arrays are the correct shape.
+        Ensure that the value is an array of correct shape.
+        Raises a ValueError if not an array or if the array
+        is not of shape (8760,).
         """
         return ensure_8760_array(value)
 
-    def __add__(self, other: "ElectricityUsageProfile") -> "ElectricityUsageProfile":
+    def __add__(
+        self, other: "ElectricityUsageTimeseries"
+    ) -> "ElectricityUsageTimeseries":
         """
-        Element-wise addition of two ElectricityUsageProfile objects.
+        Element-wise addition of two ElectricityUsageTimeseries objects.
         """
-        return ElectricityUsageProfile(
-            fixed_time_uncontrolled_kwh=self.fixed_time_uncontrolled_kwh
-            + other.fixed_time_uncontrolled_kwh,
-            fixed_time_controllable_kwh=self.fixed_time_controllable_kwh
-            + other.fixed_time_controllable_kwh,
-            shift_able_uncontrolled_kwh=self.shift_able_uncontrolled_kwh
-            + other.shift_able_uncontrolled_kwh,
-            shift_able_controllable_kwh=self.shift_able_controllable_kwh
-            + other.shift_able_controllable_kwh,
-        )
+        if not isinstance(other, ElectricityUsageTimeseries):
+            raise TypeError(
+                f"Cannot add 'ElectricityUsageTimeseries' to '{type(other).__name__}'. "
+                "Ensure 'other' is an ElectricityUsageTimeseries."
+            )
+        try:
+            return ElectricityUsageTimeseries(
+                fixed_time_uncontrolled_kwh=self.fixed_time_uncontrolled_kwh
+                + other.fixed_time_uncontrolled_kwh,
+                fixed_time_controllable_kwh=self.fixed_time_controllable_kwh
+                + other.fixed_time_controllable_kwh,
+                shift_able_uncontrolled_kwh=self.shift_able_uncontrolled_kwh
+                + other.shift_able_uncontrolled_kwh,
+                shift_able_controllable_kwh=self.shift_able_controllable_kwh
+                + other.shift_able_controllable_kwh,
+            )
+        except ValueError as e:
+            raise ValueError(
+                f"Cannot add 'ElectricityUsageTimeseries' objects: {e}"
+            ) from e
 
     def __radd__(self, other):
         """
@@ -221,6 +235,9 @@ class ElectricityUsageProfile(BaseModel):
 class ElectricityUsageReport(BaseModel):
     """
     Annual electricity usage (kwh) by category.
+
+    Used for presenting a summary of electricity usage, in cases
+    where an hourly breakdown is not helpful or needed.
     """
 
     fixed_time_uncontrolled_kwh: float = Field(
@@ -233,7 +250,7 @@ class ElectricityUsageReport(BaseModel):
     )
     shift_able_uncontrolled_kwh: float = Field(
         0.0,
-        description="PROBABLY REDUNDANT. Usage that can be time-shifted from day "
+        description="Usage that can be time-shifted from day "
         "to night but cannot be ripple-controlled (kWh)",
     )
     shift_able_controllable_kwh: float = Field(
@@ -246,13 +263,17 @@ class ElectricityUsageReport(BaseModel):
     )
 
 
-class SolarGenerationProfile(BaseModel):
+class SolarGenerationTimeseries(BaseModel):
     """
     Annual electricity generation by solar PV in a
     Typical Meteorological Year (TMY). The system
     is assumed to be north-facing and tilted at 30 degrees.
     Each climate zone has a different solar generation
     profile.
+
+    Stored as NumPy arrays, representing each hour of the year
+    (not as a pandas Series).
+
 
     Attributes:
         generation_kwh: energy generated in each of the
@@ -274,7 +295,9 @@ class SolarGenerationProfile(BaseModel):
     @classmethod
     def validate_arrays(cls, value):
         """
-        Ensure that the arrays are the correct shape.
+        Ensure that the value is an array of correct shape.
+        Raises a ValueError if not an array or if the array
+        is not of shape (8760,).
         """
         return ensure_8760_array(value)
 
@@ -285,11 +308,13 @@ class SolarGenerationProfile(BaseModel):
         """
         return float(np.sum(self.fixed_time_generation_kwh))
 
-    def __add__(self, other: "SolarGenerationProfile") -> "SolarGenerationProfile":
+    def __add__(
+        self, other: "SolarGenerationTimeseries"
+    ) -> "SolarGenerationTimeseries":
         """
-        Element-wise addition of two SolarGenerationProfile objects.
+        Element-wise addition of two SolarGenerationTimeseries objects.
         """
-        return SolarGenerationProfile(
+        return SolarGenerationTimeseries(
             fixed_time_generation_kwh=self.fixed_time_generation_kwh
             + other.fixed_time_generation_kwh
         )
@@ -306,6 +331,9 @@ class SolarGenerationProfile(BaseModel):
 class SolarGenerationReport(BaseModel):
     """
     Annual electricity generation by solar PV.
+
+    Used for presenting a summary of electricity usage, in cases
+    where an hourly breakdown is not helpful or needed.
     """
 
     fixed_time_generation_kwh: float = Field(
@@ -321,8 +349,8 @@ class YearlyFuelUsageProfile(BaseModel):
 
     Attributes:
     elx_connection_days: float, number of days with electricity connection
-    electricity_kwh: ElectricityUsageProfile, electricity consumption
-    solar_generation_kwh: SolarGenerationProfile, electricity generated by solar panels
+    electricity_kwh: ElectricityUsageTimeseries, electricity consumption
+    solar_generation_kwh: SolarGenerationTimeseries, generation by solar panels
     natural_gas_connection_days: float, number of days with natural gas
         connection
     natural_gas_kwh: float, natural gas usage
@@ -343,12 +371,12 @@ class YearlyFuelUsageProfile(BaseModel):
     elx_connection_days: float = Field(
         default=0.0, description="Number of days with electricity connection"
     )
-    electricity_kwh: ElectricityUsageProfile = Field(
-        default_factory=ElectricityUsageProfile,
+    electricity_kwh: ElectricityUsageTimeseries = Field(
+        default_factory=ElectricityUsageTimeseries,
         description="""Electricity consumption breakdown (kWh).""",
     )
-    solar_generation_kwh: SolarGenerationProfile = Field(
-        default_factory=SolarGenerationProfile,
+    solar_generation_kwh: SolarGenerationTimeseries = Field(
+        default_factory=SolarGenerationTimeseries,
         description="""Electricity generated by solar panels (kWh).""",
     )
     natural_gas_connection_days: float = Field(
@@ -544,7 +572,7 @@ class SolarYearlyFuelGenerationProfile(YearlyFuelUsageProfile):
     """
 
 
-class HouseholdOtherElectricityUsageProfile(YearlyFuelUsageProfile):
+class HouseholdOtherElectricityUsageTimeseries(YearlyFuelUsageProfile):
     """
     'Other household electricity' yearly fuel usage profile.
 
