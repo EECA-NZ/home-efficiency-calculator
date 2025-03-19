@@ -36,7 +36,7 @@ DRIVING = DrivingAnswers(
     vehicle_type="Petrol",
 )
 
-SOLAR = SolarAnswers(has_solar=False)
+SOLAR = SolarAnswers(add_solar=False)
 
 
 def test_small_electric_car():

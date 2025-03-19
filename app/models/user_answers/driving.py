@@ -97,7 +97,7 @@ class DrivingAnswers(BaseModel):
             public_charging_kwh = yearly_total_kwh * EV_PUBLIC_CHARGING_FRACTION
             home_charging_kwh = yearly_total_kwh - public_charging_kwh
 
-            if solar.has_solar:
+            if solar.add_solar:
                 charging_profile = solar_friendly_ev_charging_profile(
                     home_charging_kwh, charger_kw=DEFAULT_CHARGER_KW, year=CALENDAR_YEAR
                 )

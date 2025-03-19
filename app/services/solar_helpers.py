@@ -12,7 +12,7 @@ def get_solar_answers(answers) -> SolarAnswers:
     If the answers object contains a non-None 'solar'
     attribute, that instance is returned.
     Otherwise, a default SolarAnswers instance with
-    has_solar=False is returned.
+    add_solar=False is returned.
 
     Parameters
     ----------
@@ -28,4 +28,4 @@ def get_solar_answers(answers) -> SolarAnswers:
 
     if hasattr(answers, "solar") and answers.solar is not None:
         return answers.solar
-    return SolarAnswers(has_solar=False)
+    return SolarAnswers(add_solar=False)

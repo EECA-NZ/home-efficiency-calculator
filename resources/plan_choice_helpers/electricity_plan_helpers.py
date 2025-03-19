@@ -208,7 +208,7 @@ def load_electrified_household_energy_usage_profile():
             vehicle_type="Electric",
         ),
         solar=SolarAnswers(
-            has_solar=False,
+            add_solar=False,
         ),
     )
     household_energy_use = estimate_usage_from_profile(household_profile)

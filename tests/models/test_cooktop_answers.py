@@ -29,7 +29,7 @@ COOKTOP = CooktopAnswers(
     alternative_cooktop="Electric induction",
 )
 
-SOLAR = SolarAnswers(has_solar=False)
+SOLAR = SolarAnswers(add_solar=False)
 
 
 def validate_energy_usage_fields(energy_usage, expected_fields, cooktop_type):

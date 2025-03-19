@@ -8,34 +8,55 @@ demonstration purposes, the function returns dummy values.
 
 from ..constants import EMISSIONS_FACTORS
 
+ASSUMED_SELF_CONSUMPTION = 0.0
 
-def calculate_solar_savings(your_home, heating, hot_water, driving):
+
+def calculate_solar_savings(profile):
     """
-    Calculate the solar benefit based on the provided answer objects.
+    Calculate the benefit of adding solar PV based on the provided answer objects.
 
-    :param your_home: Instance of YourHomeAnswers (provides people_in_house,
-                      postcode, etc.)
-    :param heating: Instance of HeatingAnswers (provides main_heating_source,
-                    heating_during_day, insulation_quality)
-    :param hot_water: Instance of HotWaterAnswers (provides hot_water_heating_source,
-                      hot_water_usage)
-    :param driving: Instance of DrivingAnswers (provides vehicle_type, vehicle_size,
-                    km_per_week)
+    It is assumed that the home does not have solar PV installed yet. The benefits
+    of solar depend on the energy usage profile of the household. Variations in the
+    overall savings are attributed entirely to solar, i.e. the solar savings are
+    calculated as
+        energy_costs(alternatives, including solar) - energy_costs(current, no solar)
+
+    :param profile
+
     :return: A dictionary with the calculated solar benefit metrics:
              - 'annual_kwh_generated'
              - 'annual_kg_co2e_saving'
              - 'annual_earnings_solar_export'
              - 'annual_savings_solar_self_consumption'
     """
-    _ = (your_home, heating, hot_water, driving)
-    # For demonstration, we compute dummy values.
-    annual_kwh_generated = 5123.45
-    annual_kg_co2e_saving = (
-        annual_kwh_generated * EMISSIONS_FACTORS["electricity_kg_co2e_per_kwh"]
+    _ = profile
+
+    add_solar = False
+    if profile.solar is not None:
+        add_solar = profile.solar.add_solar
+
+    if add_solar:
+        annual_kwh_generated = profile.solar.energy_generation(
+            profile.your_home
+        ).solar_generation_kwh.fixed_time_generation_kwh.sum()
+        annual_kg_co2e_saving = (
+            annual_kwh_generated * EMISSIONS_FACTORS["electricity_kg_co2e_per_kwh"]
+        )
+    else:
+        annual_kwh_generated = 0
+        annual_kg_co2e_saving = 0
+
+    # Distribute generated energy between 'exported' and 'self-consumed'
+    annual_savings_solar_self_consumption = (
+        annual_kwh_generated * ASSUMED_SELF_CONSUMPTION * 0.25
     )
+    annual_earnings_solar_export = (
+        annual_kwh_generated * (1 - ASSUMED_SELF_CONSUMPTION) * 0.12
+    )
+
     return {
         "annual_kwh_generated": annual_kwh_generated,
         "annual_kg_co2e_saving": annual_kg_co2e_saving,
-        "annual_earnings_solar_export": 123.45,
-        "annual_savings_solar_self_consumption": 678.90,
+        "annual_earnings_solar_export": annual_earnings_solar_export,
+        "annual_savings_solar_self_consumption": annual_savings_solar_self_consumption,
     }

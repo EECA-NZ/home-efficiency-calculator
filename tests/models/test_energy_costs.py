@@ -95,7 +95,7 @@ def test_create_household_energy_profile_to_cost_with_solar():
         hot_water=get_default_hot_water_answers(),
         cooktop=get_default_cooktop_answers(),
         driving=get_default_driving_answers(),
-        solar=SolarAnswers(has_solar=True),
+        solar=SolarAnswers(add_solar=True),
     )
     my_plan = HouseholdEnergyPlan(
         name="Basic Household Energy Plan",

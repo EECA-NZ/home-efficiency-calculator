@@ -38,7 +38,7 @@ REPORT_EVERY_N_ROWS = 1e5
 # Ensure the directory exists
 os.makedirs(LOOKUP_DIR, exist_ok=True)
 
-NO_SOLAR = SolarAnswers(has_solar=False)
+NO_SOLAR = SolarAnswers(add_solar=False)
 
 people_in_house = [1, 2, 3, 4, 5, 6]
 # Post-MVP, exclude postcodes - requires coordination with web team
@@ -74,7 +74,7 @@ cooktop_types = [
 vehicle_types = ["Petrol", "Diesel", "Hybrid", "Plug-in hybrid", "Electric"]
 vehicle_sizes = ["Small", "Medium", "Large"]
 km_per_week = ["50 or less", "100", "200", "300", "400 or more"]
-has_solar = [True, False]  # Ignored for now
+add_solar = [True, False]  # Ignored for now
 
 # Cache for expensive functions
 energy_plan_cache = {}

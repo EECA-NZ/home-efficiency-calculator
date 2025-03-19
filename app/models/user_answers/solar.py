@@ -2,8 +2,6 @@
 Class for storing user answers on solar generation.
 """
 
-from typing import Optional
-
 import numpy as np
 from pydantic import BaseModel
 
@@ -13,11 +11,12 @@ from ..usage_profiles import SolarGenerationTimeseries, SolarYearlyFuelGeneratio
 
 class SolarAnswers(BaseModel):
     """
-    Does the house include solar panels?
+    Should the calculations include adding solar panels?
+
+    Note that it is assumed that the user does not have solar panels.
     """
 
-    has_solar: bool
-    alternative_has_solar: Optional[bool] = None
+    add_solar: bool
 
     def energy_generation(
         self,
@@ -39,7 +38,7 @@ class SolarAnswers(BaseModel):
             The yearly fuel usage profile for solar energy generation.
         """
         my_climate_zone = get_climate_zone.climate_zone(your_home.postcode)
-        if self.has_solar:
+        if self.add_solar:
             hourly_solar_generation_kwh = SolarGenerationTimeseries(
                 fixed_time_generation_kwh=get_solar_generation.hourly_pmax(
                     my_climate_zone

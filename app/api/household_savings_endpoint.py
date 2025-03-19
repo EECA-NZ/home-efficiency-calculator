@@ -10,13 +10,14 @@ from ..models.user_answers import HouseholdAnswers
 from ..services.cost_calculator import (
     assemble_fuel_savings,
     assemble_total_savings,
-    calculate_component_savings,
+    calculate_component_savings_without_solar,
     calculate_fixed_cost_savings,
     determine_gas_connection_checkbox,
 )
 from ..services.energy_calculator import estimate_usage_from_profile
 from ..services.get_climate_zone import climate_zone
 from ..services.get_energy_plans import postcode_to_edb_zone
+from ..services.solar_calculator import calculate_solar_savings
 
 router = APIRouter()
 
@@ -34,16 +35,23 @@ def household_energy_profile(profile: HouseholdAnswers):
             climate_zone=climate_zone(profile.your_home.postcode),
             edb_region=postcode_to_edb_zone(profile.your_home.postcode),
         )
-        response, totals = calculate_component_savings(profile)
+        response, totals = calculate_component_savings_without_solar(profile)
         gas_connection_savings = calculate_fixed_cost_savings(profile)
+        solar_savings = calculate_solar_savings(profile)
         checkbox = determine_gas_connection_checkbox(profile)
         total_fuel_savings = assemble_fuel_savings(totals)
-        total_savings = assemble_total_savings(totals, gas_connection_savings)
-        current_fuel_use_profile = estimate_usage_from_profile(
-            profile, round_to_2dp=False
+        total_savings = assemble_total_savings(
+            totals, solar_savings, gas_connection_savings
         )
-        alternative_fuel_use_profile = estimate_usage_from_profile(
-            profile, use_alternatives=True, round_to_2dp=False
+        current_fuel_use_profile = (
+            estimate_usage_from_profile(  # <- update to include solar
+                profile, round_to_2dp=False
+            )
+        )
+        alternative_fuel_use_profile = (
+            estimate_usage_from_profile(  # <- update to include solar
+                profile, use_alternatives=True, round_to_2dp=False
+            )
         )
         current_fuel_use = YearlyFuelUsageReport(
             current_fuel_use_profile, decimal_places=2
@@ -57,6 +65,7 @@ def household_energy_profile(profile: HouseholdAnswers):
             cooktop_fuel_savings=response.get("cooktop", None),
             driving_fuel_savings=response.get("driving", None),
             total_fuel_savings=total_fuel_savings,
+            solar_savings=solar_savings,
             gas_connection_savings=gas_connection_savings,
             checkbox=checkbox,
             total_savings=total_savings,

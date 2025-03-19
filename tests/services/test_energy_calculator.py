@@ -29,7 +29,7 @@ household_profile_with_solar = HouseholdAnswers(
     hot_water=cfg.get_default_hot_water_answers(),
     cooktop=cfg.get_default_cooktop_answers(),
     driving=cfg.get_default_driving_answers(),
-    solar=SolarAnswers(has_solar=True),
+    solar=SolarAnswers(add_solar=True),
 )
 
 

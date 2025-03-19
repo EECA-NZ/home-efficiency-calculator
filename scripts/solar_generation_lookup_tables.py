@@ -29,7 +29,7 @@ FLOAT_FORMAT = "%.6f"
 DEFAULT_POSTCODE = "6012"
 EXPORT_RATE = 0.12  # NZD per kWh for exported electricity
 TIMESERIES_SUM = 1000.0  # Sum of hour columns for each row
-SOLAR = SolarAnswers(has_solar=True)
+SOLAR = SolarAnswers(add_solar=True)
 
 # Constant for the lookup directory. Relative to the script location.
 LOOKUP_DIR = os.path.join(os.path.dirname(__file__), "..", "lookup")

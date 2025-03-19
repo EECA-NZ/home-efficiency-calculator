@@ -69,7 +69,7 @@ def get_default_solar_answers():
     Return a default 'solar' answers object.
     """
     return SolarAnswers(
-        has_solar=False,
+        add_solar=False,
     )
 
 

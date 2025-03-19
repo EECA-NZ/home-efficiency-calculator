@@ -146,7 +146,7 @@ def calculate_savings_for_option_provided(answers, your_home, solar):
     return calculate_savings_for_option(option, field, answers, your_home, solar)
 
 
-def calculate_component_savings(profile):
+def calculate_component_savings_without_solar(profile):
     """
     Calculate the savings and emissions reductions for each component.
 
@@ -242,7 +242,7 @@ def assemble_fuel_savings(totals):
     )
 
 
-def assemble_total_savings(totals, gas_disconnection_savings):
+def assemble_total_savings(totals, solar_savings, gas_disconnection_savings):
     """
     Calculate total cost and CO2 savings for the household.
 
@@ -259,9 +259,16 @@ def assemble_total_savings(totals, gas_disconnection_savings):
             gas_connection_type
         ]["variable_cost_nzd"].alternative
 
+    solar_export_earnings = solar_savings["annual_earnings_solar_export"]
+    solar_self_consumption_savings = solar_savings[
+        "annual_savings_solar_self_consumption"
+    ]
+    solar_savings_total = solar_export_earnings + solar_self_consumption_savings
     current_cost = totals["total_current_variable_costs"] + gas_connection_costs_current
     alternative_cost = (
-        totals["total_alternative_variable_costs"] + gas_connection_costs_alternative
+        totals["total_alternative_variable_costs"]
+        + gas_connection_costs_alternative
+        + solar_savings_total
     )
     total_cost_savings_dict = {
         "current": current_cost,
@@ -271,13 +278,18 @@ def assemble_total_savings(totals, gas_disconnection_savings):
             current_cost, alternative_cost
         ),
     }
+
+    emissions_current = totals["total_current_emissions"]
+    emissions_alternative = (
+        totals["total_alternative_emissions"] + solar_savings["annual_kg_co2e_saving"]
+    )
+
     emissions_savings_dict = {
-        "current": totals["total_current_emissions"],
-        "alternative": totals["total_alternative_emissions"],
-        "absolute_reduction": totals["total_current_emissions"]
-        - totals["total_alternative_emissions"],
+        "current": emissions_current,
+        "alternative": emissions_alternative,
+        "absolute_reduction": emissions_current - emissions_alternative,
         "percentage_reduction": safe_percentage_reduction(
-            totals["total_current_emissions"], totals["total_alternative_emissions"]
+            emissions_current, emissions_alternative
         ),
     }
     total_cost_savings_dict = round_floats_to_2_dp(total_cost_savings_dict)
