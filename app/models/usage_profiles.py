@@ -308,6 +308,13 @@ class SolarGenerationTimeseries(BaseModel):
         """
         return float(np.sum(self.fixed_time_generation_kwh))
 
+    @property
+    def timeseries(self) -> float:
+        """
+        Total electricity usage (kWh) over the entire year.
+        """
+        return self.fixed_time_generation_kwh
+
     def __add__(
         self, other: "SolarGenerationTimeseries"
     ) -> "SolarGenerationTimeseries":

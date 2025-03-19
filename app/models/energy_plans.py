@@ -50,7 +50,17 @@ class ElectricityPlan(BaseModel):
 
         Returns
         -------
-        (fixed_cost_nzd, variable_cost_nzd)
+        (fixed_cost_nzd,
+         variable_cost_nzd,
+         solar_self_consumption_savings_nzd,
+         solar_export_earnings_nzd)
+
+        Notes
+        -----
+        - The fixed cost is the daily charge times the number of days in the year.
+        - The variable cost is the sum of import costs minus export credits.
+        - The total cost borne by the household is the sum of fixed and variable costs.
+        - The solar self-consumption savings and export earnings are for information.
         """
 
         # ------------------------------------------------

@@ -10,6 +10,7 @@ from app.models.usage_profiles import (
     YearlyFuelUsageProfile,
 )
 from app.models.user_answers import HouseholdAnswers
+from app.services.get_base_demand_profile import other_electricity_energy_usage_profile
 from app.services.helpers import round_floats_to_2_dp
 from app.services.solar_helpers import get_solar_answers
 
@@ -104,6 +105,7 @@ def estimate_usage_from_profile(
     answers: HouseholdAnswers,
     use_alternatives: bool = False,
     round_to_2dp: bool = False,
+    include_other_electricity: bool = False,
 ) -> HouseholdYearlyFuelUsageProfile:
     """
     Estimate the household's yearly fuel usage profile.
@@ -150,6 +152,11 @@ def estimate_usage_from_profile(
     solar_profile = (
         solar.energy_generation(your_home) if solar else YearlyFuelUsageProfile()
     )
+    other_profile = (
+        other_electricity_energy_usage_profile()
+        if include_other_electricity
+        else YearlyFuelUsageProfile()
+    )
 
     # Determine fixed charges
     elx_connection_days = DAYS_IN_YEAR if uses_electricity(answers) else 0
@@ -164,6 +171,7 @@ def estimate_usage_from_profile(
         cooktop_profile,
         driving_profile,
         solar_profile,
+        other_profile,
     ]
 
     # Variable electricity usage

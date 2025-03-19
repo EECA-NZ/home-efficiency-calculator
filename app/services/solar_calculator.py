@@ -6,7 +6,21 @@ input parameters (your_home, heating, hot_water, and driving). For
 demonstration purposes, the function returns dummy values.
 """
 
+# pylint: disable=fixme, no-member
+
+# import logging and instantiate a logger
+import logging
+
+from app.services.driving_helpers import get_vehicle_type
+from app.services.get_energy_plans import get_energy_plan
+
 from ..constants import EMISSIONS_FACTORS
+from ..models.user_answers import SolarAnswers
+from ..services.energy_calculator import estimate_usage_from_profile
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 ASSUMED_SELF_CONSUMPTION = 0.0
 
@@ -29,34 +43,78 @@ def calculate_solar_savings(profile):
              - 'annual_earnings_solar_export'
              - 'annual_savings_solar_self_consumption'
     """
-    _ = profile
-
-    add_solar = False
-    if profile.solar is not None:
-        add_solar = profile.solar.add_solar
-
-    if add_solar:
-        annual_kwh_generated = profile.solar.energy_generation(
-            profile.your_home
-        ).solar_generation_kwh.fixed_time_generation_kwh.sum()
-        annual_kg_co2e_saving = (
-            annual_kwh_generated * EMISSIONS_FACTORS["electricity_kg_co2e_per_kwh"]
+    if (
+        profile.heating is None
+        or profile.heating.alternative_main_heating_source is None
+    ):
+        logger.warning(
+            "No heating source selected. Self-consumption may be underestimated."
         )
-    else:
-        annual_kwh_generated = 0
-        annual_kg_co2e_saving = 0
+    if (
+        profile.hot_water is None
+        or profile.hot_water.alternative_hot_water_heating_source is None
+    ):
+        logger.warning(
+            "No hot water heating source selected. "
+            "Self-consumption may be underestimated."
+        )
+    if profile.cooktop is None or profile.cooktop.alternative_cooktop is None:
+        logger.warning("No cooktop selected. Self-consumption may be underestimated.")
+    if profile.driving is None or profile.driving.alternative_vehicle_type is None:
+        logger.warning(
+            "No vehicle type selected. Self-consumption may be underestimated."
+        )
+
+    # We need to compare the energy costs with and without solar
+    counterfactual_profile = profile.model_copy()
+    counterfactual_profile.solar = SolarAnswers(add_solar=False)
+
+    with_solar_energy_usage_profile = estimate_usage_from_profile(
+        profile,
+        use_alternatives=True,
+        include_other_electricity=True,
+    )
+    no_solar_energy_usage_profile = estimate_usage_from_profile(
+        counterfactual_profile, use_alternatives=True, include_other_electricity=True
+    )
+
+    kwh_consumed = with_solar_energy_usage_profile.electricity_kwh.total_usage
+    annual_kwh_consumed = kwh_consumed.sum()
+
+    annual_solar_kwh_generated = (
+        with_solar_energy_usage_profile.solar_generation_kwh.total
+    )
+    annual_kg_co2e_saving = (
+        annual_solar_kwh_generated * EMISSIONS_FACTORS["electricity_kg_co2e_per_kwh"]
+    )
+
+    alternative_vehicle_type = get_vehicle_type(profile, use_alternatives=True)
+    energy_plan = get_energy_plan(profile.your_home.postcode, alternative_vehicle_type)
+    electricity_plan = energy_plan.electricity_plan
+
+    # TODO: modify the calculate_cost method to return a 4ple instead of a tuple
+    electricity_costs_with_solar = electricity_plan.calculate_cost(
+        with_solar_energy_usage_profile
+    )
+    electricity_costs_no_solar = electricity_plan.calculate_cost(
+        no_solar_energy_usage_profile
+    )
+
+    _ = annual_kg_co2e_saving  # suppress pylint warning
+    _ = electricity_costs_with_solar  # suppress pylint warning
+    _ = electricity_costs_no_solar  # suppress pylint warning
 
     # Distribute generated energy between 'exported' and 'self-consumed'
     annual_savings_solar_self_consumption = (
-        annual_kwh_generated * ASSUMED_SELF_CONSUMPTION * 0.25
+        annual_solar_kwh_generated * ASSUMED_SELF_CONSUMPTION * 0.25
     )
     annual_earnings_solar_export = (
-        annual_kwh_generated * (1 - ASSUMED_SELF_CONSUMPTION) * 0.12
+        annual_solar_kwh_generated * (1 - ASSUMED_SELF_CONSUMPTION) * 0.12
     )
 
     return {
-        "annual_kwh_generated": annual_kwh_generated,
-        "annual_kg_co2e_saving": annual_kg_co2e_saving,
+        "annual_kwh_generated": annual_solar_kwh_generated,
+        "annual_kg_co2e_saving": annual_kwh_consumed,
         "annual_earnings_solar_export": annual_earnings_solar_export,
         "annual_savings_solar_self_consumption": annual_savings_solar_self_consumption,
     }
