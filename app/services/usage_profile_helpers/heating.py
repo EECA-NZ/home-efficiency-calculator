@@ -1,44 +1,40 @@
 """
-Space heating profile calculation with heat pump COP logic.
+Space heating profile calculation using regression coefficients.
 
-We compute an hourly space heating demand profile for the postcode,
-factoring in day-of-week scheduling and optional heat pump COP.
+This revised version computes an hourly heating demand profile using a linear regression
+model rather than the original setpoint-based approach. Regression coefficients are loaded
+from a CSV file (1970s-house-combined-regression-electricity.csv) which contains:
+    • day_type – "Weekday" (no daytime heating) or "Weekend" (daytime heating)
+    • local_hour – the hour of the day (0-23)
+    • const – the constant for the regression model
+    • slope – the slope coefficient (multiplied by the outside temperature)
 
-Demand is computed as: max(setpoint - T_outside, 0).
-There is always heating in two baseline windows per day:
-    - Morning: 7am–9am
-    - Evening: 5pm–9pm
-And optionally an "all-day" window (7am–9pm) for a certain number
-of days per week, determined by the 'heating_during_day' parameter:
+Additional rules implemented:
+    • If the temperature is less than 5°C, use 5°C in the regression calculation.
+    • If the actual temperature is above 18°C, set heating_electricity to 0.
+    • If the regression prediction (const + temperature*slope) is negative, set to 0.
 
-  - "Never"            => 0 full-day heating days per week
-  - "1-2 days a week"  => 1 day in odd weeks, 2 in even weeks
-  - "3-4 days a week"  => 3 days in odd weeks, 4 in even weeks
-  - "5-7 days a week"  => 5 days in odd weeks, 7 in even weeks
+For each ISO week, the number of days that receive “all-day” heating is determined via
+_days_for_week(week_num, heating_during_day). The weekend days are assigned as the last
+n_full days of the week (with n_full determined by heating_during_day).
 
-If main_heating_source == "Heat pump", we reduce the required
-energy by dividing by a COP timeseries. By default ("constant"),
-this COP is taken from a dictionary keyed by climate zone.
-If cop_calculation == "scaled_carnot_cop", we estimate a
-scaled Carnot COP based on (21°C - T_outside).
-
-Finally, we normalize to produce a shape factor summing to 1.
+Finally, the hourly timeseries is normalized so that its sum is 1.
 """
 
+import os
 import numpy as np
 import pandas as pd
 
-from ...constants import HEAT_PUMP_COP_BY_CLIMATE_ZONE
-from ..get_climate_zone import climate_zone
+from ...constants import HEAT_PUMP_COP_BY_CLIMATE_ZONE  # not used in this revised algorithm
+from ..get_climate_zone import climate_zone  # not used here either
 from ..get_temperatures import hourly_ta
-from .hot_water import carnot_cop
 
-# Time window constants
-FULL_DAY_WINDOW = (7, 21)  # "full day" means 7am–9pm
-BASELINE_WINDOWS = [(7, 9), (17, 21)]  # "baseline" means 7–9am and 5–9pm
+# Time window constants are no longer used for regression-based calculation,
+# but they remain defined in case they are needed elsewhere.
+FULL_DAY_WINDOW = (7, 21)
+BASELINE_WINDOWS = [(7, 9), (17, 21)]
 
 DEFAULT_SPACE_HEATING_SETPOINT = 20.0
-
 
 def _days_for_week(week_num: int, option: str) -> int:
     """
@@ -55,7 +51,7 @@ def _days_for_week(week_num: int, option: str) -> int:
     -------
     int
         Number of days in the given week for which the user wants
-        all-day heating (7am–9pm).
+        all-day heating.
     """
     if option == "1-2 days a week":
         return 1 if (week_num % 2 == 1) else 2
@@ -65,174 +61,109 @@ def _days_for_week(week_num: int, option: str) -> int:
         return 5 if (week_num % 2 == 1) else 7
     return 0  # Default for "Never"
 
-
-def _get_heating_cop_series(
-    postcode: str,
-    temperature_series: pd.Series,
-    cop_calculation: str = "constant",
-    setpoint: float = DEFAULT_SPACE_HEATING_SETPOINT,
-) -> pd.Series:
-    """
-    Return an hourly COP series for space heating.
-
-    If cop_calculation == "constant", we use a single
-    climate-zone-specific COP from HEAT_PUMP_COP_BY_CLIMATE_ZONE,
-    repeated for every hour.
-
-    If cop_calculation == "scaled_carnot_cop", we use
-    carnot_cop(T_hot=setpoint, T_cold=outside_temperature) per hour
-    and scale it so that its average matches the climate zone's
-    annual COP from the dictionary.
-
-    Parameters
-    ----------
-    postcode : str
-        The postcode to derive the climate zone from.
-    temperature_series : pd.Series
-        Hourly outside temperatures (°C).
-    cop_calculation : str
-        "constant" or "scaled_carnot_cop".
-    setpoint : float
-        Desired indoor temperature in °C for Carnot COP calculation
-        (default=21.0).
-
-    Returns
-    -------
-    pd.Series
-        A timeseries of COP values (>=1).
-    """
-    cz = climate_zone(postcode)
-    annual_cop = HEAT_PUMP_COP_BY_CLIMATE_ZONE[cz]
-
-    if cop_calculation == "constant":
-        # Single numeric COP repeated
-        return pd.Series(annual_cop, index=temperature_series.index, name="COP")
-
-    if cop_calculation == "scaled_carnot_cop":
-        # Compute the theoretical Carnot COP for each hour, then scale
-        hourly_cop = temperature_series.apply(lambda t: carnot_cop(setpoint, t))
-        # Scale so that the mean matches annual_cop
-        scale_factor = annual_cop / hourly_cop.mean()
-        return (hourly_cop * scale_factor).rename("COP")
-
-    raise ValueError(f"Unknown cop_calculation: {cop_calculation}")
-
-
-# pylint: disable=too-many-locals
 def space_heating_profile(
     postcode: str,
     heating_during_day: str,
     setpoint: float = DEFAULT_SPACE_HEATING_SETPOINT,
-    main_heating_source: str = "Heat pump",
-    cop_calculation: str = "constant",
+    main_heating_source: str = "Heat pump",  # not used in this new approach
+    cop_calculation: str = "constant",       # not used in this new approach
 ) -> pd.Series:
     """
-    Compute an hourly space heating demand profile for the specified postcode.
+    Compute an hourly space heating demand profile using regression coefficients.
 
     Steps:
       1. Retrieve hourly outside temperatures via hourly_ta(postcode).
-      2. Compute raw heating demand = max(setpoint - temperature, 0).
-      3. If main_heating_source == "Heat pump", build a COP timeseries
-         (either "constant" or "scaled_carnot_cop") and divide raw demand
-         by that COP to get net electric demand. Otherwise, net electric
-         demand = raw demand.
-      4. Determine day scheduling: "baseline" (7–9am, 5–9pm) or
-         "full-day" (7am–9pm) on certain days each week.
-      5. Apply the active schedule to the net demand.
-      6. Normalize so sum(demand) == 1.
-
-    The number of "full-day" heating days per week is determined by
-    'heating_during_day', which can be:
-      - "Never"
-      - "1-2 days a week"
-      - "3-4 days a week"
-      - "5-7 days a week"
-
-    For each ISO week (week_num), we pick that many days
-    in ascending date order to be "full-day" (7am–9pm).
-    The rest remain on the baseline schedule.
+      2. Load regression coefficients from CSV into a DataFrame.
+      3. For each day, determine its “day type” (Weekday or Weekend) based on the week
+         number and the heating_during_day option. Weekend days are chosen as the last
+         n_full days of the week (e.g., if n_full == 1, only Sunday; if n_full == 2, Saturday
+         and Sunday; if n_full == 3, Friday, Saturday, and Sunday; etc.).
+      4. For each hour, determine the local hour and day type, then look up the corresponding
+         regression coefficients (const and slope) and calculate:
+             heating_electricity = const + temperature * slope
+         with the following modifications:
+             - If the temperature is below 5°C, use 5°C instead.
+             - If the actual temperature is above 18°C, set heating_electricity to 0.
+             - If the computed heating_electricity is negative, set it to 0.
+         If no matching coefficients are found, heating_electricity is set to 0.
+      5. Normalize the resulting timeseries so that its sum equals 1.
 
     Parameters
     ----------
     postcode : str
-        The postcode used by hourly_ta() to retrieve outside temps
-        and by climate_zone() to retrieve the climate zone.
+        The postcode used by hourly_ta() to retrieve outside temperatures.
     heating_during_day : str
         One of: "Never", "1-2 days a week", "3-4 days a week", "5-7 days a week".
     setpoint : float, optional
-        Desired indoor temperature in °C (default=21.0).
+        Desired indoor temperature in °C (not used in regression, but kept for compatibility).
     main_heating_source : str, optional
-        "Heat pump", "Resistive", etc. If "Heat pump", we reduce energy by the COP.
+        Not used in this revised algorithm.
     cop_calculation : str, optional
-        "constant" (use dictionary value per climate zone)
-        or "scaled_carnot_cop" (compute scaled carnot for each hour).
+        Not used in this revised algorithm.
 
     Returns
     -------
     pd.Series
         A Series of length 8760 (non-leap year) with an hourly DateTimeIndex,
-        representing the normalized space heating demand (kWh fraction).
+        representing the normalized heating demand (kWh fraction).
         Its sum is 1.0.
     """
     # 1. Retrieve outside temperature data
     temperature_series = hourly_ta(postcode).copy()
 
-    # 2. Compute raw heating demand (thermal) for each hour
-    demand_raw = np.maximum(setpoint - temperature_series, 0.0)
+    # 2. Load regression coefficients from CSV.
+    # Assume the CSV file is in the same directory as this module.
+    module_dir = os.path.dirname(__file__)
+    reg_csv_path = os.path.join(module_dir, "1970s-house-combined-regression-electricity.csv")
+    try:
+        reg_df = pd.read_csv(reg_csv_path)
+    except Exception as e:
+        raise FileNotFoundError(f"Could not load regression coefficients CSV: {reg_csv_path}") from e
 
-    # 3. If it's a heat pump, build a COP timeseries and divide
-    #    otherwise, net demand = demand_raw
-    if main_heating_source.lower() == "heat pump":
-        cop_series = _get_heating_cop_series(
-            postcode, temperature_series, cop_calculation, setpoint
-        )
-        net_demand = demand_raw / cop_series
-    else:
-        net_demand = demand_raw
+    # Ensure that the necessary columns are present
+    required_cols = {"day_type", "local_hour", "const", "slope"}
+    if not required_cols.issubset(set(reg_df.columns)):
+        raise ValueError(f"CSV file must contain columns: {required_cols}")
 
-    # 4. For scheduling, store net_demand in a DataFrame
+    # 3. Build a DataFrame with the temperature timeseries and date components.
     df = pd.DataFrame(
-        {
-            "net_demand": net_demand,
-            "temperature": temperature_series,
-        },
+        {"temperature": temperature_series},
         index=temperature_series.index,
     )
-
     df["date"] = df.index.normalize()
     iso_data = df.index.isocalendar()
     df["week"] = iso_data["week"]
     df["dayofweek"] = df.index.weekday  # Monday=0, Sunday=6
+    df["local_hour"] = df.index.hour
 
-    # 5. Mark full-day vs baseline days
-    full_heating_dates = {}
-    grouped = df.groupby("week")
-    for week_val, group in grouped:
-        unique_dates = np.sort(group["date"].unique())
-        n_full = _days_for_week(week_val, heating_during_day)
-        for i, day_val in enumerate(unique_dates):
-            full_heating_dates[day_val] = i < n_full
+    # 4. Determine the day type for each day.
+    # For each week, decide how many days should be treated as "Weekend" (i.e., with daytime heating)
+    # using the _days_for_week function. Here, we treat the last n_full days of the week as weekend days.
+    df["n_full"] = df["week"].apply(lambda w: _days_for_week(w, heating_during_day))
+    df["reg_day_type"] = np.where(df["dayofweek"] >= (7 - df["n_full"]), "Weekend", "Weekday")
 
-    df["full_heating"] = df["date"].map(full_heating_dates).fillna(False)
+    # 5. Merge with regression coefficients.
+    # The regression coefficients in reg_df are keyed by day_type and local_hour.
+    merged = pd.merge(
+        df,
+        reg_df,
+        how="left",
+        left_on=["reg_day_type", "local_hour"],
+        right_on=["day_type", "local_hour"],
+    )
 
-    # 6. Build boolean masks for each schedule:
-    hours = df.index.hour
+    # 6. Compute heating electricity demand.
+    # Adjust temperature: if temperature is below 5°C, use 5°C for the regression.
+    merged["calc_temperature"] = np.where(merged["temperature"] < 5, 5, merged["temperature"])
+    merged["heating_electricity"] = merged["const"].fillna(0) + merged["calc_temperature"] * merged["slope"].fillna(0)
+    # If the actual temperature is above 18°C, set heating_electricity to 0.
+    merged.loc[merged["temperature"] > 18, "heating_electricity"] = 0
+    # If the regression prediction is negative, set heating_electricity to 0.
+    merged.loc[merged["heating_electricity"] < 0, "heating_electricity"] = 0
 
-    # Full day window: (7, 21)
-    mask_full_day = (hours >= FULL_DAY_WINDOW[0]) & (hours < FULL_DAY_WINDOW[1])
-
-    # Baseline window is union of two intervals: (7,9) and (17,21)
-    mask_baseline = np.zeros(len(df), dtype=bool)
-    for start, end in BASELINE_WINDOWS:
-        mask_baseline |= (hours >= start) & (hours < end)
-
-    # Apply schedule: pick mask_full_day if full_heating==True, else mask_baseline
-    schedule_mask = np.where(df["full_heating"], mask_full_day, mask_baseline)
-    net_scheduled = df["net_demand"] * schedule_mask.astype(float)
-
-    # 7. Normalize sum to 1
-    total = net_scheduled.sum()
+    # 7. Normalize the timeseries so that its sum is 1.
+    total = merged["heating_electricity"].sum()
     if total > 0:
-        net_scheduled /= total
+        merged["heating_electricity"] /= total
 
-    return pd.Series(net_scheduled, index=df.index, name="heating_profile")
+    return pd.Series(merged["heating_electricity"], index=merged.index, name="heating_profile")
