@@ -13,7 +13,7 @@ from app.constants import CHECKBOX_BEHAVIOUR
 logging.basicConfig(level=logging.INFO)
 
 # Constant for the lookup directory. Relative to the script location.
-LOOKUP_DIR = os.path.join(os.path.dirname(__file__), "..", "lookup")
+LOOKUP_DIR = os.path.join(os.path.dirname(__file__), "..", "resources", "lookup_tables")
 REPORT_EVERY_N_ROWS = 1e5
 OUTPUT_FILE = "gas_connection_lookup_table.csv"
 

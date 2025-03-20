@@ -32,7 +32,7 @@ TIMESERIES_SUM = 1000.0  # Sum of hour columns for each row
 SOLAR = SolarAnswers(add_solar=True)
 
 # Constant for the lookup directory. Relative to the script location.
-LOOKUP_DIR = os.path.join(os.path.dirname(__file__), "..", "lookup")
+LOOKUP_DIR = os.path.join(os.path.dirname(__file__), "..", "resources", "lookup_tables")
 
 VEHICLE_PLUGIN_HYBRID = "Plug-in hybrid"
 VEHICLE_ELECTRIC = "Electric"
