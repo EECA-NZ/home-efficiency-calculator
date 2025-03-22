@@ -29,6 +29,7 @@ def get_default_heating_answers():
     """
     return HeatingAnswers(
         main_heating_source="Heat pump",
+        alternative_main_heating_source="Heat pump",
         heating_during_day="Never",
         insulation_quality="Moderately insulated",
     )
@@ -41,6 +42,7 @@ def get_default_hot_water_answers():
     return HotWaterAnswers(
         hot_water_usage="Average",
         hot_water_heating_source="Electric hot water cylinder",
+        alternative_hot_water_heating_source="Hot water heat pump",
     )
 
 
@@ -50,6 +52,7 @@ def get_default_cooktop_answers():
     """
     return CooktopAnswers(
         cooktop="Electric (coil or ceramic)",
+        alternative_cooktop="Electric induction",
     )
 
 
@@ -61,6 +64,7 @@ def get_default_driving_answers():
         vehicle_size="Medium",
         km_per_week="200",
         vehicle_type="Electric",
+        alternative_vehicle_type="Electric",
     )
 
 

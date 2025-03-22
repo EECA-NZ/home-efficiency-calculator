@@ -44,16 +44,16 @@ def test_space_heating_energy_usage():
         )
 
         # calculate costs by fuel
-        _, heating_electricity_variable_cost = plans["electricity_plan"].calculate_cost(
+        _, heating_electricity_variable_cost, _, _, _ = plans[
+            "electricity_plan"
+        ].calculate_cost(heating_energy_use)
+        _, heating_lpg_variable_cost, _, _, _ = plans["lpg_plan"].calculate_cost(
             heating_energy_use
         )
-        _, heating_lpg_variable_cost = plans["lpg_plan"].calculate_cost(
-            heating_energy_use
-        )
-        _, heating_natural_gas_variable_cost = plans["natural_gas_plan"].calculate_cost(
-            heating_energy_use
-        )
-        _, heating_wood_variable_cost = plans["wood_price"].calculate_cost(
+        _, heating_natural_gas_variable_cost, _, _, _ = plans[
+            "natural_gas_plan"
+        ].calculate_cost(heating_energy_use)
+        _, heating_wood_variable_cost, _, _, _ = plans["wood_price"].calculate_cost(
             heating_energy_use
         )
 

@@ -28,17 +28,31 @@ def costs_and_emissions(answers, your_plan, solar, your_home):
     your_home: YourHomeAnswers object
 
     Returns:
-    Tuple[float, float, float], the fixed cost, variable cost, and emissions
-    for the household. Units are NZD, NZD, and kg CO2e, respectively.
+    Tuple[float, float, float, float, float], the fixed cost, variable cost,
+    solar_self_consumption_savings, solar_export_earnings, and emissions
+    for the household. Units are [NZD] * 4 and kg CO2e, respectively.
     """
     energy_use = (
         answers.energy_usage_pattern(your_home, solar)
         if answers
         else YearlyFuelUsageProfile()
     )
-    (fixed_cost_nzd, variable_cost_nzd) = your_plan.calculate_cost(energy_use)
+    (
+        fixed_cost_nzd,
+        variable_cost_nzd,
+        solar_self_consumption_savings,
+        solar_export_earnings,
+        solar_self_consumption_percentage,
+    ) = your_plan.calculate_cost(energy_use)
     my_emissions_kg_co2e = emissions_kg_co2e(energy_use)
-    return fixed_cost_nzd, variable_cost_nzd, my_emissions_kg_co2e
+    return (
+        fixed_cost_nzd,
+        variable_cost_nzd,
+        solar_self_consumption_savings,
+        solar_export_earnings,
+        solar_self_consumption_percentage,
+        my_emissions_kg_co2e,
+    )
 
 
 def calculate_savings_for_option(option, field, answers, your_home, solar):
@@ -60,7 +74,7 @@ def calculate_savings_for_option(option, field, answers, your_home, solar):
         alternative_plan = get_energy_plan(your_home.postcode, "None")
 
     # Calculate the current energy use, costs, and emissions
-    _, current_variable_costs, current_emissions_kg_co2e = costs_and_emissions(
+    _, current_variable_costs, _, _, _, current_emissions_kg_co2e = costs_and_emissions(
         answers, current_plan, solar, your_home
     )
 
@@ -69,9 +83,14 @@ def calculate_savings_for_option(option, field, answers, your_home, solar):
     setattr(alternative_answers, field, option)
 
     # Calculate the energy use, costs, and emissions for the alternative option
-    _, alternative_variable_costs, alternative_emissions_kg_co2e = costs_and_emissions(
-        alternative_answers, alternative_plan, solar, your_home
-    )
+    (
+        _,
+        alternative_variable_costs,
+        _,
+        _,
+        _,
+        alternative_emissions_kg_co2e,
+    ) = costs_and_emissions(alternative_answers, alternative_plan, solar, your_home)
 
     # Calculate the absolute and percentage savings and emissions reduction
     absolute_cost_savings = current_variable_costs - alternative_variable_costs

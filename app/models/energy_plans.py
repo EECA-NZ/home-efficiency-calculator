@@ -27,80 +27,84 @@ class ElectricityPlan(BaseModel):
 
     Features:
         1. Supports day/night or controlled/uncontrolled or single-rate.
-        2. Allocates solar: first offsets usage, leftover is exported.
-        3. Compares Option 1 (no shift) vs. Option 2 (night shift).
-        4. Uses NumPy vectorized operations exclusively.
+        2. Determines solar self-consumption and export earnings.
+        3. For simplicity and correspondence with lookup-table implementation,
+           allocates solar simply: for Day/Night, all solar consumption is
+           assumed to offset day tariff imports. For single-rate, solar
+           offsets total usage (straight net). Solar is not implemented for
+           Controlled/Uncontrolled tariffs.
+        4. In “night shift” mode, used if solar is not present, shiftable usage
+           is moved to take advantage of off-peak rates.
+        5. Uses NumPy vectorized operations for performance.
     """
 
     name: str
     fixed_rate: float  # NZD per day
-    import_rates: Dict[str, float]  # e.g. {"Day": 0.25, "Night": 0.15}, or
-    # {"Controlled": 0.1, "Uncontrolled": 0.22}, etc.
+    import_rates: Dict[str, float]  # e.g. {"Day": 0.25, "Night": 0.15}
     export_rates: Dict[str, float]  # e.g. {"Uncontrolled": 0.12}
 
-    def calculate_cost(
-        self, profile, compare_shifts: bool = True
-    ) -> Tuple[float, float]:
+    def calculate_cost(self, usage_profile) -> Tuple[float, float, float, float, float]:
         """
         Calculate the electricity cost for this plan.
-        By default (compare_shifts=True), we:
-            1) Build Option 1 usage arrays (no shift).
-            2) Build Option 2 usage arrays (with night shift).
-            3) Compute variable costs for both, pick the cheaper scenario.
 
         Returns
         -------
         (fixed_cost_nzd,
          variable_cost_nzd,
          solar_self_consumption_savings_nzd,
-         solar_export_earnings_nzd)
+         solar_export_earnings_nzd,
+         solar_self_consumption_pct)
 
         Notes
         -----
-        - The fixed cost is the daily charge times the number of days in the year.
-        - The variable cost is the sum of import costs minus export credits.
-        - The total cost borne by the household is the sum of fixed and variable costs.
-        - The solar self-consumption savings and export earnings are for information.
+        - We do a simple check: if solar is present, use normal usage. If not, apply
+          a “night shift” version of usage.
+        - The fixed cost is fixed_rate times the number of connection days.
+        - The variable cost is import minus export credits.
+        - The solar self-consumption savings and export earnings are informational.
         """
+        # Decide whether to use "night shift" usage
+        use_night_shift = True
+        if usage_profile.solar_generation_kwh is not None:
+            if usage_profile.solar_generation_kwh.total > 0:
+                use_night_shift = False
 
-        # ------------------------------------------------
-        # 1) Identify tariff structure from import_rates
-        # ------------------------------------------------
+        # Identify which tariff structure we have
         tariff_structure = set(self.import_rates.keys())
 
-        # ------------------------------------------------
-        # 2) Gather usage arrays (all shape (8760,))
-        # ------------------------------------------------
-        solar_kwh = profile.solar_generation_kwh.fixed_time_generation_kwh
+        # Gather usage arrays (all shape (8760,))
+        solar_kwh = usage_profile.solar_generation_kwh.fixed_time_generation_kwh
 
-        # Option 1 (no shift): as-is
-        uncontrolled_opt1 = profile.electricity_kwh.total_uncontrolled_usage
-        controllable_opt1 = profile.electricity_kwh.total_controllable_usage
-
-        # Option 2 (night shift): shift the shiftable portions
-        uncontrolled_opt2 = profile.electricity_kwh.total_uncontrolled_night_shifted
-        controllable_opt2 = profile.electricity_kwh.total_controllable_night_shifted
-
-        # ------------------------------------------------
-        # 3) Compute variable cost for each scenario
-        # ------------------------------------------------
-        var_cost_opt1 = self._compute_variable_cost(
-            tariff_structure, uncontrolled_opt1, controllable_opt1, solar_kwh
-        )
-        if compare_shifts:
-            var_cost_opt2 = self._compute_variable_cost(
-                tariff_structure, uncontrolled_opt2, controllable_opt2, solar_kwh
+        if use_night_shift:
+            uncontrolled_kwh = (
+                usage_profile.electricity_kwh.total_uncontrolled_night_shifted
             )
-            variable_cost_nzd = min(var_cost_opt1, var_cost_opt2)
+            controlled_kwh = (
+                usage_profile.electricity_kwh.total_controllable_night_shifted
+            )
         else:
-            variable_cost_nzd = var_cost_opt1
+            uncontrolled_kwh = usage_profile.electricity_kwh.total_uncontrolled_usage
+            controlled_kwh = usage_profile.electricity_kwh.total_controllable_usage
 
-        # ------------------------------------------------
-        # 4) Fixed cost
-        # ------------------------------------------------
-        fixed_cost_nzd = profile.elx_connection_days * self.fixed_rate
+        (
+            variable_cost_nzd,
+            solar_self_consumption_savings_nzd,
+            solar_export_earnings_nzd,
+            solar_self_consumption_pct,
+        ) = self._compute_variable_cost(
+            tariff_structure, uncontrolled_kwh, controlled_kwh, solar_kwh
+        )
 
-        return (fixed_cost_nzd, variable_cost_nzd)
+        # Fixed cost
+        fixed_cost_nzd = usage_profile.elx_connection_days * self.fixed_rate
+
+        return (
+            fixed_cost_nzd,
+            variable_cost_nzd,
+            solar_self_consumption_savings_nzd,
+            solar_export_earnings_nzd,
+            solar_self_consumption_pct,
+        )
 
     def _compute_variable_cost(
         self,
@@ -108,31 +112,38 @@ class ElectricityPlan(BaseModel):
         uncontrolled_kwh: np.ndarray,
         controlled_kwh: np.ndarray,
         solar_kwh: np.ndarray,
-    ) -> float:
+    ) -> Tuple[float, float, float, float]:
         """
-        Router method that picks the right helper for the given tariff structure.
+        Router method that picks the appropriate helper for the given tariff structure.
+
+        Returns
+        -------
+        (net_import_cost_nzd,
+         solar_self_consumption_savings_nzd,
+         solar_export_earnings_nzd,
+         solar_self_consumption_pct)
         """
         if tariff_structure == {"Day", "Night"}:
-            # Combine controlled + uncontrolled for day/night logic
-            total_usage = uncontrolled_kwh + controlled_kwh
-            return self._compute_variable_cost_day_night(total_usage, solar_kwh)
+            total_usage_kwh = uncontrolled_kwh + controlled_kwh
+            return self._compute_variable_cost_day_night(total_usage_kwh, solar_kwh)
+
         if tariff_structure == {"Controlled", "Uncontrolled"}:
             return self._compute_variable_cost_controlled_uncontrolled(
                 uncontrolled_kwh, controlled_kwh, solar_kwh
             )
+
         if tariff_structure == {"All inclusive"}:
-            # Single rate
-            total_usage = uncontrolled_kwh + controlled_kwh
+            total_usage_kwh = uncontrolled_kwh + controlled_kwh
             return self._compute_variable_cost_single_rate(
-                total_usage, solar_kwh, rate_key="All inclusive"
+                total_usage_kwh, solar_kwh, rate_key="All inclusive"
             )
+
         if tariff_structure == {"Uncontrolled"}:
-            # Single rate
-            total_usage = uncontrolled_kwh + controlled_kwh
+            total_usage_kwh = uncontrolled_kwh + controlled_kwh
             return self._compute_variable_cost_single_rate(
-                total_usage, solar_kwh, rate_key="Uncontrolled"
+                total_usage_kwh, solar_kwh, rate_key="Uncontrolled"
             )
-        # Extend for additional structures as needed
+
         raise ValueError(f"Unexpected tariff structure: {tariff_structure}")
 
     # --------------------------------------------------------------------
@@ -140,91 +151,166 @@ class ElectricityPlan(BaseModel):
     # --------------------------------------------------------------------
     def _compute_variable_cost_day_night(
         self, usage_kwh: np.ndarray, solar_kwh: np.ndarray
-    ) -> float:
+    ) -> Tuple[float, float, float, float]:
         """
-        For a day/night tariff, do a fully vectorized hour-by-hour net import,
-        net export, day vs. night import rates, and subtract export credit.
+        For a day/night tariff, we assume all solar generation offsets day usage.
+
+        Returns
+        -------
+        (net_import_cost_nzd,
+         solar_offset_savings_nzd,
+         solar_export_earnings_nzd,
+         solar_self_consumption_pct)
         """
         export_rate = self.export_rates.get("Uncontrolled", 0.0)
         day_rate = self.import_rates["Day"]
         night_rate = self.import_rates["Night"]
 
-        # Compute net import/export for each hour
-        usage_minus_solar = usage_kwh - solar_kwh
-        net_import = np.clip(usage_minus_solar, a_min=0, a_max=None)
-        net_export = np.clip(-usage_minus_solar, a_min=0, a_max=None)
+        # Compute net usage and net export
+        net_usage_kwh = usage_kwh - solar_kwh
+        net_export_kwh = np.clip(-net_usage_kwh, a_min=0, a_max=None)
 
-        day_import = net_import * day_mask
-        night_import = net_import * (~day_mask)
+        # All solar offsets day usage
+        solar_self_consumption_kwh = np.minimum(usage_kwh, solar_kwh)
 
-        day_cost = day_import * day_rate
-        night_cost = night_import * night_rate
-        export_credit = net_export * export_rate
+        day_usage_kwh = (usage_kwh * day_mask).sum()
+        night_usage_kwh = (usage_kwh * (~day_mask)).sum()
+        total_self_consumed_kwh = solar_self_consumption_kwh.sum()
 
-        total_import_cost = day_cost.sum() + night_cost.sum()
-        total_export_credit = export_credit.sum()
+        # Subtract solar from day usage
+        net_day_usage_kwh = day_usage_kwh - total_self_consumed_kwh
 
-        return total_import_cost - total_export_credit
+        day_cost_nzd = net_day_usage_kwh * day_rate
+        night_cost_nzd = night_usage_kwh * night_rate
+        total_export_credit_nzd = net_export_kwh.sum() * export_rate
+
+        # “Savings” = how much day usage we offset
+        solar_offset_savings_nzd = total_self_consumed_kwh * day_rate
+
+        total_import_cost_nzd = day_cost_nzd + night_cost_nzd
+        net_import_cost_nzd = total_import_cost_nzd - total_export_credit_nzd
+        solar_export_earnings_nzd = total_export_credit_nzd
+
+        total_usage_sum = usage_kwh.sum()
+        if total_usage_sum == 0:
+            solar_self_consumption_pct = 0.0
+        else:
+            solar_self_consumption_pct = (
+                total_self_consumed_kwh / total_usage_sum
+            ) * 100.0
+
+        return (
+            net_import_cost_nzd,
+            solar_offset_savings_nzd,
+            solar_export_earnings_nzd,
+            solar_self_consumption_pct,
+        )
 
     # --------------------------------------------------------------------
     #   CONTROLLED/UNCONTROLLED
     # --------------------------------------------------------------------
     def _compute_variable_cost_controlled_uncontrolled(
-        self, unctrl_kwh: np.ndarray, ctrl_kwh: np.ndarray, solar_kwh: np.ndarray
-    ) -> float:
+        self,
+        uncontrolled_kwh: np.ndarray,
+        controlled_kwh: np.ndarray,
+        solar_kwh: np.ndarray,
+    ) -> Tuple[float, float, float, float]:
         """
-        Vectorized approach to "allocate solar to uncontrolled first,
-        then controlled, leftover is exported," in a single pass.
+        Allocate solar to uncontrolled usage first (like “day”),
+        then to controlled usage, leftover is exported.
         """
         export_rate = self.export_rates.get("Uncontrolled", 0.0)
         unctrl_rate = self.import_rates["Uncontrolled"]
         ctrl_rate = self.import_rates["Controlled"]
 
+        # Cost if no solar:
+        baseline_import_cost_nzd = (uncontrolled_kwh * unctrl_rate).sum() + (
+            controlled_kwh * ctrl_rate
+        ).sum()
+
         # 1) Allocate solar to uncontrolled
-        solar_to_uncontrolled = np.minimum(unctrl_kwh, solar_kwh)
+        solar_to_uncontrolled_kwh = np.minimum(uncontrolled_kwh, solar_kwh)
+        # 2) Remainder of solar
+        leftover_solar_kwh = solar_kwh - solar_to_uncontrolled_kwh
+        # 3) Then allocate to controlled
+        solar_to_controlled_kwh = np.minimum(controlled_kwh, leftover_solar_kwh)
+        # 4) Leftover => export
+        leftover_solar_kwh = np.clip(
+            leftover_solar_kwh - solar_to_controlled_kwh, 0, None
+        )
 
-        # 2) Remainder of solar (after meeting uncontrolled)
-        s_remaining = solar_kwh - solar_to_uncontrolled
+        # Net import
+        net_uncontrolled_kwh = uncontrolled_kwh - solar_to_uncontrolled_kwh
+        net_controlled_kwh = controlled_kwh - solar_to_controlled_kwh
 
-        # 3) Allocate to controlled
-        solar_to_controlled = np.minimum(ctrl_kwh, s_remaining)
+        solar_self_consumption_kwh = solar_to_uncontrolled_kwh + solar_to_controlled_kwh
+        total_usage_kwh = (uncontrolled_kwh + controlled_kwh).sum()
 
-        # 4) Leftover solar => export
-        leftover_solar = s_remaining - solar_to_controlled
-        leftover_solar = np.clip(leftover_solar, 0, None)  # defensive clip
+        if total_usage_kwh == 0:
+            solar_self_consumption_pct = 0.0
+        else:
+            solar_self_consumption_pct = (
+                solar_self_consumption_kwh.sum() / total_usage_kwh
+            ) * 100.0
 
-        # 5) Net import for each usage category
-        unctrl_import = unctrl_kwh - solar_to_uncontrolled
-        ctrl_import = ctrl_kwh - solar_to_controlled
+        import_cost_nzd = (net_uncontrolled_kwh * unctrl_rate).sum() + (
+            net_controlled_kwh * ctrl_rate
+        ).sum()
+        export_credit_nzd = (leftover_solar_kwh * export_rate).sum()
 
-        import_cost = unctrl_import * unctrl_rate + ctrl_import * ctrl_rate
-        export_credit = leftover_solar * export_rate
+        net_import_cost_nzd = import_cost_nzd - export_credit_nzd
+        solar_export_earnings_nzd = export_credit_nzd
+        solar_offset_savings_nzd = baseline_import_cost_nzd - import_cost_nzd
 
-        total_import_cost = import_cost.sum()
-        total_export_credit = export_credit.sum()
-
-        return total_import_cost - total_export_credit
+        return (
+            net_import_cost_nzd,
+            solar_offset_savings_nzd,
+            solar_export_earnings_nzd,
+            solar_self_consumption_pct,
+        )
 
     # --------------------------------------------------------------------
     #  'ALL INCLUSIVE' OR 'UNCONTROLLED' SINGLE RATE
     # --------------------------------------------------------------------
     def _compute_variable_cost_single_rate(
         self, usage_kwh: np.ndarray, solar_kwh: np.ndarray, rate_key: str
-    ) -> float:
+    ) -> Tuple[float, float, float, float]:
         """
-        Single import rate (e.g. 'All inclusive'), plus optional buy-back export rate.
+        Single import rate plus optional buy-back export rate.
+        Solar offsets total usage equally (no day vs. night distinction).
         """
         export_rate = self.export_rates.get("Uncontrolled", 0.0)
         import_rate = self.import_rates[rate_key]
 
-        usage_minus_solar = usage_kwh - solar_kwh
-        net_import = np.clip(usage_minus_solar, 0, None)
-        net_export = np.clip(-usage_minus_solar, 0, None)
+        # Cost if no solar:
+        baseline_import_cost_nzd = (usage_kwh * import_rate).sum()
 
-        import_cost = (net_import * import_rate).sum()
-        export_credit = (net_export * export_rate).sum()
+        net_usage_kwh = usage_kwh - solar_kwh
+        net_export_kwh = np.clip(-net_usage_kwh, 0, None)
+        net_import_kwh = np.clip(net_usage_kwh, 0, None)
 
-        return import_cost - export_credit
+        solar_self_consumption_kwh = np.minimum(usage_kwh, solar_kwh)
+        total_usage_sum = usage_kwh.sum()
+        if total_usage_sum == 0:
+            solar_self_consumption_pct = 0.0
+        else:
+            solar_self_consumption_pct = (
+                solar_self_consumption_kwh.sum() / total_usage_sum
+            ) * 100.0
+
+        import_cost_nzd = (net_import_kwh * import_rate).sum()
+        export_credit_nzd = (net_export_kwh * export_rate).sum()
+
+        net_import_cost_nzd = import_cost_nzd - export_credit_nzd
+        solar_export_earnings_nzd = export_credit_nzd
+        solar_offset_savings_nzd = baseline_import_cost_nzd - import_cost_nzd
+
+        return (
+            net_import_cost_nzd,
+            solar_offset_savings_nzd,
+            solar_export_earnings_nzd,
+            solar_self_consumption_pct,
+        )
 
 
 class NaturalGasPlan(BaseModel):
@@ -236,29 +322,30 @@ class NaturalGasPlan(BaseModel):
     fixed_rate: float
     import_rates: Dict[str, float]
 
-    def calculate_cost(self, profile):
+    def calculate_cost(self, usage_profile) -> Tuple[float, float, float, float, float]:
         """
         Calculate the cost of natural gas for a household.
 
-        Args:
-        profile: HouseholdYearlyFuelUsageProfile object
-
-        Returns:
-        Tuple[float, float], the fixed and variable cost
-        of natural gas for the household
+        Returns
+        -------
+        (fixed_cost_nzd,
+         variable_cost_nzd,
+         0.0,
+         0.0,
+         0.0)
         """
         keys = set(self.import_rates.keys())
-        variable_cost_nzd = 0
+        variable_cost_nzd = 0.0
 
         if keys == {"Uncontrolled"}:
-            variable_cost_nzd += (profile.natural_gas_kwh) * self.import_rates[
-                "Uncontrolled"
-            ]
+            variable_cost_nzd += (
+                usage_profile.natural_gas_kwh * self.import_rates["Uncontrolled"]
+            )
         else:
             raise ValueError(f"Unexpected import_rates keys: {keys}")
 
-        fixed_cost_nzd = profile.natural_gas_connection_days * self.fixed_rate
-        return (fixed_cost_nzd, variable_cost_nzd)
+        fixed_cost_nzd = usage_profile.natural_gas_connection_days * self.fixed_rate
+        return (fixed_cost_nzd, variable_cost_nzd, 0.0, 0.0, 0.0)
 
 
 class LPGPlan(BaseModel):
@@ -270,20 +357,17 @@ class LPGPlan(BaseModel):
     per_lpg_kwh: float
     fixed_rate: float
 
-    def calculate_cost(self, profile):
+    def calculate_cost(self, usage_profile) -> Tuple[float, float, float, float, float]:
         """
-        Calculate the cost of LPG for a household.
+        Calculate the cost of LPG.
 
-        Args:
-        profile: HouseholdYearlyFuelUsageProfile object
-
-        Returns:
-        Tuple[float, float], the fixed and variable
-        cost of LPG for the household
+        Returns
+        -------
+        (fixed_cost_nzd, variable_cost_nzd, 0.0, 0.0, 0.0)
         """
-        variable_cost_nzd = profile.lpg_kwh * self.per_lpg_kwh
-        fixed_cost_nzd = profile.lpg_tanks_rental_days * self.fixed_rate
-        return (fixed_cost_nzd, variable_cost_nzd)
+        variable_cost_nzd = usage_profile.lpg_kwh * self.per_lpg_kwh
+        fixed_cost_nzd = usage_profile.lpg_tanks_rental_days * self.fixed_rate
+        return (fixed_cost_nzd, variable_cost_nzd, 0.0, 0.0, 0.0)
 
 
 class WoodPrice(BaseModel):
@@ -294,19 +378,16 @@ class WoodPrice(BaseModel):
     name: str
     per_wood_kwh: float
 
-    def calculate_cost(self, profile):
+    def calculate_cost(self, usage_profile) -> Tuple[float, float, float, float, float]:
         """
-        Calculate the cost of wood for a household.
+        Calculate the cost of wood.
 
-        Args:
-        profile: HouseholdYearlyFuelUsageProfile object
-
-        Returns:
-        Tuple[float, float], the fixed cost of wood
-        for the household ($zero) and the variable
-        cost (in NZ$ per embodied kWh) of wood.
+        Returns
+        -------
+        (0, variable_cost_nzd, 0.0, 0.0, 0.0)
         """
-        return (0, profile.wood_kwh * self.per_wood_kwh)
+        variable_cost_nzd = usage_profile.wood_kwh * self.per_wood_kwh
+        return (0.0, variable_cost_nzd, 0.0, 0.0, 0.0)
 
 
 class PetrolPrice(BaseModel):
@@ -317,19 +398,16 @@ class PetrolPrice(BaseModel):
     name: str
     per_petrol_litre: float
 
-    def calculate_cost(self, profile):
+    def calculate_cost(self, usage_profile) -> Tuple[float, float, float, float, float]:
         """
-        Calculate the cost of petrol for a household.
+        Calculate the cost of petrol.
 
-        Args:
-        profile: HouseholdYearlyFuelUsageProfile object
-
-        Returns:
-        Tuple[float, float], the fixed cost of petrol
-        for the household ($zero) and the variable cost
-        (in NZ$ per litre) of petrol.
+        Returns
+        -------
+        (0, variable_cost_nzd, 0.0, 0.0, 0.0)
         """
-        return (0, profile.petrol_litres * self.per_petrol_litre)
+        variable_cost_nzd = usage_profile.petrol_litres * self.per_petrol_litre
+        return (0.0, variable_cost_nzd, 0.0, 0.0, 0.0)
 
 
 class DieselPrice(BaseModel):
@@ -340,19 +418,16 @@ class DieselPrice(BaseModel):
     name: str
     per_diesel_litre: float
 
-    def calculate_cost(self, profile):
+    def calculate_cost(self, usage_profile) -> Tuple[float, float, float, float, float]:
         """
-        Calculate the cost of diesel for a household.
+        Calculate the cost of diesel.
 
-        Args:
-        profile: HouseholdYearlyFuelUsageProfile object
-
-        Returns:
-        Tuple[float, float], the fixed cost of diesel
-        for the household ($zero) and the variable cost
-        (in NZ$ per litre) of diesel.
+        Returns
+        -------
+        (0, variable_cost_nzd, 0.0, 0.0, 0.0)
         """
-        return (0, profile.diesel_litres * self.per_diesel_litre)
+        variable_cost_nzd = usage_profile.diesel_litres * self.per_diesel_litre
+        return (0.0, variable_cost_nzd, 0.0, 0.0, 0.0)
 
 
 class PublicChargingPrice(BaseModel):
@@ -363,60 +438,46 @@ class PublicChargingPrice(BaseModel):
     name: str
     per_kwh: float
 
-    def calculate_cost(self, profile):
+    def calculate_cost(self, usage_profile) -> Tuple[float, float, float, float, float]:
         """
-        Calculate the cost of public charging for a household.
+        Calculate the cost of public EV charging.
 
-        Args:
-        profile: HouseholdYearlyFuelUsageProfile object
-
-        Returns:
-        Tuple[float, float], the fixed cost (which is 0) of
-        public charging for the household and the variable cost
-        (in NZ$ per kWh) of public charging.
+        Returns
+        -------
+        (0, variable_cost_nzd, 0.0, 0.0, 0.0)
         """
-        return (0, profile.public_ev_charger_kwh * self.per_kwh)
+        variable_cost_nzd = usage_profile.public_ev_charger_kwh * self.per_kwh
+        return (0.0, variable_cost_nzd, 0.0, 0.0, 0.0)
 
 
 class NonEnergyVehicleCosts(BaseModel):
     """
-    Non-energy costs of vehicle ownership for a household.
+    Non-energy costs of vehicle ownership.
     """
 
     name: str
-
     nzd_per_year_licensing: float
     nzd_per_year_servicing_cost: float
     nzd_per_000_km_road_user_charges: float
 
-    def calculate_cost(self, profile):
+    def calculate_cost(self, usage_profile) -> Tuple[float, float, float, float, float]:
         """
-        Calculate the cost of vehicle ownership for a household.
-
-        Parameters
-        ----------
-        profile : HouseholdYearlyFuelUsageProfile
-            The yearly fuel usage profile of the household.
+        Calculate all non-energy vehicle costs.
 
         Returns
         -------
-        fixed_cost : float
-            The fixed cost of vehicle ownership, which is currently set to $0.
-        variable_cost : float
-            The variable cost of vehicle ownership, including licensing, servicing,
-            and road user charges.
-
-        Notes
-        -----
-        For the time being, all costs are being considered as variable costs,
-        treating vehicle ownership as the quantity that varies.
+        (0,
+         variable_cost_nzd,
+         0.0,
+         0.0,
+         0.0)
         """
-        return (
-            0,
+        variable_cost_nzd = (
             self.nzd_per_year_licensing
             + self.nzd_per_year_servicing_cost
-            + profile.thousand_km * self.nzd_per_000_km_road_user_charges,
+            + usage_profile.thousand_km * self.nzd_per_000_km_road_user_charges
         )
+        return (0.0, variable_cost_nzd, 0.0, 0.0, 0.0)
 
 
 class HouseholdEnergyPlan(BaseModel):
@@ -434,20 +495,28 @@ class HouseholdEnergyPlan(BaseModel):
     public_charging_price: PublicChargingPrice
     other_vehicle_costs: NonEnergyVehicleCosts
 
-    def calculate_cost(self, profile, verbose=False):
+    def calculate_cost(self, usage_profile) -> Tuple[float, float, float, float, float]:
         """
-        Calculate the total cost of energy for a household.
+        Calculate total costs across all energy types.
 
-        Args:
-        profile: HouseholdYearlyFuelUsageProfile object
-
-        Returns:
-        Tuple[float, float], the total fixed and variable
-        cost of energy for the household
+        Returns
+        -------
+        (fixed_cost_nzd,
+         variable_cost_nzd,
+         total_solar_self_consumption_savings,
+         total_solar_export_earnings,
+         overall_solar_self_consumption_pct)
         """
-        fixed_cost_nzd = 0
-        variable_cost_nzd = 0
-        for plan in [
+        total_fixed_cost_nzd = 0.0
+        total_variable_cost_nzd = 0.0
+        total_solar_self_consumption_savings = 0.0
+        total_solar_export_earnings = 0.0
+
+        # Since only ElectricityPlan has non-zero solar %,
+        # we just capture that single value
+        overall_solar_self_consumption_pct = 0.0
+
+        for energy_plan in [
             self.electricity_plan,
             self.natural_gas_plan,
             self.lpg_plan,
@@ -457,11 +526,27 @@ class HouseholdEnergyPlan(BaseModel):
             self.public_charging_price,
             self.other_vehicle_costs,
         ]:
-            fixed, variable = plan.calculate_cost(profile)
-            if verbose:
-                print(f"{plan.name} fixed cost: {fixed}")
-                print(f"{plan.name} variable cost: {variable}")
-            fixed_cost_nzd += fixed
-            variable_cost_nzd += variable
+            (
+                fixed_cost_nzd,
+                variable_cost_nzd,
+                sc_savings_nzd,
+                export_earnings_nzd,
+                sc_percentage,
+            ) = energy_plan.calculate_cost(usage_profile)
 
-        return (fixed_cost_nzd, variable_cost_nzd)
+            total_fixed_cost_nzd += fixed_cost_nzd
+            total_variable_cost_nzd += variable_cost_nzd
+            total_solar_self_consumption_savings += sc_savings_nzd
+            total_solar_export_earnings += export_earnings_nzd
+
+            # Only update from the electricity plan
+            if isinstance(energy_plan, ElectricityPlan):
+                overall_solar_self_consumption_pct = sc_percentage
+
+        return (
+            total_fixed_cost_nzd,
+            total_variable_cost_nzd,
+            total_solar_self_consumption_savings,
+            total_solar_export_earnings,
+            overall_solar_self_consumption_pct,
+        )

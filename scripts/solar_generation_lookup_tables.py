@@ -22,6 +22,10 @@ from app.services.get_climate_zone import postcode_dict
 from app.services.get_energy_plans import postcode_to_electricity_plan_dict
 from app.services.get_solar_generation import hourly_pmax
 
+# set TEST_MODE to True to run the script in test mode
+TEST_MODE = True
+os.environ["TEST_MODE"] = "True" if TEST_MODE else "False"
+
 # Round numerical outputs
 FLOAT_FORMAT = "%.6f"
 
@@ -32,7 +36,14 @@ TIMESERIES_SUM = 1000.0  # Sum of hour columns for each row
 SOLAR = SolarAnswers(add_solar=True)
 
 # Constant for the lookup directory. Relative to the script location.
-LOOKUP_DIR = os.path.join(os.path.dirname(__file__), "..", "resources", "lookup_tables")
+if TEST_MODE:
+    LOOKUP_DIR = os.path.join(
+        os.path.dirname(__file__), "..", "resources", "test_data", "lookup_tables"
+    )
+else:
+    LOOKUP_DIR = os.path.join(
+        os.path.dirname(__file__), "..", "resources", "lookup_tables"
+    )
 
 VEHICLE_PLUGIN_HYBRID = "Plug-in hybrid"
 VEHICLE_ELECTRIC = "Electric"

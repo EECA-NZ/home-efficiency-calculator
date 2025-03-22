@@ -114,7 +114,10 @@ def night_shift(usage_profile: np.ndarray) -> np.ndarray:
     Given an 8760-long 1D numpy array (usage_profile),
     shifts all daytime usage (7 AM to 9 PM) into the corresponding
     nighttime hours for each day, distributing it evenly among
-    the 10 night hours. Vectorized approach (no explicit for-loop).
+    the night hours. Vectorized approach (no explicit for-loop).
+
+    Edited to put the daytime usage into the hours between
+    11pm and 4am to avoid overlap with sunrise/sunset.
 
     Parameters
     ----------
@@ -136,8 +139,8 @@ def night_shift(usage_profile: np.ndarray) -> np.ndarray:
 
     # Daytime hours: 7..20
     daytime_hours = np.arange(7, 21)
-    # Nighttime hours: [0..6, 21..23] => 10 hours total
-    nighttime_hours = np.concatenate([np.arange(0, 7), np.arange(21, 24)])
+    # Nighttime hours: [0..3, 23..23] => 5 hours total
+    nighttime_hours = np.concatenate([np.arange(0, 4), np.arange(23, 24)])
 
     # Sum the daytime usage for each day
     day_sums = profile_2d[:, daytime_hours].sum(axis=1)  # shape: (365,)

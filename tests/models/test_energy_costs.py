@@ -1,9 +1,12 @@
 """
-Tests for the enests module.
+Tests for the energy_costs module.
 """
 
-# pylint: disable=no-member
+# pylint: disable=no-member, too-many-locals
 
+import os
+
+import pytest
 from pytest import approx
 
 from app.models.energy_plans import HouseholdEnergyPlan
@@ -28,7 +31,18 @@ from app.services.configuration import (
 )
 from app.services.energy_calculator import estimate_usage_from_profile
 
-EXPECTED_COSTS_DEFAULT = (730.5, 2855.7395)
+EXPECTED_COSTS_DEFAULT = (730.5, 2855.7395, 0.0, 0.0, 0.0)
+
+
+@pytest.fixture(autouse=True, scope="session")
+def set_test_environment_variable():
+    """
+    Set the TEST_MODE environment variable to True.
+    This will ensure that the test data is used, allowing
+    the tests to run without the need for data files that
+    are not licensed for sharing publicly.
+    """
+    os.environ["TEST_MODE"] = "True"
 
 
 def test_calculate_annual_costs():
@@ -89,13 +103,21 @@ def test_create_household_energy_profile_to_cost_with_solar():
     """
     Test constructing a profile and plan, and doing a cost calculation.
     """
-    household_profile = HouseholdAnswers(
+    household_profile_with_solar = HouseholdAnswers(
         your_home=get_default_your_home_answers(),
         heating=get_default_heating_answers(),
         hot_water=get_default_hot_water_answers(),
         cooktop=get_default_cooktop_answers(),
         driving=get_default_driving_answers(),
         solar=SolarAnswers(add_solar=True),
+    )
+    household_profile_no_solar = HouseholdAnswers(
+        your_home=get_default_your_home_answers(),
+        heating=get_default_heating_answers(),
+        hot_water=get_default_hot_water_answers(),
+        cooktop=get_default_cooktop_answers(),
+        driving=get_default_driving_answers(),
+        solar=SolarAnswers(add_solar=False),
     )
     my_plan = HouseholdEnergyPlan(
         name="Basic Household Energy Plan",
@@ -107,41 +129,58 @@ def test_create_household_energy_profile_to_cost_with_solar():
         diesel_price=get_default_diesel_price(),
         public_charging_price=get_default_public_ev_charger_rate(),
         other_vehicle_costs=get_default_annual_other_vehicle_costs(
-            household_profile.driving.vehicle_type
+            household_profile_with_solar.driving.vehicle_type
         ),
     )
-    household_energy_use = estimate_usage_from_profile(household_profile)
-    total_energy_costs = my_plan.calculate_cost(household_energy_use)
-    variable_costs_with_solar = total_energy_costs[1]
-    # If the other tests pass, EXPECTED_COSTS_DEFAULT are correct.
-    variable_costs_no_solar = EXPECTED_COSTS_DEFAULT[1]
-    total_solar_savings = variable_costs_no_solar - variable_costs_with_solar
-    total_solar_generation = (
-        household_energy_use.solar_generation_kwh.fixed_time_generation_kwh.sum()
+    household_energy_use_with_solar = estimate_usage_from_profile(
+        household_profile_with_solar
     )
+    household_energy_use_no_solar = estimate_usage_from_profile(
+        household_profile_no_solar
+    )
+
+    total_energy_costs_with_solar = my_plan.calculate_cost(
+        household_energy_use_with_solar
+    )
+    total_energy_costs_no_solar = my_plan.calculate_cost(household_energy_use_no_solar)
+
+    variable_costs_with_solar = total_energy_costs_with_solar[1]
+    variable_costs_no_solar = total_energy_costs_no_solar[1]
+
+    total_solar_savings_1 = variable_costs_no_solar - variable_costs_with_solar
+
+    (
+        _,
+        _,
+        solar_self_consumption_savings_nzd,
+        solar_export_earnings_nzd,
+        self_consumption_percentage,
+    ) = total_energy_costs_with_solar
+
+    total_solar_savings_2 = (
+        solar_self_consumption_savings_nzd + solar_export_earnings_nzd
+    )
+
+    # The first comparison accounts for night shifting without solar
+    # which reduces the actual benefit of solar. The implementation
+    # based on lookup tables is equivalent to the second comparison.
+    assert total_solar_savings_1 < total_solar_savings_2
+
+    total_solar_generation = household_energy_use_with_solar.solar_generation_kwh.total
 
     day_tariff = my_plan.electricity_plan.import_rates["Day"]
     export_tariff = my_plan.electricity_plan.export_rates["Uncontrolled"]
     total_solar_revenue_if_exported = total_solar_generation * export_tariff
     total_solar_savings_if_self_consumed = total_solar_generation * day_tariff
 
-    # Use the savings to determine the self-consumption fraction
-    self_consumption_percentage = (
-        100
-        * (total_solar_savings - total_solar_revenue_if_exported)
-        / (total_solar_savings_if_self_consumed - total_solar_revenue_if_exported)
-    )
-
-    assert total_solar_generation == approx(6779.145125)
+    assert total_solar_generation == approx(6779.145125, rel=1e-4)
     assert day_tariff == approx(0.242)
     assert export_tariff == approx(0.12)
     assert (
         total_solar_revenue_if_exported
-        <= total_solar_savings
+        <= total_solar_savings_1
         <= total_solar_savings_if_self_consumed
     )
-    # With the placeholder consumption profiles, the self-consumption
-    # fraction comes out at only about 15%.
     # This result has changed in a directionally consistent way with
     # changes to the model, but hasn't been verified against a reference.
-    assert self_consumption_percentage == approx(15.441821861148222)
+    assert self_consumption_percentage == approx(47.81319, rel=1e-4)

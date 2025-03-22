@@ -19,7 +19,6 @@ from ...services.hot_water_helpers import (
     standing_loss_kwh_per_year,
 )
 from ...services.usage_profile_helpers.hot_water import (
-    default_hot_water_electricity_usage_timeseries,
     solar_friendly_hot_water_electricity_usage_timeseries,
 )
 from ..usage_profiles import ElectricityUsageTimeseries, HotWaterYearlyFuelUsageProfile
@@ -71,6 +70,11 @@ class HotWaterAnswers(BaseModel):
         HotWaterYearlyFuelUsageProfile
             The yearly fuel usage profile for hot water heating.
         """
+        _ = solar
+        # solar is currently unused here but required for signature
+        # compatibility with other components, which are assumed to
+        # alter their electricity consumption patterns based on
+        # presence or absence of solar.
         hot_water_heating_source = (
             self.alternative_hot_water_heating_source
             if use_alternative
@@ -99,31 +103,20 @@ class HotWaterAnswers(BaseModel):
 
         # Build the usage profile only for electric systems
         if hot_water_heating_source in ELECTRIC_SYSTEMS:
-            if solar.add_solar:
-                # --- Electric systems with solar PV ---
-                synthetic_hourly_profile = (
-                    solar_friendly_hot_water_electricity_usage_timeseries(
-                        your_home.postcode,
-                        heat_demand_kwh_per_year,
-                        HOT_WATER_POWER_INPUT_KW,
-                        hot_water_heating_source,
-                    )
+            synthetic_hourly_profile = (
+                solar_friendly_hot_water_electricity_usage_timeseries(
+                    your_home.postcode,
+                    heat_demand_kwh_per_year,
+                    HOT_WATER_POWER_INPUT_KW,
+                    hot_water_heating_source,
                 )
-                electricity_kwh = ElectricityUsageTimeseries(
-                    fixed_time_uncontrolled_kwh=total_kwh * synthetic_hourly_profile,
-                )
-            else:
-                # --- Electric systems without solar PV ---
-                anytime_kwh = total_kwh * HOT_WATER_FLEXIBLE_KWH_FRACTION
-                fixed_kwh = total_kwh - anytime_kwh
-                synthetic_hourly_profile = (
-                    default_hot_water_electricity_usage_timeseries()
-                )
-                electricity_kwh = ElectricityUsageTimeseries(
-                    fixed_time_uncontrolled_kwh=fixed_kwh * synthetic_hourly_profile,
-                    shift_able_uncontrolled_kwh=anytime_kwh * synthetic_hourly_profile,
-                )
-
+            )
+            anytime_kwh = total_kwh * HOT_WATER_FLEXIBLE_KWH_FRACTION
+            fixed_kwh = total_kwh - anytime_kwh
+            electricity_kwh = ElectricityUsageTimeseries(
+                fixed_time_uncontrolled_kwh=fixed_kwh * synthetic_hourly_profile,
+                shift_able_uncontrolled_kwh=anytime_kwh * synthetic_hourly_profile,
+            )
             return HotWaterYearlyFuelUsageProfile(
                 elx_connection_days=DAYS_IN_YEAR,
                 electricity_kwh=electricity_kwh,

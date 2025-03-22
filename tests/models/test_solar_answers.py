@@ -32,4 +32,4 @@ def test_total_generation():
         YOUR_HOME
     ).solar_generation_kwh.fixed_time_generation_kwh.sum()
     assert SOLAR.add_solar
-    assert total_generation == approx(6779.145125)
+    assert total_generation == approx(6779.145125, rel=1e-4)

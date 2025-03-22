@@ -3,11 +3,33 @@ Test solar generation calculation of solar self-consumption
 vs export for various input profiles. Starting point.
 """
 
+import importlib.resources as pkg_resources
+import os
+
 import numpy as np
 import pandas as pd
+import pytest
+from fastapi.testclient import TestClient
 from pytest import approx
 
+from app.main import app
+from app.services.get_climate_zone import climate_zone
+from app.services.get_energy_plans import get_energy_plan
+
 # pylint: disable=fixme, too-many-locals
+
+client = TestClient(app)
+
+
+@pytest.fixture(autouse=True, scope="session")
+def set_test_environment_variable():
+    """
+    Set the TEST_MODE environment variable to True.
+    This will ensure that the test data is used, allowing
+    the tests to run without the need for data files that
+    are not licensed for sharing publicly.
+    """
+    os.environ["TEST_MODE"] = "True"
 
 
 def load_lookup_timeseries(
@@ -86,46 +108,116 @@ profile1 = {
     "solar": {"add_solar": True},
 }
 
+profile2 = {
+    "your_home": {"people_in_house": 4, "postcode": "9016", "disconnect_gas": True},
+    "heating": {
+        "main_heating_source": "Electric heater",
+        "alternative_main_heating_source": "Heat pump",
+        "heating_during_day": "3-4 days a week",
+        "insulation_quality": "Not well insulated",
+    },
+    "hot_water": {
+        "hot_water_usage": "High",
+        "hot_water_heating_source": "Electric hot water cylinder",
+        "alternative_hot_water_heating_source": "Hot water heat pump",
+    },
+    "cooktop": {
+        "cooktop": "Electric (coil or ceramic)",
+        "alternative_cooktop": "Electric induction",
+    },
+    "driving": {
+        "vehicle_size": "Small",
+        "km_per_week": "200",
+        "vehicle_type": "Petrol",
+        "alternative_vehicle_type": "Electric",
+    },
+    "solar": {"add_solar": True},
+}
+
+profile3 = {
+    "your_home": {"people_in_house": 4, "postcode": "9016", "disconnect_gas": True},
+    "heating": {
+        "main_heating_source": "Wood burner",
+        "alternative_main_heating_source": "Heat pump",
+        "heating_during_day": "Never",
+        "insulation_quality": "Not well insulated",
+    },
+    "hot_water": {
+        "hot_water_usage": "Low",
+        "hot_water_heating_source": "Electric hot water cylinder",
+        "alternative_hot_water_heating_source": "Hot water heat pump",
+    },
+    "cooktop": {
+        "cooktop": "Electric (coil or ceramic)",
+        "alternative_cooktop": "Electric induction",
+    },
+    "driving": {
+        "vehicle_size": "Small",
+        "km_per_week": "100",
+        "vehicle_type": "Petrol",
+        "alternative_vehicle_type": "Electric",
+    },
+    "solar": {"add_solar": True},
+}
+
 
 def compare_api_calculation_with_manual_calculation(
-    input_profile: dict, expected_values: dict
+    input_profile: dict,
 ):
     """
     Compare the API calculation with the manual calculation.
     """
+    if "TEST_MODE" not in os.environ or os.environ["TEST_MODE"] != "True":
+        raise ValueError(
+            "This test must be run with the TEST_MODE environment variable set to True"
+        )
+    # lookup_tables_path = pkg_resources.files("resources.lookup_tables")
+    lookup_tables_path = pkg_resources.files("resources.test_data.lookup_tables")
 
-    _ = (input_profile, expected_values)
+    energy_plan = get_energy_plan(input_profile["your_home"]["postcode"], "Petrol")
+    electricity_plan_name = energy_plan.electricity_plan.name
+    electricity_plans = pd.read_csv(
+        lookup_tables_path / "solar_electricity_plans_lookup_table.csv"
+    )
+    elx_plan = electricity_plans.set_index("electricity_plan_name").loc[
+        electricity_plan_name
+    ]
+    nzd_per_kwh_day = elx_plan.import_rates_day
+    nzd_per_kwh_export = elx_plan.import_rates_export
+    kg_co2e_per_kwh = elx_plan.kg_co2e_per_kwh
 
-    ##########################################
-    # TODO: load these from ..\..\lookup\solar_electricity_plans_lookup_table.csv
-    kg_co2e_per_kwh = 0.1072
-    nzd_per_kwh_export = 0.12
-    nzd_per_kwh_day = 0.21229
-    ##########################################
+    cz = climate_zone(input_profile["your_home"]["postcode"])
+    ppl = input_profile["your_home"]["people_in_house"]
+    hwus = input_profile["hot_water"]["hot_water_usage"]
+    hw = input_profile["hot_water"]["alternative_hot_water_heating_source"]
+    sh = input_profile["heating"]["alternative_main_heating_source"]
+    shus = input_profile["heating"]["heating_during_day"]
+    ins = input_profile["heating"]["insulation_quality"]
+    veh = input_profile["driving"]["alternative_vehicle_type"]
+    vsz = input_profile["driving"]["vehicle_size"]
+    km = input_profile["driving"]["km_per_week"]
+    ct = input_profile["cooktop"]["alternative_cooktop"]
 
-    ##########################################
-    # TODO: determine match strings from input_profile dict.
     solar_generation_timeseries = load_lookup_timeseries(
-        "../../lookup/solar_generation_lookup_table.csv", "Wellington"
+        lookup_tables_path / "solar_generation_lookup_table.csv", f"{cz}"
     )
     hot_water_timeseries = load_lookup_timeseries(
-        "../../lookup/solar_hot_water_lookup_table.csv",
-        "Wellington,4,High,Hot water heat pump",
+        lookup_tables_path / "solar_hot_water_lookup_table.csv",
+        f"{cz},{ppl},{hwus},{hw}",
     )
     space_heating_timeseries = load_lookup_timeseries(
-        "../../lookup/solar_space_heating_lookup_table.csv",
-        "Wellington,Heat pump,3-4 days a week,Not well insulated",
+        lookup_tables_path / "solar_space_heating_lookup_table.csv",
+        f"{cz},{sh},{shus},{ins}",
     )
     vehicle_charging_timeseries = load_lookup_timeseries(
-        "../../lookup/solar_vehicle_lookup_table.csv", "Electric,Small,200"
+        lookup_tables_path / "solar_vehicle_lookup_table.csv", f"{veh},{vsz},{km}"
     )
     other_electricity_timeseries = load_lookup_timeseries(
-        "../../lookup/solar_other_electricity_usage_lookup_table.csv", ""
+        lookup_tables_path / "solar_other_electricity_usage_lookup_table.csv", ""
     )
     cooktop_timeseries = load_lookup_timeseries(
-        "../../lookup/solar_cooktop_lookup_table.csv", "4,Electric induction"
+        lookup_tables_path / "solar_cooktop_lookup_table.csv", f"{ppl},{ct}"
     )
-    ##########################################
 
     assert len(solar_generation_timeseries) == 8760
     assert len(hot_water_timeseries) == 8760
@@ -146,31 +238,38 @@ def compare_api_calculation_with_manual_calculation(
         0, solar_generation_timeseries - total_kwh_timeseries
     )
     self_consumption_timeseries = solar_generation_timeseries - export_timeseries
-    grid_purchase_timeseries = total_kwh_timeseries - self_consumption_timeseries
 
     annual_kwh_generated = sum(solar_generation_timeseries)
     annual_kwh_exported = sum(export_timeseries)
-    annual_kwh_imported = sum(grid_purchase_timeseries)
     annual_kwh_self_consumed = sum(self_consumption_timeseries)
 
     annual_kg_co2e_saving = annual_kwh_generated * kg_co2e_per_kwh
-    annual_savings_solar_export = annual_kwh_exported * nzd_per_kwh_export
+    annual_earnings_solar_export = annual_kwh_exported * nzd_per_kwh_export
     annual_savings_solar_self_consumption = annual_kwh_self_consumed * nzd_per_kwh_day
 
-    ##########################################
-    # TODO: determine the expected values from the expected_values dict.
-    assert total_kwh_timeseries.sum() == approx(6785.70)
-    assert solar_generation_timeseries.sum() == approx(6779.137959)
+    response = client.post("/solar/savings", json=input_profile)
+    assert response.status_code == 200
 
-    assert (self_consumption_timeseries + grid_purchase_timeseries).sum() == approx(
-        6785.70
+    response_data = response.json()
+    assert response_data["annual_kwh_generated"] == approx(
+        annual_kwh_generated, rel=1e-4
     )
-    assert (export_timeseries + self_consumption_timeseries).sum() == approx(6779.14)
 
-    assert (annual_kwh_self_consumed + annual_kwh_imported) == approx(6785.70)
-    assert (annual_kwh_exported + annual_kwh_self_consumed) == approx(6779.14)
+    assert response_data["annual_earnings_solar_export"] == approx(
+        annual_earnings_solar_export, rel=1e-4
+    )
+    assert response_data["annual_savings_solar_self_consumption"] == approx(
+        annual_savings_solar_self_consumption, rel=1e-4
+    )
+    assert response_data["annual_kg_co2e_saving"] == approx(
+        annual_kg_co2e_saving, rel=1e-4
+    )
 
-    assert annual_kg_co2e_saving == approx(726.72356)
-    assert annual_savings_solar_export == approx(466.22422)
-    assert annual_savings_solar_self_consumption == approx(614.35366)
-    ##########################################
+
+def test_api_solar_calculation():
+    """
+    Test the solar generation calculation for various input profiles.
+    """
+    compare_api_calculation_with_manual_calculation(profile1)
+    compare_api_calculation_with_manual_calculation(profile2)
+    compare_api_calculation_with_manual_calculation(profile3)
