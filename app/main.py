@@ -9,7 +9,11 @@ import uvicorn
 from fastapi import FastAPI, responses
 
 # Import the app from component_savings_endpoints
-from .api import household_savings_endpoint, solar_savings_endpoint
+from .api import (
+    household_savings_endpoint,
+    solar_savings_endpoint,
+    user_geography_endpoint,
+)
 from .api.component_savings_endpoints import app as component_savings_app
 
 # Set up logging
@@ -43,6 +47,8 @@ def main():
 
 
 # Include the router for component savings endpoints
+app.include_router(user_geography_endpoint.router)
+
 app.include_router(component_savings_app.router)
 app.include_router(solar_savings_endpoint.router)
 
