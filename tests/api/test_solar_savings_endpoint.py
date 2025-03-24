@@ -266,10 +266,22 @@ def compare_api_calculation_with_manual_calculation(
     )
 
 
-def test_api_solar_calculation():
+def test_api_solar_calculation_1():
     """
-    Test the solar generation calculation for various input profiles.
+    Test the solar generation calculation for input profile 1.
     """
     compare_api_calculation_with_manual_calculation(profile1)
+
+
+def test_api_solar_calculation_2():
+    """
+    Test the solar generation calculation for input profile 2.
+    """
     compare_api_calculation_with_manual_calculation(profile2)
+
+
+def test_api_solar_calculation_3():
+    """
+    Test the solar generation calculation for input profile 3.
+    """
     compare_api_calculation_with_manual_calculation(profile3)
