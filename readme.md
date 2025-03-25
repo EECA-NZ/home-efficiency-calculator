@@ -151,7 +151,7 @@ $location = "australiaeast"
 $containerGroupName = "aci-home-efficiency-calculator"
 $acrPassword = az acr credential show -n $acrName --query "passwords[0].value" -o tsv
 $loginServer = az acr show -n $acrName --query loginServer --output tsv
-$image = "home-efficiency-calculator:0.1.0"
+$image = "home-efficiency-calculator:0.2.0"
 $imageTag = "$loginServer/$image"
 ```
 
