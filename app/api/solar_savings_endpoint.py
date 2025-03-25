@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException
 
 from ..models.response_models import SolarSavingsResponse
 from ..models.user_answers import HouseholdAnswers, SolarAnswers
+from ..services.helpers import round_floats_to_2_dp
 from ..services.solar_calculator import calculate_solar_savings
 
 router = APIRouter()
@@ -17,9 +18,8 @@ def household_energy_profile(profile: HouseholdAnswers):
     Calculate savings and emissions reductions if solar is added to the household.
     Assumes that the user has already provided information about their household
     energy usage. The benefits of solar are calculated assuming that a HEMS is
-    also installed, and is able to manage the electricity consumption for EV
-    charging and hot water so as to use night-time electricity to make up for
-    any shortfall in solar generation.
+    able to manage the electricity consumption for EV charging and hot water so
+    as to use night-time electricity to make up for any shortfall in solar generation.
 
     Returns:
     - Savings and emissions reductions attributable to adding solar.
@@ -41,6 +41,7 @@ def household_energy_profile(profile: HouseholdAnswers):
     profile.solar = SolarAnswers(add_solar=True)
     try:
         solar_savings = calculate_solar_savings(profile)
+        solar_savings = round_floats_to_2_dp(solar_savings)
         return SolarSavingsResponse(**solar_savings)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
