@@ -70,11 +70,6 @@ class HotWaterAnswers(BaseModel):
         HotWaterYearlyFuelUsageProfile
             The yearly fuel usage profile for hot water heating.
         """
-        _ = solar
-        # solar is currently unused here but required for signature
-        # compatibility with other components, which are assumed to
-        # alter their electricity consumption patterns based on
-        # presence or absence of solar.
         hot_water_heating_source = (
             self.alternative_hot_water_heating_source
             if use_alternative
@@ -111,7 +106,14 @@ class HotWaterAnswers(BaseModel):
                     hot_water_heating_source,
                 )
             )
-            anytime_kwh = total_kwh * HOT_WATER_FLEXIBLE_KWH_FRACTION
+            # =====================================================
+            # This is a temporary solution to aligning with the
+            # lookup-table-based numbers produced in the web tool
+            hot_water_flexible_kwh_fraction = HOT_WATER_FLEXIBLE_KWH_FRACTION
+            if solar.add_solar:
+                hot_water_flexible_kwh_fraction = 1.0
+            # =====================================================
+            anytime_kwh = total_kwh * hot_water_flexible_kwh_fraction
             fixed_kwh = total_kwh - anytime_kwh
             electricity_kwh = ElectricityUsageTimeseries(
                 fixed_time_uncontrolled_kwh=fixed_kwh * synthetic_hourly_profile,

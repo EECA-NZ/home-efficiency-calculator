@@ -31,7 +31,7 @@ from app.services.configuration import (
 )
 from app.services.energy_calculator import estimate_usage_from_profile
 
-EXPECTED_COSTS_DEFAULT = (730.5, 2823.8435, 0.0, 0.0, 0.0)
+EXPECTED_COSTS_DEFAULT = (730.5, 2855.7396, 0.0, 0.0, 0.0)
 
 
 @pytest.fixture(autouse=True, scope="session")
