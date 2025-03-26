@@ -186,6 +186,32 @@ profile4 = {
     "solar": {"add_solar": True},
 }
 
+profile5 = {
+    "your_home": {"people_in_house": 3, "postcode": "4277", "disconnect_gas": True},
+    "heating": {
+        "main_heating_source": "Piped gas heater",
+        "alternative_main_heating_source": "Heat pump",
+        "heating_during_day": "5-7 days a week",
+        "insulation_quality": "Moderately insulated",
+    },
+    "hot_water": {
+        "hot_water_usage": "High",
+        "hot_water_heating_source": "Electric hot water cylinder",
+        "alternative_hot_water_heating_source": "Electric hot water cylinder",
+    },
+    "cooktop": {
+        "cooktop": "Electric (coil or ceramic)",
+        "alternative_cooktop": "Electric induction",
+    },
+    "driving": {
+        "vehicle_size": "Small",
+        "km_per_week": "200",
+        "vehicle_type": "Petrol",
+        "alternative_vehicle_type": "Plug-in hybrid",
+    },
+    "solar": {"add_solar": True},
+}
+
 
 def compare_api_calculation_with_manual_calculation(
     input_profile: dict,
@@ -299,7 +325,9 @@ def compare_api_calculation_with_manual_calculation(
     os.environ.get("LOCAL_SOLAR_DATA", "True") != "True",
     reason="Skipping solar test because local lookup table data is unavailable.",
 )
-@pytest.mark.parametrize("input_profile", [profile1, profile2, profile3, profile4])
+@pytest.mark.parametrize(
+    "input_profile", [profile1, profile2, profile3, profile4, profile5]
+)
 def test_api_solar_calculation(input_profile):
     """
     Parametrized test function that checks
