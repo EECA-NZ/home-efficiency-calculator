@@ -19,11 +19,14 @@ from app.models.user_answers import (
 )
 from app.services.get_base_demand_profile import other_electricity_energy_usage_profile
 from app.services.get_climate_zone import postcode_dict
-from app.services.get_energy_plans import postcode_to_electricity_plan_dict
+from app.services.get_energy_plans import (
+    get_energy_plan,
+    postcode_to_electricity_plan_dict,
+)
 from app.services.get_solar_generation import hourly_pmax
 
 # set TEST_MODE to True to run the script in test mode
-TEST_MODE = True
+TEST_MODE = False
 os.environ["TEST_MODE"] = "True" if TEST_MODE else "False"
 
 # Round numerical outputs
@@ -412,7 +415,10 @@ def transform_plans_to_dataframe():
       import_rates_export, kg_co2e_per_kwh.
     """
     modified_plans = {}
-    for plan in postcode_to_electricity_plan_dict.values():
+    plans = list(postcode_to_electricity_plan_dict.values())
+    # Need to include default plan for fallback
+    plans.append(get_energy_plan("not_a_postcode", "Petrol").electricity_plan)
+    for plan in plans:
         plan_name = plan.name
         rate_dict = plan.import_rates
         fixed_rate = plan.fixed_rate

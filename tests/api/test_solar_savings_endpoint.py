@@ -252,9 +252,12 @@ def compare_api_calculation_with_manual_calculation(
     assert len(other_electricity_timeseries) == 8760
 
     total_inflexible_loads = (
-        space_heating_timeseries + cooktop_timeseries + other_electricity_timeseries
+        space_heating_timeseries
+        + cooktop_timeseries
+        + other_electricity_timeseries
+        + (0.2 * hot_water_timeseries)
     )
-    total_flexible_loads = hot_water_timeseries + vehicle_charging_timeseries
+    total_flexible_loads = (0.8 * hot_water_timeseries) + vehicle_charging_timeseries
     inflexible_self_consumption = np.minimum(
         total_inflexible_loads, solar_generation_timeseries
     )

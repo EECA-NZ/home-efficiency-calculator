@@ -1,6 +1,16 @@
+
+
 Step 1: Set Variables
 ---------------------
 
+The instructions below assume that you are in the project's root directory.
+
+Typically it will be necessary to first login to Azure.
+```powershell
+az login --scope https://management.core.windows.net//.default
+```
+
+Then proceed to set the necessary environment variables:
 ```powershell
 $resourceGroup = "eeca-rg-DWBI-dev-aue"
 $acrName = "eecaacrdwbidevaue"
@@ -87,6 +97,72 @@ Point your browser at:
 ```
 https://home-efficiency-calculator-app.azurewebsites.net/docs
 ```
+
+
+Step 7: Update the Web App with New Code Changes
+------------------------------------------------
+
+Whenever you have new code changes you want to deploy, you will:
+
+1.  **Increment** the image version tag (for example, from `home-efficiency-calculator:0.2.0` to `home-efficiency-calculator:0.2.1`).
+
+2.  **Build** and **push** the new container to your Azure Container Registry.
+
+3.  **Switch** the Azure Web App’s container to the newly pushed version.
+
+
+Below is an example workflow.
+
+### 7.1 Update the version tag in your variables
+
+```powershell
+$resourceGroup = "eeca-rg-DWBI-dev-aue"
+$acrName = "eecaacrdwbidevaue"
+$location = "australiaeast"
+$appServicePlan = "home-efficiency-plan"
+$webAppName = "home-efficiency-calculator-app"
+$loginServer = az acr show -n $acrName --query loginServer --output tsv
+$acrPassword = az acr credential show -n $acrName --query "passwords[0].value" -o tsv
+# Example of new version
+$image = "home-efficiency-calculator:0.2.0"
+$imageTag = "$loginServer/$image"
+```
+
+### 7.2 Build and push the new Docker image to ACR
+
+```powershell
+# Log in again if necessary
+docker login -u $acrName -p $acrPassword $loginServer
+
+# Build the new image
+docker build -t $image .
+
+# Tag it for pushing to ACR
+docker tag $image $imageTag
+
+# Push the new image to ACR
+docker push $imageTag
+```
+
+### 7.3 Point the Azure Web App to the new image and restart
+
+```powershell
+az webapp config container set `
+  --name $webAppName `
+  --resource-group $resourceGroup `
+  --docker-custom-image-name $imageTag `
+  --docker-registry-server-url https://$loginServer `
+  --docker-registry-server-user $acrName `
+  --docker-registry-server-password $acrPassword
+
+# Optionally, you can force a restart to ensure the new container gets pulled:
+az webapp restart `
+  --name $webAppName `
+  --resource-group $resourceGroup
+```
+
+At this point, Azure should pull down the newly tagged container and run it with your updated code.
+
 
 * * *
 
