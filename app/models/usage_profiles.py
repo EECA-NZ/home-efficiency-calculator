@@ -143,6 +143,22 @@ class ElectricityUsageTimeseries(BaseModel):
         )
 
     @functools.cached_property
+    def shift_able_uncontrolled_kwh_night_shifted(self) -> np.ndarray:
+        """
+        Shiftable uncontrolled electricity usage timeseries (kWh) for the
+        year, if it has been shifted to night-time.
+        """
+        return night_shift(self.shift_able_uncontrolled_kwh)
+
+    @functools.cached_property
+    def shift_able_controllable_kwh_night_shifted(self) -> np.ndarray:
+        """
+        Shiftable controllable electricity usage timeseries (kWh) for the
+        year, if it has been shifted to night-time.
+        """
+        return night_shift(self.shift_able_controllable_kwh)
+
+    @functools.cached_property
     def total_usage_night_shifted(self) -> np.ndarray:
         """
         Total electricity usage timeseries (kWh) for the year,

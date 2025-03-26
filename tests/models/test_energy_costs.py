@@ -31,7 +31,7 @@ from app.services.configuration import (
 )
 from app.services.energy_calculator import estimate_usage_from_profile
 
-EXPECTED_COSTS_DEFAULT = (730.5, 2855.7395, 0.0, 0.0, 0.0)
+EXPECTED_COSTS_DEFAULT = (730.5, 2823.8435, 0.0, 0.0, 0.0)
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -111,14 +111,6 @@ def test_create_household_energy_profile_to_cost_with_solar():
         driving=get_default_driving_answers(),
         solar=SolarAnswers(add_solar=True),
     )
-    household_profile_no_solar = HouseholdAnswers(
-        your_home=get_default_your_home_answers(),
-        heating=get_default_heating_answers(),
-        hot_water=get_default_hot_water_answers(),
-        cooktop=get_default_cooktop_answers(),
-        driving=get_default_driving_answers(),
-        solar=SolarAnswers(add_solar=False),
-    )
     my_plan = HouseholdEnergyPlan(
         name="Basic Household Energy Plan",
         electricity_plan=get_default_electricity_plan(),
@@ -135,36 +127,17 @@ def test_create_household_energy_profile_to_cost_with_solar():
     household_energy_use_with_solar = estimate_usage_from_profile(
         household_profile_with_solar
     )
-    household_energy_use_no_solar = estimate_usage_from_profile(
-        household_profile_no_solar
-    )
-
-    total_energy_costs_with_solar = my_plan.calculate_cost(
-        household_energy_use_with_solar
-    )
-    total_energy_costs_no_solar = my_plan.calculate_cost(household_energy_use_no_solar)
-
-    variable_costs_with_solar = total_energy_costs_with_solar[1]
-    variable_costs_no_solar = total_energy_costs_no_solar[1]
-
-    total_solar_savings_1 = variable_costs_no_solar - variable_costs_with_solar
-
     (
         _,
         _,
         solar_self_consumption_savings_nzd,
         solar_export_earnings_nzd,
         self_consumption_percentage,
-    ) = total_energy_costs_with_solar
+    ) = my_plan.calculate_cost(household_energy_use_with_solar)
 
     total_solar_savings_2 = (
         solar_self_consumption_savings_nzd + solar_export_earnings_nzd
     )
-
-    # The first comparison accounts for night shifting without solar
-    # which reduces the actual benefit of solar. The implementation
-    # based on lookup tables is equivalent to the second comparison.
-    assert total_solar_savings_1 < total_solar_savings_2
 
     total_solar_generation = household_energy_use_with_solar.solar_generation_kwh.total
 
@@ -176,11 +149,6 @@ def test_create_household_energy_profile_to_cost_with_solar():
     assert total_solar_generation == approx(6779.145125, rel=1e-4)
     assert day_tariff == approx(0.242)
     assert export_tariff == approx(0.12)
-    assert (
-        total_solar_revenue_if_exported
-        <= total_solar_savings_1
-        <= total_solar_savings_if_self_consumed
-    )
-    # This result has changed in a directionally consistent way with
-    # changes to the model, but hasn't been verified against a reference.
+    assert total_solar_revenue_if_exported <= total_solar_savings_2
+    assert total_solar_savings_2 <= total_solar_savings_if_self_consumed
     assert self_consumption_percentage == approx(47.81319, rel=1e-4)

@@ -33,7 +33,7 @@ logging.basicConfig(level=logging.INFO)
 # Constant for the lookup directory. Relative to the script location.
 LOOKUP_DIR = os.path.join(os.path.dirname(__file__), "..", "resources", "lookup_tables")
 DEFAULT_VEHICLE_TYPE = "None"
-REPORT_EVERY_N_ROWS = 1e5
+REPORT_EVERY_N_ROWS = 1e3
 
 # Ensure the directory exists
 os.makedirs(LOOKUP_DIR, exist_ok=True)
@@ -144,7 +144,7 @@ def calculate_cost_and_emissions(your_home, answers):
     else:
         vehicle_type = DEFAULT_VEHICLE_TYPE
     my_plan = get_energy_plan_cached(your_home.postcode, vehicle_type)
-    (_, variable_cost_nzd) = my_plan.calculate_cost(energy_usage_profile)
+    (_, variable_cost_nzd, _, _, _) = my_plan.calculate_cost(energy_usage_profile)
     my_emissions_kg_co2e = emissions_kg_co2e(energy_usage_profile)
     result = {
         "variable_cost_nzd": variable_cost_nzd,

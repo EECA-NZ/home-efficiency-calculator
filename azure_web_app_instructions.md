@@ -7,13 +7,23 @@ $acrName = "eecaacrdwbidevaue"
 $location = "australiaeast"
 $appServicePlan = "home-efficiency-plan"
 $webAppName = "home-efficiency-calculator-app"
-$image = "home-efficiency-calculator:0.1.0"
+$image = "home-efficiency-calculator:0.2.0"
 $loginServer = az acr show -n $acrName --query loginServer --output tsv
 $imageTag = "$loginServer/$image"
 $acrPassword = az acr credential show -n $acrName --query "passwords[0].value" -o tsv
 ```
 
-Step 2: Create an App Service Plan for Linux containers
+Step 2: Ensure the Docker image is built and pushed to the Azure Container Registry
+---------------------
+
+```powershell
+docker login -u $acrName -p $acrPassword $loginServer
+docker build -t $image .
+docker tag $image $imageTag
+docker push $imageTag
+```
+
+Step 3: Create an App Service Plan for Linux containers
 -------------------------------------------------------
 
 ```powershell
@@ -25,7 +35,7 @@ az appservice plan create `
   --sku B1  # Basic plan (supports custom containers)
 ```
 
-Step 3: Create the Web App
+Step 4: Create the Web App
 --------------------------------------------
 
 ```powershell
@@ -36,7 +46,7 @@ az webapp create `
   --deployment-container-image-name $imageTag
 ```
 
-Step 4: Configure the container with ACR credentials
+Step 5: Configure the container with ACR credentials
 -----------------------------------------------------
 
 ```powershell
@@ -49,7 +59,7 @@ az webapp config container set `
   --docker-registry-server-password $acrPassword
 ```
 
-Step 5: Restart the app and tell Azure explicitly to run Uvicorn on port 80
+Step 6: Restart the app and tell Azure explicitly to run Uvicorn on port 80
 ----------------------------------------------------------------------------
 
 ```powershell
