@@ -1,5 +1,5 @@
 """
-Module for the household energy profile endpoint.
+Module for the solar savings endpoint.
 """
 
 from fastapi import APIRouter, HTTPException
@@ -13,7 +13,7 @@ router = APIRouter()
 
 
 @router.post("/solar/savings", response_model=SolarSavingsResponse)
-def household_energy_profile(profile: HouseholdAnswers):
+def get_solar_savings(profile: HouseholdAnswers):
     """
     Calculate savings and emissions reductions if solar is added to the household.
     Assumes that the user has already provided information about their household
