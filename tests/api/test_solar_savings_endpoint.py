@@ -82,7 +82,7 @@ def load_lookup_timeseries(
     return (annual_total / 1000.0) * fractions
 
 
-profile1 = {
+profile0 = {
     "your_home": {"people_in_house": 4, "postcode": "6012", "disconnect_gas": True},
     "heating": {
         "main_heating_source": "Piped gas heater",
@@ -108,7 +108,7 @@ profile1 = {
     "solar": {"add_solar": True},
 }
 
-profile2 = {
+profile1 = {
     "your_home": {"people_in_house": 4, "postcode": "9016", "disconnect_gas": True},
     "heating": {
         "main_heating_source": "Electric heater",
@@ -134,7 +134,7 @@ profile2 = {
     "solar": {"add_solar": True},
 }
 
-profile3 = {
+profile2 = {
     "your_home": {"people_in_house": 4, "postcode": "9016", "disconnect_gas": True},
     "heating": {
         "main_heating_source": "Wood burner",
@@ -160,7 +160,7 @@ profile3 = {
     "solar": {"add_solar": True},
 }
 
-profile4 = {
+profile3 = {
     "your_home": {"people_in_house": 3, "postcode": "1010", "disconnect_gas": True},
     "heating": {
         "main_heating_source": "Piped gas heater",
@@ -186,7 +186,7 @@ profile4 = {
     "solar": {"add_solar": True},
 }
 
-profile5 = {
+profile4 = {
     "your_home": {"people_in_house": 3, "postcode": "4277", "disconnect_gas": True},
     "heating": {
         "main_heating_source": "Piped gas heater",
@@ -208,6 +208,32 @@ profile5 = {
         "km_per_week": "200",
         "vehicle_type": "Petrol",
         "alternative_vehicle_type": "Plug-in hybrid",
+    },
+    "solar": {"add_solar": True},
+}
+
+profile5 = {
+    "your_home": {"people_in_house": 4, "postcode": "0182", "disconnect_gas": True},
+    "heating": {
+        "main_heating_source": "Piped gas heater",
+        "alternative_main_heating_source": "Heat pump",
+        "heating_during_day": "3-4 days a week",
+        "insulation_quality": "Not well insulated",
+    },
+    "hot_water": {
+        "hot_water_usage": "Low",
+        "hot_water_heating_source": "Electric hot water cylinder",
+        "alternative_hot_water_heating_source": "Hot water heat pump",
+    },
+    "cooktop": {
+        "cooktop": "Electric (coil or ceramic)",
+        "alternative_cooktop": "Electric induction",
+    },
+    "driving": {
+        "vehicle_size": "Medium",
+        "km_per_week": "200",
+        "vehicle_type": "Petrol",
+        "alternative_vehicle_type": "Electric",
     },
     "solar": {"add_solar": True},
 }
@@ -309,7 +335,6 @@ def compare_api_calculation_with_manual_calculation(
     assert response_data["annual_kwh_generated"] == approx(
         annual_kwh_generated, rel=1e-4
     )
-
     assert response_data["annual_earnings_solar_export"] == approx(
         annual_earnings_solar_export, rel=1e-4
     )
@@ -326,7 +351,7 @@ def compare_api_calculation_with_manual_calculation(
     reason="Skipping solar test because local lookup table data is unavailable.",
 )
 @pytest.mark.parametrize(
-    "input_profile", [profile1, profile2, profile3, profile4, profile5]
+    "input_profile", [profile0, profile1, profile2, profile3, profile4, profile5]
 )
 def test_api_solar_calculation(input_profile):
     """
