@@ -10,6 +10,7 @@ from fastapi import FastAPI, responses
 
 # Import the app from component_savings_endpoints
 from .api import (  # household_savings_endpoint,
+    fixed_cost_savings_endpoint,
     solar_savings_endpoint,
     user_geography_endpoint,
 )
@@ -47,9 +48,9 @@ def main():
 
 # Include the router for component savings endpoints
 app.include_router(user_geography_endpoint.router)
-
 app.include_router(component_savings_app.router)
 app.include_router(solar_savings_endpoint.router)
+app.include_router(fixed_cost_savings_endpoint.router)
 
 # Include the router for the household energy profile
 # app.include_router(household_savings_endpoint.router)

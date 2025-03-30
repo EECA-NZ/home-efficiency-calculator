@@ -72,6 +72,14 @@ class CheckboxData(BaseModel):
     checkbox_default_on: Optional[bool]
 
 
+class FixedCostsResponse(BaseModel):
+    """
+    Response model for the fixed costs endpoint.
+    """
+
+    gas_connection_savings: dict[str, SavingsResponse]
+
+
 class HouseholdSavingsResponse(BaseModel):
     """
     Response model for the household energy profile endpoint.

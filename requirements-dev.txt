@@ -11,6 +11,5 @@ seaborn==0.*
 fiona==1.*
 pyproj==3.*
 coverage==7.*
-img2pdf==0.*
 pip-audit==2.*
 setuptools==75.*
