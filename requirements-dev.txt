@@ -6,11 +6,6 @@ isort==5.*
 pre-commit==4.*
 pandas==2.*
 openpyxl==3.*
-networkx==3.*
-geopandas==1.*
-matplotlib==3.*
-numpy==1.24.3
-scipy==1.11.2
 ipython==8.*
 seaborn==0.*
 fiona==1.*
