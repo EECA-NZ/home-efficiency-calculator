@@ -11,7 +11,7 @@ from ..services.cost_calculator import calculate_fixed_cost_savings
 router = APIRouter()
 
 
-@router.post("/gas-fixed-costs/savings/", response_model=FixedCostsResponse)
+@router.post("/fixed-costs/savings/", response_model=FixedCostsResponse)
 def household_energy_profile(profile: HouseholdAnswers):
     """
     Endpoint to retrieve gas fixed cost savings based on the user's home answers.
@@ -21,6 +21,14 @@ def household_energy_profile(profile: HouseholdAnswers):
     """
     try:
         gas_connection_savings = calculate_fixed_cost_savings(profile)
+        if gas_connection_savings is None:
+            raise HTTPException(
+                status_code=400, detail="Gas connection savings not found"
+            )
+        if not isinstance(gas_connection_savings, dict):
+            raise HTTPException(
+                status_code=400, detail="Invalid gas connection savings data"
+            )
         return FixedCostsResponse(gas_connection_savings=gas_connection_savings)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
