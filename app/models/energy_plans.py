@@ -18,8 +18,11 @@ day_mask = day_night_flag()
 class ElectricityPlan(BaseModel):
     """
     Electricity plan for a household.
+
     Daily charge is in NZD per day.
     Import and export rates are in NZD per kWh.
+
+    Returns an EnergyCostBreakdown for the given usage profile.
 
     Implementation covers three tariff structure types:
         - Day/Night
@@ -46,11 +49,12 @@ class ElectricityPlan(BaseModel):
 
     def calculate_cost(self, usage_profile) -> EnergyCostBreakdown:
         """
-        Calculate the electricity cost for this plan.
+        Returns an EnergyCostBreakdown for this electricity plan and usage profile.
 
-        Returns
-        -------
-        EnergyCostBreakdown
+        Includes:
+        - fixed cost: daily connection charge × number of days
+        - variable cost: import cost minus export credits
+        - solar savings breakdown (if solar is present)
 
         Notes
         -----
@@ -58,7 +62,8 @@ class ElectricityPlan(BaseModel):
           a “night shift” version of usage.
         - The fixed cost is fixed_rate times the number of connection days.
         - The variable cost is import minus export credits.
-        - The solar self-consumption savings and export earnings are informational.
+        - The solar self-consumption savings and export earnings are included in
+            the returned solar field, if applicable.
         """
         # Decide whether to use "night shift" usage
         use_night_shift = True
@@ -571,6 +576,8 @@ class NonEnergyVehicleCosts(BaseModel):
 class HouseholdEnergyPlan(BaseModel):
     """
     Overall household energy plan.
+
+    Returns an EnergyCostBreakdown across all fuel types for the given profile.
     """
 
     name: str
@@ -589,9 +596,9 @@ class HouseholdEnergyPlan(BaseModel):
 
         Returns
         -------
-        EnergyCostBreakdown
-            Includes total fixed and variable costs, and (if applicable)
-            solar savings breakdown from electricity self-consumption and export.
+        EnergyCostBreakdown that includes:
+        - Total fixed and variable energy costs.
+        - Solar savings breakdown if solar generation is present.
         """
         total_fixed_cost_nzd = 0.0
         total_variable_cost_nzd = 0.0
