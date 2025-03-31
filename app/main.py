@@ -36,7 +36,12 @@ async def lifespan(app_instance: FastAPI):
 
 
 # Pass the lifespan handler when creating the FastAPI instance
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    title="Home Energy Savings Calculator",
+    version="0.2.0",
+    description="API for estimating household energy and emissions savings.",
+    lifespan=lifespan,
+)
 
 
 @app.get("/")
