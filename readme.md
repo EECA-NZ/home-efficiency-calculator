@@ -89,7 +89,6 @@ It is assumed that the user is working in a powershell environment on a Windows 
             "your_home": {
                 "people_in_house": 4,
                 "postcode": "9016",
-                "disconnect_gas": true
             }
         }' `
         -OutFile 'response.json'
@@ -206,7 +205,6 @@ curl -Method 'POST' `
         "your_home": {
             "people_in_house": 4,
             "postcode": "6012",
-            "disconnect_gas": true,
         },
         "heating": {
             "main_heating_source": "Piped gas heater",

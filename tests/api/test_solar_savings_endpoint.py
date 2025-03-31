@@ -83,7 +83,7 @@ def load_lookup_timeseries(
 
 
 profile0 = {
-    "your_home": {"people_in_house": 4, "postcode": "6012", "disconnect_gas": True},
+    "your_home": {"people_in_house": 4, "postcode": "6012"},
     "heating": {
         "main_heating_source": "Piped gas heater",
         "alternative_main_heating_source": "Heat pump",
@@ -109,7 +109,7 @@ profile0 = {
 }
 
 profile1 = {
-    "your_home": {"people_in_house": 4, "postcode": "9016", "disconnect_gas": True},
+    "your_home": {"people_in_house": 4, "postcode": "9016"},
     "heating": {
         "main_heating_source": "Electric heater",
         "alternative_main_heating_source": "Heat pump",
@@ -135,7 +135,7 @@ profile1 = {
 }
 
 profile2 = {
-    "your_home": {"people_in_house": 4, "postcode": "9016", "disconnect_gas": True},
+    "your_home": {"people_in_house": 4, "postcode": "9016"},
     "heating": {
         "main_heating_source": "Wood burner",
         "alternative_main_heating_source": "Heat pump",
@@ -161,7 +161,7 @@ profile2 = {
 }
 
 profile3 = {
-    "your_home": {"people_in_house": 3, "postcode": "1010", "disconnect_gas": True},
+    "your_home": {"people_in_house": 3, "postcode": "1010"},
     "heating": {
         "main_heating_source": "Piped gas heater",
         "alternative_main_heating_source": "Heat pump",
@@ -187,7 +187,7 @@ profile3 = {
 }
 
 profile4 = {
-    "your_home": {"people_in_house": 3, "postcode": "4277", "disconnect_gas": True},
+    "your_home": {"people_in_house": 3, "postcode": "4277"},
     "heating": {
         "main_heating_source": "Piped gas heater",
         "alternative_main_heating_source": "Heat pump",
@@ -213,7 +213,7 @@ profile4 = {
 }
 
 profile5 = {
-    "your_home": {"people_in_house": 4, "postcode": "0182", "disconnect_gas": True},
+    "your_home": {"people_in_house": 4, "postcode": "0182"},
     "heating": {
         "main_heating_source": "Piped gas heater",
         "alternative_main_heating_source": "Heat pump",

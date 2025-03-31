@@ -45,7 +45,6 @@ def suppressed_test_household_energy_profile():
         "your_home": {
             "people_in_house": 3,
             "postcode": "6012",
-            "disconnect_gas": True,
         },
         "heating": {
             "main_heating_source": "Heat pump",
@@ -71,6 +70,7 @@ def suppressed_test_household_energy_profile():
         "solar": {
             "add_solar": False,
         },
+        "other": {"fixed_cost_changes": True},
     }
 
     response = client.post("/household-energy-profile/", json=profile_data)
@@ -102,7 +102,6 @@ def suppressed_test_complete_household_energy_profile():
         "your_home": {
             "people_in_house": 1,
             "postcode": "3010",
-            "disconnect_gas": True,
         },
         "heating": {
             "main_heating_source": "Piped gas heater",
@@ -126,6 +125,7 @@ def suppressed_test_complete_household_energy_profile():
             "km_per_week": "50 or less",
         },
         "solar": {"add_solar": True},
+        "other": {"fixed_cost_changes": True},
     }
 
     response = client.post("/household-energy-profile/", json=profile_data)
@@ -151,7 +151,6 @@ def suppressed_test_partial_household_energy_profile():
         "your_home": {
             "people_in_house": 1,
             "postcode": "3010",
-            "disconnect_gas": True,
         },
         "heating": {
             "main_heating_source": "Piped gas heater",
@@ -167,6 +166,7 @@ def suppressed_test_partial_household_energy_profile():
             "cooktop": "Piped gas",
             "alternative_cooktop": "Electric induction",
         },
+        "other": {"fixed_cost_changes": True},
     }
 
     response = client.post("/household-energy-profile/", json=profile_data)

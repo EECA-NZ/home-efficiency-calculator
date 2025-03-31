@@ -31,7 +31,7 @@ def test_get_user_geography(postcode, expected, client_fixture):
     """
     response = client_fixture.post(
         "/user/geography",
-        json={"postcode": postcode, "disconnect_gas": True, "people_in_house": 1},
+        json={"postcode": postcode, "people_in_house": 1},
     )
     assert response.status_code == 200
     assert response.json() == expected

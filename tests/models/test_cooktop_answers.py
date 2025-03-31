@@ -21,7 +21,6 @@ MY_ENERGY_PLAN = get_energy_plan("6012", "None")
 YOUR_HOME = YourHomeAnswers(
     people_in_house=4,
     postcode="6012",
-    disconnect_gas=True,
 )
 
 COOKTOP = CooktopAnswers(
@@ -59,7 +58,6 @@ def test_invalid_cooktop_type():
     your_home = YourHomeAnswers(
         people_in_house=3,
         postcode="9016",
-        disconnect_gas=True,
     )
     cooktop_answers = CooktopAnswers(
         cooktop="Piped gas",

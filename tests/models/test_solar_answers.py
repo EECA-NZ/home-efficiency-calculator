@@ -14,7 +14,6 @@ MY_ENERGY_PLAN = get_energy_plan("6012", "None")
 YOUR_HOME = YourHomeAnswers(
     people_in_house=4,
     postcode="6012",
-    disconnect_gas=True,
 )
 
 SOLAR = SolarAnswers(

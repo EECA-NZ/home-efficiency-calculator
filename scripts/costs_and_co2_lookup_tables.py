@@ -259,7 +259,6 @@ def generate_hot_water_lookup_table():
         your_home = YourHomeAnswers(
             people_in_house=people,
             postcode=postcode,
-            disconnect_gas=disconnect,
         )
         hot_water = HotWaterAnswers(
             hot_water_usage=usage,
@@ -307,7 +306,6 @@ def generate_cooktop_lookup_table():
         your_home = YourHomeAnswers(
             people_in_house=people,
             postcode=postcode,
-            disconnect_gas=disconnect,
         )
         cooktop = CooktopAnswers(
             cooktop=cooktop_type,
@@ -365,7 +363,6 @@ def generate_vehicle_lookup_table():
         your_home = YourHomeAnswers(
             people_in_house=people,
             postcode=postcode,
-            disconnect_gas=disconnect,
         )
         driving = DrivingAnswers(
             vehicle_type=vehicle_type,

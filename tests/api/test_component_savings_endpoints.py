@@ -33,7 +33,6 @@ def test_heating_savings_specific_alternative():
         "your_home": {
             "people_in_house": 1,
             "postcode": "9810",
-            "disconnect_gas": True,
         },
         "heating_answers": {
             "main_heating_source": "Piped gas heater",
@@ -59,7 +58,6 @@ def test_heating_savings_all_alternatives():
         "your_home": {
             "people_in_house": 1,
             "postcode": "9810",
-            "disconnect_gas": True,
         },
         "heating_answers": {
             "main_heating_source": "Piped gas heater",
@@ -87,7 +85,6 @@ def test_hot_water_savings_specific_alternative():
         "your_home": {
             "people_in_house": 1,
             "postcode": "8022",
-            "disconnect_gas": True,
         },
         "hot_water_answers": {
             "hot_water_usage": "Low",
@@ -115,7 +112,6 @@ def test_hot_water_savings_without_alternative():
         "your_home": {
             "people_in_house": 1,
             "postcode": "8022",
-            "disconnect_gas": True,
         },
         "hot_water_answers": {
             "hot_water_usage": "Low",
@@ -141,7 +137,6 @@ def test_cooktop_savings_specific_alternative():
         "your_home": {
             "people_in_house": 1,
             "postcode": "6012",
-            "disconnect_gas": True,
         },
         "cooktop_answers": {
             "cooktop": "Piped gas",
@@ -169,7 +164,6 @@ def test_cooktop_savings_all_alternatives():
         "your_home": {
             "people_in_house": 1,
             "postcode": "6012",
-            "disconnect_gas": True,
         },
         "cooktop_answers": {
             "cooktop": "Piped gas",
@@ -197,7 +191,6 @@ def test_driving_savings_specific_alternative():
         "your_home": {
             "people_in_house": 1,
             "postcode": "1024",
-            "disconnect_gas": True,
         },
         "driving_answers": {
             "vehicle_type": "Petrol",
@@ -226,7 +219,6 @@ def test_driving_savings_all_alternatives():
         "your_home": {
             "people_in_house": 1,
             "postcode": "1024",
-            "disconnect_gas": True,
         },
         "driving_answers": {
             "vehicle_type": "Petrol",

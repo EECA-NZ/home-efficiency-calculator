@@ -13,7 +13,7 @@ from app.services.get_energy_plans import get_energy_plan
 from app.services.helpers import load_lookup_timeseries
 
 profile = {
-    "your_home": {"people_in_house": 4, "postcode": "6012", "disconnect_gas": True},
+    "your_home": {"people_in_house": 4, "postcode": "6012"},
     "heating": {
         "main_heating_source": "Piped gas heater",
         "alternative_main_heating_source": "Heat pump",
@@ -36,10 +36,11 @@ profile = {
         "alternative_vehicle_type": "Electric",
     },
     "solar": {"add_solar": True},
+    "user_decisions": {"fixed_cost_changes": True, "adding_solar": True},
 }
 
 profile = {
-    "your_home": {"people_in_house": 4, "postcode": "2471", "disconnect_gas": True},
+    "your_home": {"people_in_house": 4, "postcode": "2471"},
     "heating": {
         "main_heating_source": "Piped gas heater",
         "alternative_main_heating_source": "Heat pump",
@@ -62,6 +63,7 @@ profile = {
         "alternative_vehicle_type": "Electric",
     },
     "solar": {"add_solar": True},
+    "user_decisions": {"fixed_cost_changes": True, "adding_solar": True},
 }
 
 lookup_tables_path = Path("../resources/lookup_tables")

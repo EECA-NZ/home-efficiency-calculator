@@ -146,7 +146,6 @@ def generate_vehicle_solar_lookup_table(output_dir="."):
                     YourHomeAnswers(
                         people_in_house=3,
                         postcode=DEFAULT_POSTCODE,
-                        disconnect_gas=True,
                     ),
                     solar=SOLAR,
                     use_alternative=False,
@@ -200,7 +199,6 @@ def generate_hot_water_solar_lookup_table(output_dir="."):
                     your_home = YourHomeAnswers(
                         people_in_house=p,
                         postcode=pc,
-                        disconnect_gas=True,
                     )
                     energy = hot_water.energy_usage_pattern(your_home, SOLAR)
                     total_kwh = energy.electricity_kwh.total_usage.sum()
@@ -255,7 +253,6 @@ def generate_space_heating_solar_lookup_table(output_dir="."):
                         YourHomeAnswers(
                             people_in_house=3,
                             postcode=pc,
-                            disconnect_gas=True,
                         ),
                         solar=SOLAR,
                     )
@@ -306,7 +303,6 @@ def generate_cooktop_solar_lookup_table(output_dir="."):
             your_home = YourHomeAnswers(
                 people_in_house=p,
                 postcode=DEFAULT_POSTCODE,
-                disconnect_gas=True,
             )
             energy = cooktop.energy_usage_pattern(your_home, SOLAR)
             total_kwh = energy.electricity_kwh.total_usage.sum()

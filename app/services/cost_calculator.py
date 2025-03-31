@@ -12,6 +12,7 @@ from ..models.usage_profiles import YearlyFuelUsageProfile
 from ..services.energy_calculator import uses_lpg, uses_natural_gas
 from ..services.get_energy_plans import get_energy_plan
 from ..services.helpers import round_floats_to_2_dp, safe_percentage_reduction
+from ..services.other_answers_helpers import get_other_answers
 from .energy_calculator import emissions_kg_co2e
 from .get_energy_plans import get_energy_plan
 from .helpers import safe_percentage_reduction
@@ -345,7 +346,7 @@ def calculate_fixed_cost_savings(profile):
     """
     Calculate the fixed cost savings for the household, by inferring
     the type of gas connection (if any) that could be disconnected.
-    If your_home.disconnect_gas is False, no disconnection is assumed.
+    If other_answers.fixed_cost_changes is False, no disconnection is assumed.
 
     Returns:
     - A dictionary of fixed cost savings for each gas connection.
@@ -356,6 +357,8 @@ def calculate_fixed_cost_savings(profile):
         )
     else:
         your_plan = get_energy_plan(profile.your_home.postcode, "None")
+
+    other_answers = get_other_answers(profile)
 
     current_uses_natural_gas = uses_natural_gas(profile)
     current_uses_lpg = uses_lpg(profile)
@@ -384,12 +387,12 @@ def calculate_fixed_cost_savings(profile):
         "current": current_natural_gas_fixed_cost,
         "alternative": (
             alternative_natural_gas_fixed_cost
-            if profile.your_home.disconnect_gas
+            if other_answers.fixed_cost_changes
             else current_natural_gas_fixed_cost
         ),
         "absolute_reduction": (
             current_natural_gas_fixed_cost - alternative_natural_gas_fixed_cost
-            if profile.your_home.disconnect_gas
+            if other_answers.fixed_cost_changes
             else 0
         ),
         "percentage_reduction": (
@@ -401,7 +404,7 @@ def calculate_fixed_cost_savings(profile):
                     current_natural_gas_fixed_cost, alternative_natural_gas_fixed_cost
                 )
             )
-            and profile.your_home.disconnect_gas
+            and other_answers.fixed_cost_changes
             else 0
         ),
     }
@@ -409,12 +412,12 @@ def calculate_fixed_cost_savings(profile):
         "current": current_lpg_fixed_cost,
         "alternative": (
             alternative_lpg_fixed_cost
-            if profile.your_home.disconnect_gas
+            if other_answers.fixed_cost_changes
             else current_lpg_fixed_cost
         ),
         "absolute_reduction": (
             current_lpg_fixed_cost - alternative_lpg_fixed_cost
-            if profile.your_home.disconnect_gas
+            if other_answers.fixed_cost_changes
             else 0
         ),
         "percentage_reduction": (
@@ -426,7 +429,7 @@ def calculate_fixed_cost_savings(profile):
                     current_lpg_fixed_cost, alternative_lpg_fixed_cost
                 )
             )
-            and profile.your_home.disconnect_gas
+            and other_answers.fixed_cost_changes
             else 0
         ),
     }
