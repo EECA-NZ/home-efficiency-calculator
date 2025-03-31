@@ -145,9 +145,8 @@ def calculate_optimal_plan_by_edb(profile, filtered_df):
 
         for _, plan_data in plans.iterrows():
             plan = row_to_plan(plan_data)
-
-            (fixed_cost, variable_cost, _, _, _) = plan.calculate_cost(profile)
-            total_cost = fixed_cost + variable_cost
+            cost = plan.calculate_cost(profile)
+            total_cost = cost.fixed_cost_nzd + cost.variable_cost_nzd
 
             if total_cost < lowest_cost:
                 lowest_cost = total_cost
