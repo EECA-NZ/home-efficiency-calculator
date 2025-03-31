@@ -8,7 +8,7 @@ import numpy as np
 
 from ..constants import CHECKBOX_BEHAVIOUR, DAYS_IN_YEAR
 from ..models.response_models import SavingsData, SavingsResponse
-from ..models.usage_profiles import YearlyFuelUsageProfile
+from ..models.usage_profiles import EnergyCostBreakdown, YearlyFuelUsageProfile
 from ..services.energy_calculator import uses_lpg, uses_natural_gas
 from ..services.get_energy_plans import get_energy_plan
 from ..services.helpers import round_floats_to_2_dp, safe_percentage_reduction
@@ -29,31 +29,18 @@ def costs_and_emissions(answers, your_plan, solar, your_home):
     your_home: YourHomeAnswers object
 
     Returns:
-    Tuple[float, float, float, float, float], the fixed cost, variable cost,
-    solar_self_consumption_savings, solar_export_earnings, and emissions
-    for the household. Units are [NZD] * 4 and kg CO2e, respectively.
+    Tuple containing:
+    - EnergyCostBreakdown
+    - emissions [float] in kg CO2e
     """
     energy_use = (
         answers.energy_usage_pattern(your_home, solar)
         if answers
         else YearlyFuelUsageProfile()
     )
-    (
-        fixed_cost_nzd,
-        variable_cost_nzd,
-        solar_self_consumption_savings,
-        solar_export_earnings,
-        solar_self_consumption_percentage,
-    ) = your_plan.calculate_cost(energy_use)
+    cost: EnergyCostBreakdown = your_plan.calculate_cost(energy_use)
     my_emissions_kg_co2e = emissions_kg_co2e(energy_use)
-    return (
-        fixed_cost_nzd,
-        variable_cost_nzd,
-        solar_self_consumption_savings,
-        solar_export_earnings,
-        solar_self_consumption_percentage,
-        my_emissions_kg_co2e,
-    )
+    return cost, my_emissions_kg_co2e
 
 
 def calculate_savings_for_option(option, field, answers, your_home, solar):
@@ -64,39 +51,27 @@ def calculate_savings_for_option(option, field, answers, your_home, solar):
     - A dictionary structured to fit into the SavingsData model.
     """
     if type(answers).__name__ == "DrivingAnswers":
-        # The vehicle type affects the Road User Charges part of the energy
-        # plan, so we need to get a plan for the current and alternative vehicle types
         current_plan = get_energy_plan(your_home.postcode, answers.vehicle_type)
         alternative_plan = get_energy_plan(your_home.postcode, option)
     else:
-        # The other parts of the house aren't affected by 'other vehicle costs'
-        # so we can get a plan for any vehicle type
         current_plan = get_energy_plan(your_home.postcode, "None")
         alternative_plan = get_energy_plan(your_home.postcode, "None")
 
-    # Calculate the current energy use, costs, and emissions
-    _, current_variable_costs, _, _, _, current_emissions_kg_co2e = costs_and_emissions(
+    current_cost, current_emissions_kg_co2e = costs_and_emissions(
         answers, current_plan, solar, your_home
     )
 
-    # Create a copy of the answers and set the new option for the specified field
     alternative_answers = answers.model_copy()
     setattr(alternative_answers, field, option)
+    alternative_cost, alternative_emissions_kg_co2e = costs_and_emissions(
+        alternative_answers, alternative_plan, solar, your_home
+    )
 
-    # Calculate the energy use, costs, and emissions for the alternative option
-    (
-        _,
-        alternative_variable_costs,
-        _,
-        _,
-        _,
-        alternative_emissions_kg_co2e,
-    ) = costs_and_emissions(alternative_answers, alternative_plan, solar, your_home)
-
-    # Calculate the absolute and percentage savings and emissions reduction
-    absolute_cost_savings = current_variable_costs - alternative_variable_costs
+    absolute_cost_savings = (
+        current_cost.variable_cost_nzd - alternative_cost.variable_cost_nzd
+    )
     percentage_cost_reduction = safe_percentage_reduction(
-        current_variable_costs, alternative_variable_costs
+        current_cost.variable_cost_nzd, alternative_cost.variable_cost_nzd
     )
     absolute_emissions_reduction = (
         current_emissions_kg_co2e - alternative_emissions_kg_co2e
@@ -107,8 +82,8 @@ def calculate_savings_for_option(option, field, answers, your_home, solar):
 
     return {
         "variable_cost_nzd": {
-            "current": current_variable_costs,
-            "alternative": alternative_variable_costs,
+            "current": current_cost.variable_cost_nzd,
+            "alternative": alternative_cost.variable_cost_nzd,
             "absolute_reduction": absolute_cost_savings,
             "percentage_reduction": percentage_cost_reduction,
         },
@@ -131,7 +106,6 @@ def generate_savings_options(answers, field, your_home, solar):
     if not hasattr(answers, field):
         raise ValueError(f"Field {field} not found in answers")
 
-    # Get all the possible options for the given field (e.g., 'main_heating_source')
     options = getattr(type(answers).model_fields[field], "annotation").__args__
 
     return_dictionary = {}

@@ -22,7 +22,7 @@ from ...constants import (
 from ...services import get_climate_zone
 from ...services.helpers import heating_frequency_factor
 from ...services.usage_profile_helpers.heating import space_heating_profile
-from ..usage_profiles import ElectricityUsageTimeseries, HeatingYearlyFuelUsageProfile
+from ..usage_profiles import ElectricityUsageDetailed, HeatingYearlyFuelUsageProfile
 
 
 class HeatingAnswers(BaseModel):
@@ -103,7 +103,7 @@ class HeatingAnswers(BaseModel):
                 "lpg_tanks_rental_days": DAYS_IN_YEAR,
             },
             "Heat pump": {
-                "electricity_kwh": ElectricityUsageTimeseries(
+                "electricity_kwh": ElectricityUsageDetailed(
                     fixed_time_uncontrolled_kwh=heating_energy_service_demand
                     / HEAT_PUMP_COP_BY_CLIMATE_ZONE[climate_zone]
                     * space_heating_profile(
@@ -114,7 +114,7 @@ class HeatingAnswers(BaseModel):
                 ),
             },
             "Electric heater": {
-                "electricity_kwh": ElectricityUsageTimeseries(
+                "electricity_kwh": ElectricityUsageDetailed(
                     fixed_time_uncontrolled_kwh=heating_energy_service_demand
                     / ELECTRIC_HEATER_SPACE_HEATING_EFFICIENCY
                     * space_heating_profile(

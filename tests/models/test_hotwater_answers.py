@@ -8,7 +8,7 @@ from pytest import approx
 
 from app.constants import DAYS_IN_YEAR, HOT_WATER_FLEXIBLE_KWH_FRACTION
 from app.models.usage_profiles import (
-    ElectricityUsageTimeseries,
+    ElectricityUsageDetailed,
     HotWaterYearlyFuelUsageProfile,
 )
 from app.models.user_answers import HotWaterAnswers
@@ -37,7 +37,7 @@ def test_water_heating_energy_usage():
     anytime_kwh = total_kwh * HOT_WATER_FLEXIBLE_KWH_FRACTION
     fixed_kwh = total_kwh - anytime_kwh
 
-    electricity_kwh = ElectricityUsageTimeseries(
+    electricity_kwh = ElectricityUsageDetailed(
         shift_able_controllable_kwh=anytime_kwh * day_profile,
         fixed_time_controllable_kwh=fixed_kwh * day_profile,
     )

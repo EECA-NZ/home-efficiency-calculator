@@ -9,6 +9,7 @@ from typing import Dict, Tuple
 import numpy as np
 from pydantic import BaseModel
 
+from app.models.usage_profiles import EnergyCostBreakdown, SolarSavingsBreakdown
 from app.services.usage_profile_helpers import day_night_flag
 
 day_mask = day_night_flag()
@@ -43,17 +44,13 @@ class ElectricityPlan(BaseModel):
     import_rates: Dict[str, float]  # e.g. {"Day": 0.25, "Night": 0.15}
     export_rates: Dict[str, float]  # e.g. {"Uncontrolled": 0.12}
 
-    def calculate_cost(self, usage_profile) -> Tuple[float, float, float, float, float]:
+    def calculate_cost(self, usage_profile) -> EnergyCostBreakdown:
         """
         Calculate the electricity cost for this plan.
 
         Returns
         -------
-        (fixed_cost_nzd,
-         variable_cost_nzd,
-         solar_self_consumption_savings_nzd,
-         solar_export_earnings_nzd,
-         solar_self_consumption_pct)
+        EnergyCostBreakdown
 
         Notes
         -----
@@ -101,6 +98,7 @@ class ElectricityPlan(BaseModel):
             shift_able_controllable_kwh = (
                 usage_profile.electricity_kwh.shift_able_controllable_kwh
             )
+
         (
             variable_cost_nzd,
             solar_self_consumption_savings_nzd,
@@ -115,15 +113,35 @@ class ElectricityPlan(BaseModel):
             solar_kwh,
         )
 
-        # Fixed cost
         fixed_cost_nzd = usage_profile.elx_connection_days * self.fixed_rate
 
-        return (
-            fixed_cost_nzd,
-            variable_cost_nzd,
-            solar_self_consumption_savings_nzd,
-            solar_export_earnings_nzd,
-            solar_self_consumption_pct,
+        if solar_self_consumption_savings_nzd > 0 or solar_export_earnings_nzd > 0:
+            import_rate = (
+                self.import_rates.get("Day")
+                or self.import_rates.get("Uncontrolled")
+                or 0.0
+            )
+            export_rate = self.export_rates.get("Uncontrolled") or 0.0
+            solar = SolarSavingsBreakdown(
+                self_consumption_kwh=(
+                    solar_self_consumption_savings_nzd / import_rate
+                    if import_rate > 0
+                    else 0.0
+                ),
+                export_kwh=(
+                    solar_export_earnings_nzd / export_rate if export_rate > 0 else 0.0
+                ),
+                self_consumption_savings_nzd=solar_self_consumption_savings_nzd,
+                export_earnings_nzd=solar_export_earnings_nzd,
+                self_consumption_pct=solar_self_consumption_pct,
+            )
+        else:
+            solar = None
+
+        return EnergyCostBreakdown(
+            fixed_cost_nzd=fixed_cost_nzd,
+            variable_cost_nzd=variable_cost_nzd,
+            solar=solar,
         )
 
     # pylint: disable=too-many-arguments, too-many-positional-arguments
@@ -382,17 +400,13 @@ class NaturalGasPlan(BaseModel):
     fixed_rate: float
     import_rates: Dict[str, float]
 
-    def calculate_cost(self, usage_profile) -> Tuple[float, float, float, float, float]:
+    def calculate_cost(self, usage_profile) -> EnergyCostBreakdown:
         """
         Calculate the cost of natural gas for a household.
 
         Returns
         -------
-        (fixed_cost_nzd,
-         variable_cost_nzd,
-         0.0,
-         0.0,
-         0.0)
+        EnergyCostBreakdown
         """
         keys = set(self.import_rates.keys())
         variable_cost_nzd = 0.0
@@ -405,7 +419,11 @@ class NaturalGasPlan(BaseModel):
             raise ValueError(f"Unexpected import_rates keys: {keys}")
 
         fixed_cost_nzd = usage_profile.natural_gas_connection_days * self.fixed_rate
-        return (fixed_cost_nzd, variable_cost_nzd, 0.0, 0.0, 0.0)
+        return EnergyCostBreakdown(
+            fixed_cost_nzd=fixed_cost_nzd,
+            variable_cost_nzd=variable_cost_nzd,
+            solar=None,
+        )
 
 
 class LPGPlan(BaseModel):
@@ -417,17 +435,21 @@ class LPGPlan(BaseModel):
     per_lpg_kwh: float
     fixed_rate: float
 
-    def calculate_cost(self, usage_profile) -> Tuple[float, float, float, float, float]:
+    def calculate_cost(self, usage_profile) -> EnergyCostBreakdown:
         """
         Calculate the cost of LPG.
 
         Returns
         -------
-        (fixed_cost_nzd, variable_cost_nzd, 0.0, 0.0, 0.0)
+        EnergyCostBreakdown
         """
         variable_cost_nzd = usage_profile.lpg_kwh * self.per_lpg_kwh
         fixed_cost_nzd = usage_profile.lpg_tanks_rental_days * self.fixed_rate
-        return (fixed_cost_nzd, variable_cost_nzd, 0.0, 0.0, 0.0)
+        return EnergyCostBreakdown(
+            fixed_cost_nzd=fixed_cost_nzd,
+            variable_cost_nzd=variable_cost_nzd,
+            solar=None,
+        )
 
 
 class WoodPrice(BaseModel):
@@ -438,16 +460,18 @@ class WoodPrice(BaseModel):
     name: str
     per_wood_kwh: float
 
-    def calculate_cost(self, usage_profile) -> Tuple[float, float, float, float, float]:
+    def calculate_cost(self, usage_profile) -> EnergyCostBreakdown:
         """
         Calculate the cost of wood.
 
         Returns
         -------
-        (0, variable_cost_nzd, 0.0, 0.0, 0.0)
+        EnergyCostBreakdown
         """
         variable_cost_nzd = usage_profile.wood_kwh * self.per_wood_kwh
-        return (0.0, variable_cost_nzd, 0.0, 0.0, 0.0)
+        return EnergyCostBreakdown(
+            fixed_cost_nzd=0.0, variable_cost_nzd=variable_cost_nzd, solar=None
+        )
 
 
 class PetrolPrice(BaseModel):
@@ -458,16 +482,18 @@ class PetrolPrice(BaseModel):
     name: str
     per_petrol_litre: float
 
-    def calculate_cost(self, usage_profile) -> Tuple[float, float, float, float, float]:
+    def calculate_cost(self, usage_profile) -> EnergyCostBreakdown:
         """
         Calculate the cost of petrol.
 
         Returns
         -------
-        (0, variable_cost_nzd, 0.0, 0.0, 0.0)
+        EnergyCostBreakdown
         """
         variable_cost_nzd = usage_profile.petrol_litres * self.per_petrol_litre
-        return (0.0, variable_cost_nzd, 0.0, 0.0, 0.0)
+        return EnergyCostBreakdown(
+            fixed_cost_nzd=0.0, variable_cost_nzd=variable_cost_nzd, solar=None
+        )
 
 
 class DieselPrice(BaseModel):
@@ -478,16 +504,18 @@ class DieselPrice(BaseModel):
     name: str
     per_diesel_litre: float
 
-    def calculate_cost(self, usage_profile) -> Tuple[float, float, float, float, float]:
+    def calculate_cost(self, usage_profile) -> EnergyCostBreakdown:
         """
         Calculate the cost of diesel.
 
         Returns
         -------
-        (0, variable_cost_nzd, 0.0, 0.0, 0.0)
+        EnergyCostBreakdown
         """
         variable_cost_nzd = usage_profile.diesel_litres * self.per_diesel_litre
-        return (0.0, variable_cost_nzd, 0.0, 0.0, 0.0)
+        return EnergyCostBreakdown(
+            fixed_cost_nzd=0.0, variable_cost_nzd=variable_cost_nzd, solar=None
+        )
 
 
 class PublicChargingPrice(BaseModel):
@@ -498,16 +526,18 @@ class PublicChargingPrice(BaseModel):
     name: str
     per_kwh: float
 
-    def calculate_cost(self, usage_profile) -> Tuple[float, float, float, float, float]:
+    def calculate_cost(self, usage_profile) -> EnergyCostBreakdown:
         """
         Calculate the cost of public EV charging.
 
         Returns
         -------
-        (0, variable_cost_nzd, 0.0, 0.0, 0.0)
+        EnergyCostBreakdown
         """
         variable_cost_nzd = usage_profile.public_ev_charger_kwh * self.per_kwh
-        return (0.0, variable_cost_nzd, 0.0, 0.0, 0.0)
+        return EnergyCostBreakdown(
+            fixed_cost_nzd=0.0, variable_cost_nzd=variable_cost_nzd, solar=None
+        )
 
 
 class NonEnergyVehicleCosts(BaseModel):
@@ -520,24 +550,22 @@ class NonEnergyVehicleCosts(BaseModel):
     nzd_per_year_servicing_cost: float
     nzd_per_000_km_road_user_charges: float
 
-    def calculate_cost(self, usage_profile) -> Tuple[float, float, float, float, float]:
+    def calculate_cost(self, usage_profile) -> EnergyCostBreakdown:
         """
         Calculate all non-energy vehicle costs.
 
         Returns
         -------
-        (0,
-         variable_cost_nzd,
-         0.0,
-         0.0,
-         0.0)
+        EnergyCostBreakdown
         """
         variable_cost_nzd = (
             self.nzd_per_year_licensing
             + self.nzd_per_year_servicing_cost
             + usage_profile.thousand_km * self.nzd_per_000_km_road_user_charges
         )
-        return (0.0, variable_cost_nzd, 0.0, 0.0, 0.0)
+        return EnergyCostBreakdown(
+            fixed_cost_nzd=0.0, variable_cost_nzd=variable_cost_nzd, solar=None
+        )
 
 
 class HouseholdEnergyPlan(BaseModel):
@@ -555,25 +583,22 @@ class HouseholdEnergyPlan(BaseModel):
     public_charging_price: PublicChargingPrice
     other_vehicle_costs: NonEnergyVehicleCosts
 
-    def calculate_cost(self, usage_profile) -> Tuple[float, float, float, float, float]:
+    def calculate_cost(self, usage_profile) -> EnergyCostBreakdown:
         """
-        Calculate total costs across all energy types.
+        Calculate total energy costs for a household across all fuel types.
 
         Returns
         -------
-        (fixed_cost_nzd,
-         variable_cost_nzd,
-         total_solar_self_consumption_savings,
-         total_solar_export_earnings,
-         overall_solar_self_consumption_pct)
+        EnergyCostBreakdown
+            Includes total fixed and variable costs, and (if applicable)
+            solar savings breakdown from electricity self-consumption and export.
         """
         total_fixed_cost_nzd = 0.0
         total_variable_cost_nzd = 0.0
         total_solar_self_consumption_savings = 0.0
         total_solar_export_earnings = 0.0
-
-        # Since only ElectricityPlan has non-zero solar %,
-        # we just capture that single value
+        total_self_consumption_kwh = 0.0
+        total_export_kwh = 0.0
         overall_solar_self_consumption_pct = 0.0
 
         for energy_plan in [
@@ -586,27 +611,31 @@ class HouseholdEnergyPlan(BaseModel):
             self.public_charging_price,
             self.other_vehicle_costs,
         ]:
-            (
-                fixed_cost_nzd,
-                variable_cost_nzd,
-                sc_savings_nzd,
-                export_earnings_nzd,
-                sc_percentage,
-            ) = energy_plan.calculate_cost(usage_profile)
+            cost = energy_plan.calculate_cost(usage_profile)
+            total_fixed_cost_nzd += cost.fixed_cost_nzd
+            total_variable_cost_nzd += cost.variable_cost_nzd
+            if cost.solar:
+                total_solar_self_consumption_savings += (
+                    cost.solar.self_consumption_savings_nzd
+                )
+                total_solar_export_earnings += cost.solar.export_earnings_nzd
+                total_self_consumption_kwh += cost.solar.self_consumption_kwh
+                total_export_kwh += cost.solar.export_kwh
+                overall_solar_self_consumption_pct = cost.solar.self_consumption_pct
 
-            total_fixed_cost_nzd += fixed_cost_nzd
-            total_variable_cost_nzd += variable_cost_nzd
-            total_solar_self_consumption_savings += sc_savings_nzd
-            total_solar_export_earnings += export_earnings_nzd
-
-            # Only update from the electricity plan
-            if isinstance(energy_plan, ElectricityPlan):
-                overall_solar_self_consumption_pct = sc_percentage
-
-        return (
-            total_fixed_cost_nzd,
-            total_variable_cost_nzd,
-            total_solar_self_consumption_savings,
-            total_solar_export_earnings,
-            overall_solar_self_consumption_pct,
+        return EnergyCostBreakdown(
+            fixed_cost_nzd=total_fixed_cost_nzd,
+            variable_cost_nzd=total_variable_cost_nzd,
+            solar=(
+                SolarSavingsBreakdown(
+                    self_consumption_kwh=total_self_consumption_kwh,
+                    export_kwh=total_export_kwh,
+                    self_consumption_savings_nzd=total_solar_self_consumption_savings,
+                    export_earnings_nzd=total_solar_export_earnings,
+                    self_consumption_pct=overall_solar_self_consumption_pct,
+                )
+                if total_solar_self_consumption_savings > 0
+                or total_solar_export_earnings > 0
+                else None
+            ),
         )

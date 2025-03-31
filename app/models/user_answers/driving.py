@@ -17,7 +17,7 @@ from ...constants import (
 )
 from ...services.usage_profile_helpers import flat_day_night_profiles
 from ...services.usage_profile_helpers.driving import solar_friendly_ev_charging_profile
-from ..usage_profiles import DrivingYearlyFuelUsageProfile, ElectricityUsageTimeseries
+from ..usage_profiles import DrivingYearlyFuelUsageProfile, ElectricityUsageDetailed
 
 DEFAULT_CHARGER_KW = 3.0  # See https://www.standards.govt.nz/shop/snz-pas-60112023
 CALENDAR_YEAR = 2019
@@ -97,14 +97,14 @@ class DrivingAnswers(BaseModel):
             charging_profile = solar_friendly_ev_charging_profile(
                 home_charging_kwh, charger_kw=DEFAULT_CHARGER_KW, year=CALENDAR_YEAR
             )
-            home_charging_timeseries = ElectricityUsageTimeseries(
+            home_charging_timeseries = ElectricityUsageDetailed(
                 shift_able_uncontrolled_kwh=home_charging_kwh * charging_profile
             )
         else:
             # No battery usage
             yearly_total_kwh = 0
             public_charging_kwh = 0
-            home_charging_timeseries = ElectricityUsageTimeseries()
+            home_charging_timeseries = ElectricityUsageDetailed()
 
         # Finally, return the DrivingYearlyFuelUsageProfile.
         return DrivingYearlyFuelUsageProfile(

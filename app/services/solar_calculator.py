@@ -86,13 +86,11 @@ def calculate_solar_savings(profile):
     )
     electricity_plan = energy_plan.electricity_plan
 
-    (
-        _,
-        _,
-        total_solar_self_consumption_savings,
-        total_solar_export_earnings,
-        _,
-    ) = electricity_plan.calculate_cost(with_solar_energy_usage_profile)
+    solar_breakdown = electricity_plan.calculate_cost(
+        with_solar_energy_usage_profile
+    ).solar
+    total_solar_self_consumption_savings = solar_breakdown.self_consumption_savings_nzd
+    total_solar_export_earnings = solar_breakdown.export_earnings_nzd
 
     return {
         "annual_kwh_generated": annual_solar_kwh_generated,

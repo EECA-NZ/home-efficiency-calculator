@@ -10,7 +10,7 @@ from pytest import approx
 from app.constants import DAYS_IN_YEAR
 from app.models.energy_plans import ElectricityPlan
 from app.models.usage_profiles import (
-    ElectricityUsageTimeseries,
+    ElectricityUsageDetailed,
     HouseholdYearlyFuelUsageProfile,
 )
 from app.services.get_energy_plans import (
@@ -106,7 +106,7 @@ class TestElectricityPlan(unittest.TestCase):
     def setUp(self):
         self.profile = HouseholdYearlyFuelUsageProfile(
             elx_connection_days=DAYS_IN_YEAR,
-            electricity_kwh=ElectricityUsageTimeseries(
+            electricity_kwh=ElectricityUsageDetailed(
                 fixed_time_uncontrolled_kwh=300 * day_profile,
                 shift_able_controllable_kwh=100 * night_profile,
             ),
@@ -190,8 +190,8 @@ class TestElectricityPlan(unittest.TestCase):
         {"All inclusive"}.
         """
         cost = self.electricity_plan_all_inclusive.calculate_cost(self.profile)
-        self.assertAlmostEqual(cost[0], self.fixed_rate * DAYS_IN_YEAR)
-        self.assertAlmostEqual(cost[1], (300 + 100) * self.all_inclusive)
+        self.assertAlmostEqual(cost.fixed_cost_nzd, self.fixed_rate * DAYS_IN_YEAR)
+        self.assertAlmostEqual(cost.variable_cost_nzd, (300 + 100) * self.all_inclusive)
 
     def test_day_night_plan(self):
         """
@@ -199,8 +199,10 @@ class TestElectricityPlan(unittest.TestCase):
         {"Day", "Night"}.
         """
         cost = self.electricity_plan_day_night.calculate_cost(self.profile)
-        self.assertAlmostEqual(cost[0], self.fixed_rate * DAYS_IN_YEAR)
-        self.assertAlmostEqual(cost[1], 300 * self.day + 100 * self.night)
+        self.assertAlmostEqual(cost.fixed_cost_nzd, self.fixed_rate * DAYS_IN_YEAR)
+        self.assertAlmostEqual(
+            cost.variable_cost_nzd, 300 * self.day + 100 * self.night
+        )
 
     def test_uncontrolled(self):
         """
@@ -208,8 +210,8 @@ class TestElectricityPlan(unittest.TestCase):
         {"Uncontrolled"}.
         """
         cost = self.electricity_plan_uncontrolled.calculate_cost(self.profile)
-        self.assertAlmostEqual(cost[0], self.fixed_rate * DAYS_IN_YEAR)
-        self.assertAlmostEqual(cost[1], (300 + 100) * self.uncontrolled)
+        self.assertAlmostEqual(cost.fixed_cost_nzd, self.fixed_rate * DAYS_IN_YEAR)
+        self.assertAlmostEqual(cost.variable_cost_nzd, (300 + 100) * self.uncontrolled)
 
     def test_uncontrolled_controlled(self):
         """
@@ -219,8 +221,10 @@ class TestElectricityPlan(unittest.TestCase):
         cost = self.electricity_plan_uncontrolled_controlled.calculate_cost(
             self.profile
         )
-        self.assertAlmostEqual(cost[0], self.fixed_rate * DAYS_IN_YEAR)
-        self.assertAlmostEqual(cost[1], 300 * self.uncontrolled + 100 * self.controlled)
+        self.assertAlmostEqual(cost.fixed_cost_nzd, self.fixed_rate * DAYS_IN_YEAR)
+        self.assertAlmostEqual(
+            cost.variable_cost_nzd, 300 * self.uncontrolled + 100 * self.controlled
+        )
 
     def test_unexpected_keys(self):
         """

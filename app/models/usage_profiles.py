@@ -5,6 +5,7 @@ might not be relevant for some areas.
 """
 
 import functools
+from dataclasses import dataclass
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -21,7 +22,19 @@ from app.services.usage_profile_helpers import (
 day_mask = day_night_flag()
 
 
-class ElectricityUsageTimeseries(BaseModel):
+class ElectricityUsageFlat(BaseModel):
+    """
+    Aggregated electricity usage over the year (no hourly breakdown).
+    Used when solar generation is not present.
+    """
+
+    fixed_time_uncontrolled_kwh: float = 0.0
+    fixed_time_controllable_kwh: float = 0.0
+    shift_able_uncontrolled_kwh: float = 0.0
+    shift_able_controllable_kwh: float = 0.0
+
+
+class ElectricityUsageDetailed(BaseModel):
     """
     Annual electricity usage for a time-slice,
     stored as NumPy arrays, representing each hour of the year
@@ -95,32 +108,22 @@ class ElectricityUsageTimeseries(BaseModel):
         """
         return ensure_8760_array(value)
 
-    def __add__(
-        self, other: "ElectricityUsageTimeseries"
-    ) -> "ElectricityUsageTimeseries":
+    def __add__(self, other: "ElectricityUsageDetailed") -> "ElectricityUsageDetailed":
         """
-        Element-wise addition of two ElectricityUsageTimeseries objects.
+        Element-wise addition of two ElectricityUsageDetailed objects.
         """
-        if not isinstance(other, ElectricityUsageTimeseries):
-            raise TypeError(
-                f"Cannot add 'ElectricityUsageTimeseries' to '{type(other).__name__}'. "
-                "Ensure 'other' is an ElectricityUsageTimeseries."
-            )
-        try:
-            return ElectricityUsageTimeseries(
-                fixed_time_uncontrolled_kwh=self.fixed_time_uncontrolled_kwh
-                + other.fixed_time_uncontrolled_kwh,
-                fixed_time_controllable_kwh=self.fixed_time_controllable_kwh
-                + other.fixed_time_controllable_kwh,
-                shift_able_uncontrolled_kwh=self.shift_able_uncontrolled_kwh
-                + other.shift_able_uncontrolled_kwh,
-                shift_able_controllable_kwh=self.shift_able_controllable_kwh
-                + other.shift_able_controllable_kwh,
-            )
-        except ValueError as e:
-            raise ValueError(
-                f"Cannot add 'ElectricityUsageTimeseries' objects: {e}"
-            ) from e
+        if not isinstance(other, ElectricityUsageDetailed):
+            raise TypeError(f"Cannot add ElectricityUsageDetailed with {type(other)}")
+        return ElectricityUsageDetailed(
+            fixed_time_uncontrolled_kwh=self.fixed_time_uncontrolled_kwh
+            + other.fixed_time_uncontrolled_kwh,
+            fixed_time_controllable_kwh=self.fixed_time_controllable_kwh
+            + other.fixed_time_controllable_kwh,
+            shift_able_uncontrolled_kwh=self.shift_able_uncontrolled_kwh
+            + other.shift_able_uncontrolled_kwh,
+            shift_able_controllable_kwh=self.shift_able_controllable_kwh
+            + other.shift_able_controllable_kwh,
+        )
 
     def __radd__(self, other):
         """
@@ -143,6 +146,75 @@ class ElectricityUsageTimeseries(BaseModel):
         )
 
     @functools.cached_property
+    def total_usage_night_shifted(self) -> np.ndarray:
+        """
+        Total electricity usage timeseries (kWh) for the year,
+        if all consumption that can be shifted to night-time is shifted.
+        """
+        return (
+            self.fixed_time_controllable_kwh
+            + self.fixed_time_uncontrolled_kwh
+            + night_shift(self.shift_able_controllable_kwh)
+            + night_shift(self.shift_able_uncontrolled_kwh)
+        )
+
+    @functools.cached_property
+    def total_fixed_time_usage(self) -> np.ndarray:
+        """
+        Total electricity usage (kWh) that is fixed to a specific time.
+        """
+        return self.fixed_time_uncontrolled_kwh + self.fixed_time_controllable_kwh
+
+    @functools.cached_property
+    def total_shift_able_usage(self) -> np.ndarray:
+        """
+        Total electricity usage (kWh) that can be shifted in time.
+        """
+        return self.shift_able_uncontrolled_kwh + self.shift_able_controllable_kwh
+
+    @functools.cached_property
+    def total_controllable_usage(self) -> np.ndarray:
+        """
+        Total controllable electricity usage (kWh) over the entire year.
+        """
+        return self.fixed_time_controllable_kwh + self.shift_able_controllable_kwh
+
+    @functools.cached_property
+    def total_uncontrolled_usage(self) -> np.ndarray:
+        """
+        Total uncontrolled electricity usage (kWh) as an array.
+        """
+        return self.fixed_time_uncontrolled_kwh + self.shift_able_uncontrolled_kwh
+
+    @functools.cached_property
+    def daytime_total_usage(self) -> np.ndarray:
+        """
+        Daytime electricity usage (kWh) time series.
+        """
+        return daytime_total_usage(self.total_usage)
+
+    @functools.cached_property
+    def nighttime_total_usage(self) -> np.ndarray:
+        """
+        Nighttime electricity usage (kWh) time series.
+        """
+        return nighttime_total_usage(self.total_usage)
+
+    @functools.cached_property
+    def daytime_total_usage_night_shifted(self) -> np.ndarray:
+        """
+        Daytime electricity usage (kWh) time series after night shift.
+        """
+        return daytime_total_usage(self.total_usage_night_shifted)
+
+    @functools.cached_property
+    def nighttime_total_usage_night_shifted(self) -> np.ndarray:
+        """
+        Nighttime electricity usage (kWh) time series after night shift.
+        """
+        return nighttime_total_usage(self.total_usage_night_shifted)
+
+    @functools.cached_property
     def shift_able_uncontrolled_kwh_night_shifted(self) -> np.ndarray:
         """
         Shiftable uncontrolled electricity usage timeseries (kWh) for the
@@ -159,26 +231,6 @@ class ElectricityUsageTimeseries(BaseModel):
         return night_shift(self.shift_able_controllable_kwh)
 
     @functools.cached_property
-    def total_usage_night_shifted(self) -> np.ndarray:
-        """
-        Total electricity usage timeseries (kWh) for the year,
-        if all consumption that can be shifted to night-time is shifted.
-        """
-        return (
-            self.fixed_time_controllable_kwh
-            + self.fixed_time_uncontrolled_kwh
-            + night_shift(self.shift_able_controllable_kwh)
-            + night_shift(self.shift_able_uncontrolled_kwh)
-        )
-
-    @functools.cached_property
-    def total_uncontrolled_usage(self) -> np.ndarray:
-        """
-        Total uncontrolled electricity usage (kWh) as an array.
-        """
-        return self.fixed_time_uncontrolled_kwh + self.shift_able_uncontrolled_kwh
-
-    @functools.cached_property
     def total_uncontrolled_night_shifted(self) -> np.ndarray:
         """
         Total uncontrolled electricity usage (kWh) over the entire year,
@@ -187,13 +239,6 @@ class ElectricityUsageTimeseries(BaseModel):
         return self.fixed_time_uncontrolled_kwh + night_shift(
             self.shift_able_uncontrolled_kwh
         )
-
-    @functools.cached_property
-    def total_controllable_usage(self) -> np.ndarray:
-        """
-        Total controllable electricity usage (kWh) over the entire year.
-        """
-        return self.fixed_time_controllable_kwh + self.shift_able_controllable_kwh
 
     @functools.cached_property
     def total_controllable_night_shifted(self) -> np.ndarray:
@@ -205,78 +250,29 @@ class ElectricityUsageTimeseries(BaseModel):
             self.shift_able_controllable_kwh
         )
 
-    @functools.cached_property
-    def total_shift_able_usage(self) -> np.ndarray:
-        """
-        Total electricity usage (kWh) that can be shifted in time.
-        """
-        return self.shift_able_uncontrolled_kwh + self.shift_able_controllable_kwh
 
-    @functools.cached_property
-    def total_fixed_time_usage(self) -> np.ndarray:
-        """
-        Total electricity usage (kWh) that is fixed to a specific time.
-        """
-        return self.fixed_time_uncontrolled_kwh + self.fixed_time_controllable_kwh
-
-    @functools.cached_property
-    def daytime_total_usage(self) -> np.ndarray:
-        """
-        Daytime electricity usage (kWh) time series.
-        """
-        return daytime_total_usage(self.total_usage)
-
-    @functools.cached_property
-    def daytime_total_usage_night_shifted(self) -> np.ndarray:
-        """
-        Daytime electricity usage (kWh) time series.
-        """
-        return daytime_total_usage(self.total_usage_night_shifted)
-
-    @functools.cached_property
-    def nighttime_total_usage(self) -> np.ndarray:
-        """
-        Nighttime electricity usage (kWh) time series.
-        """
-        return nighttime_total_usage(self.total_usage)
-
-    @functools.cached_property
-    def nighttime_total_usage_night_shifted(self) -> np.ndarray:
-        """
-        Nighttime electricity usage (kWh) time series.
-        """
-        return nighttime_total_usage(self.total_usage_night_shifted)
-
-
-class ElectricityUsageReport(BaseModel):
+@dataclass
+class SolarSavingsBreakdown:
     """
-    Annual electricity usage (kwh) by category.
-
-    Used for presenting a summary of electricity usage, in cases
-    where an hourly breakdown is not helpful or needed.
+    Stores the financial and energy breakdown of solar savings.
     """
 
-    fixed_time_uncontrolled_kwh: float = Field(
-        0.0,
-        description="Usage that is fixed and cannot be ripple-controlled (kWh)",
-    )
-    fixed_time_controllable_kwh: float = Field(
-        0.0,
-        description="Usage that can be under ripple control (kWh)",
-    )
-    shift_able_uncontrolled_kwh: float = Field(
-        0.0,
-        description="Usage that can be time-shifted from day "
-        "to night but cannot be ripple-controlled (kWh)",
-    )
-    shift_able_controllable_kwh: float = Field(
-        0.0,
-        description="""Flexible electricity consumption (kWh).:
-        if solar generation is present, the consumption can
-        happen during the day, otherwise it can be shifted to
-        take advantage of night rates if preferable. Can also
-        be under ripple control.""",
-    )
+    self_consumption_kwh: float
+    export_kwh: float
+    self_consumption_savings_nzd: float
+    export_earnings_nzd: float
+    self_consumption_pct: float
+
+
+@dataclass
+class EnergyCostBreakdown:
+    """
+    Contains total fixed and variable costs and (optionally) solar interaction results.
+    """
+
+    fixed_cost_nzd: float
+    variable_cost_nzd: float
+    solar: SolarSavingsBreakdown | None = None
 
 
 class SolarGenerationTimeseries(BaseModel):
@@ -372,7 +368,7 @@ class YearlyFuelUsageProfile(BaseModel):
 
     Attributes:
     elx_connection_days: float, number of days with electricity connection
-    electricity_kwh: ElectricityUsageTimeseries, electricity consumption
+    electricity_kwh: ElectricityUsageDetailed, electricity consumption
     solar_generation_kwh: SolarGenerationTimeseries, generation by solar panels
     natural_gas_connection_days: float, number of days with natural gas
         connection
@@ -394,8 +390,8 @@ class YearlyFuelUsageProfile(BaseModel):
     elx_connection_days: float = Field(
         default=0.0, description="Number of days with electricity connection"
     )
-    electricity_kwh: ElectricityUsageTimeseries = Field(
-        default_factory=ElectricityUsageTimeseries,
+    electricity_kwh: ElectricityUsageDetailed = Field(
+        default_factory=ElectricityUsageDetailed,
         description="""Electricity consumption breakdown (kWh).""",
     )
     solar_generation_kwh: SolarGenerationTimeseries = Field(
@@ -477,7 +473,7 @@ class YearlyFuelUsageReport(BaseModel):
     elx_connection_days: float = Field(
         0.0, description="Number of days with electricity connection"
     )
-    electricity_kwh: ElectricityUsageReport
+    electricity_kwh: ElectricityUsageFlat
     solar_generation_kwh: SolarGenerationReport
     natural_gas_connection_days: float = Field(
         0.0, description="Number of days with natural gas connection"
@@ -501,7 +497,7 @@ class YearlyFuelUsageReport(BaseModel):
 
         super().__init__(
             elx_connection_days=round_float(profile.elx_connection_days),
-            electricity_kwh=ElectricityUsageReport(
+            electricity_kwh=ElectricityUsageFlat(
                 fixed_time_uncontrolled_kwh=round_float(
                     profile.electricity_kwh.fixed_time_uncontrolled_kwh.sum()
                 ),
@@ -595,7 +591,7 @@ class SolarYearlyFuelGenerationProfile(YearlyFuelUsageProfile):
     """
 
 
-class HouseholdOtherElectricityUsageTimeseries(YearlyFuelUsageProfile):
+class HouseholdOtherElectricityUsageDetailed(YearlyFuelUsageProfile):
     """
     'Other household electricity' yearly fuel usage profile.
 

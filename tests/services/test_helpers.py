@@ -8,8 +8,8 @@ from pytest import approx
 
 from app.constants import DAY_NIGHT_FRAC, DAYS_IN_YEAR, OTHER_ELX_KWH_PER_DAY
 from app.models.usage_profiles import (
-    ElectricityUsageTimeseries,
-    HouseholdOtherElectricityUsageTimeseries,
+    ElectricityUsageDetailed,
+    HouseholdOtherElectricityUsageDetailed,
 )
 from app.models.user_answers import SolarAnswers
 from app.services.configuration import get_default_electricity_plan
@@ -126,19 +126,19 @@ def test_standing_loss_kwh_per_year():
 def test_other_electricity_energy_usage_profile_1():
     """
     Test that other_electricity_energy_usage_profile() returns
-    a HouseholdOtherElectricityUsageTimeseries with the correct
+    a HouseholdOtherElectricityUsageDetailed with the correct
     allocation of day vs. night usage and total kWh.
     """
     profile = other_electricity_energy_usage_profile()
 
     # 1. Check that the returned object is the correct type
-    assert isinstance(profile, HouseholdOtherElectricityUsageTimeseries)
+    assert isinstance(profile, HouseholdOtherElectricityUsageDetailed)
 
     # 2. Check connection days
     assert profile.elx_connection_days == DAYS_IN_YEAR
 
-    # 3. The .electricity_kwh attribute should be an ElectricityUsageTimeseries
-    assert isinstance(profile.electricity_kwh, ElectricityUsageTimeseries)
+    # 3. The .electricity_kwh attribute should be an ElectricityUsageDetailed
+    assert isinstance(profile.electricity_kwh, ElectricityUsageDetailed)
 
     # 4. The usage array should have 8760 elements
     usage_array = profile.electricity_kwh.fixed_time_uncontrolled_kwh
@@ -175,19 +175,19 @@ def test_other_electricity_energy_usage_profile_1():
 def test_other_electricity_energy_usage_profile_2():
     """
     Test that other_electricity_energy_usage_profile() returns
-    a HouseholdOtherElectricityUsageTimeseries with the correct
+    a HouseholdOtherElectricityUsageDetailed with the correct
     allocation of day vs. night usage and total kWh.
     """
     profile = other_electricity_energy_usage_profile()
 
     # 1. Check that the returned object is the correct type
-    assert isinstance(profile, HouseholdOtherElectricityUsageTimeseries)
+    assert isinstance(profile, HouseholdOtherElectricityUsageDetailed)
 
     # 2. Check connection days
     assert profile.elx_connection_days == DAYS_IN_YEAR
 
-    # 3. The .electricity_kwh attribute should be an ElectricityUsageTimeseries
-    assert isinstance(profile.electricity_kwh, ElectricityUsageTimeseries)
+    # 3. The .electricity_kwh attribute should be an ElectricityUsageDetailed
+    assert isinstance(profile.electricity_kwh, ElectricityUsageDetailed)
 
     # 4. The usage array should have 8760 elements
     usage_array = profile.electricity_kwh.fixed_time_uncontrolled_kwh

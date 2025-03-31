@@ -200,13 +200,15 @@ def test_cost_savings_calculations():
     calculated_savings = calculate_savings_for_option(
         "Electric induction", "cooktop", COOKTOP, YOUR_HOME, SOLAR
     )
-    assert gas_energy_costs[1] == approx(
+    assert gas_energy_costs.variable_cost_nzd == approx(
         calculated_savings["variable_cost_nzd"]["current"]
     )
-    assert gas_energy_costs[1] == approx(manual_cost_calculation_natural_gas())
-    assert induction_energy_costs[1] == approx(
+    assert gas_energy_costs.variable_cost_nzd == approx(
+        manual_cost_calculation_natural_gas()
+    )
+    assert induction_energy_costs.variable_cost_nzd == approx(
         calculated_savings["variable_cost_nzd"]["alternative"]
     )
-    assert induction_energy_costs[1] == approx(
+    assert induction_energy_costs.variable_cost_nzd == approx(
         manual_cost_calculation_electric_induction()
     )
