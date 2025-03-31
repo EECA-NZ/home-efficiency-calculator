@@ -11,7 +11,7 @@ from ..services.cost_calculator import determine_gas_connection_checkbox
 router = APIRouter()
 
 
-@router.post("/checkbox-behaviour/", response_model=CheckboxData)
+@router.post("/checkbox-behaviour", response_model=CheckboxData)
 def household_energy_profile(profile: HouseholdAnswers):
     """
     Determine the checkbox behaviour based on the user's home answers.
