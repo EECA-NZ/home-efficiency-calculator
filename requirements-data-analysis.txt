@@ -1,7 +1,0 @@
--r requirements-dev.txt
-networkx==3.*
-geopandas==1.*
-matplotlib==3.*
-numpy==1.24.*
-scipy==1.11.*
-img2pdf==0.*
