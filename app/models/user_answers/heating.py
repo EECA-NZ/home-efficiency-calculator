@@ -79,12 +79,15 @@ class HeatingAnswers(BaseModel):
         # to alter their electricity consumption patterns based
         # on presence or absence of solar.
         _ = solar
+
         main_heating_source = (
             self.alternative_main_heating_source
             if use_alternative
             else self.main_heating_source
         )
         climate_zone = get_climate_zone.climate_zone(your_home.postcode)
+
+        # Calculate the total kWh of space heating demand (service energy)
         heating_energy_service_demand = (
             HEATING_DEGREE_DAYS[climate_zone]
             * STANDARD_HOME_KWH_HEATING_DEMAND_PER_HEATING_DEGREE_DAY
@@ -92,42 +95,60 @@ class HeatingAnswers(BaseModel):
             * THERMAL_ENVELOPE_QUALITY[self.insulation_quality]
             * heating_frequency_factor(HEATING_DAYS_PER_WEEK[self.heating_during_day])
         )
-        fuel_usage = {
-            "Piped gas heater": {
-                "natural_gas_kwh": heating_energy_service_demand
+
+        # Return early for each main heating source
+        if main_heating_source == "Piped gas heater":
+            return HeatingYearlyFuelUsageProfile(
+                natural_gas_kwh=heating_energy_service_demand
                 / GAS_SPACE_HEATING_EFFICIENCY,
-                "natural_gas_connection_days": DAYS_IN_YEAR,
-            },
-            "Bottled gas heater": {
-                "lpg_kwh": heating_energy_service_demand / LPG_SPACE_HEATING_EFFICIENCY,
-                "lpg_tanks_rental_days": DAYS_IN_YEAR,
-            },
-            "Heat pump": {
-                "electricity_kwh": ElectricityUsageDetailed(
-                    fixed_time_uncontrolled_kwh=heating_energy_service_demand
-                    / HEAT_PUMP_COP_BY_CLIMATE_ZONE[climate_zone]
-                    * space_heating_profile(
-                        postcode=your_home.postcode,
-                        heating_during_day=self.heating_during_day,
-                        setpoint=21.0,
+                natural_gas_connection_days=DAYS_IN_YEAR,
+                elx_connection_days=DAYS_IN_YEAR,
+            )
+
+        if main_heating_source == "Bottled gas heater":
+            return HeatingYearlyFuelUsageProfile(
+                lpg_kwh=heating_energy_service_demand / LPG_SPACE_HEATING_EFFICIENCY,
+                lpg_tanks_rental_days=DAYS_IN_YEAR,
+                elx_connection_days=DAYS_IN_YEAR,
+            )
+
+        if main_heating_source == "Heat pump":
+            return HeatingYearlyFuelUsageProfile(
+                electricity_kwh=ElectricityUsageDetailed(
+                    fixed_time_uncontrolled_kwh=(
+                        heating_energy_service_demand
+                        / HEAT_PUMP_COP_BY_CLIMATE_ZONE[climate_zone]
+                        * space_heating_profile(
+                            postcode=your_home.postcode,
+                            heating_during_day=self.heating_during_day,
+                            setpoint=21.0,
+                        )
                     )
                 ),
-            },
-            "Electric heater": {
-                "electricity_kwh": ElectricityUsageDetailed(
-                    fixed_time_uncontrolled_kwh=heating_energy_service_demand
-                    / ELECTRIC_HEATER_SPACE_HEATING_EFFICIENCY
-                    * space_heating_profile(
-                        postcode=your_home.postcode,
-                        heating_during_day=self.heating_during_day,
-                        setpoint=21.0,
+                elx_connection_days=DAYS_IN_YEAR,
+            )
+
+        if main_heating_source == "Electric heater":
+            return HeatingYearlyFuelUsageProfile(
+                electricity_kwh=ElectricityUsageDetailed(
+                    fixed_time_uncontrolled_kwh=(
+                        heating_energy_service_demand
+                        / ELECTRIC_HEATER_SPACE_HEATING_EFFICIENCY
+                        * space_heating_profile(
+                            postcode=your_home.postcode,
+                            heating_during_day=self.heating_during_day,
+                            setpoint=21.0,
+                        )
                     )
                 ),
-            },
-            "Wood burner": {
-                "wood_kwh": heating_energy_service_demand
+                elx_connection_days=DAYS_IN_YEAR,
+            )
+
+        if main_heating_source == "Wood burner":
+            return HeatingYearlyFuelUsageProfile(
+                wood_kwh=heating_energy_service_demand
                 / LOG_BURNER_SPACE_HEATING_EFFICIENCY,
-            },
-        }
-        fuel_usage[main_heating_source]["elx_connection_days"] = DAYS_IN_YEAR
-        return HeatingYearlyFuelUsageProfile(**fuel_usage[main_heating_source])
+                elx_connection_days=DAYS_IN_YEAR,
+            )
+
+        raise ValueError(f"Unknown heating source: {main_heating_source}")

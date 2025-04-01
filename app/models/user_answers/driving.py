@@ -11,16 +11,15 @@ from pydantic import BaseModel
 from ...constants import (
     ASSUMED_DISTANCES_PER_WEEK,
     BATTERY_ECONOMY_KWH_PER_100KM,
+    CALENDAR_YEAR,
     DAYS_IN_YEAR,
+    DEFAULT_CHARGER_KW,
     EV_PUBLIC_CHARGING_FRACTION,
     FUEL_CONSUMPTION_LITRES_PER_100KM,
 )
 from ...services.usage_profile_helpers import flat_day_night_profiles
 from ...services.usage_profile_helpers.driving import solar_friendly_ev_charging_profile
 from ..usage_profiles import DrivingYearlyFuelUsageProfile, ElectricityUsageDetailed
-
-DEFAULT_CHARGER_KW = 3.0  # See https://www.standards.govt.nz/shop/snz-pas-60112023
-CALENDAR_YEAR = 2019
 
 
 class DrivingAnswers(BaseModel):
@@ -69,21 +68,32 @@ class DrivingAnswers(BaseModel):
         # Figure out whether we have a petrol or diesel vehicle
         # (including hybrid/plug-in hybrid),
         # so that we can compute yearly fuel usage if needed.
-        if vehicle_type in ["Petrol", "Hybrid", "Plug-in hybrid"]:
-            liquid_fuel = "Petrol"
-        elif vehicle_type == "Diesel":
-            liquid_fuel = "Diesel"
-        else:
-            liquid_fuel = None  # e.g. pure Electric
+        if vehicle_type in ["Petrol", "Hybrid", "Diesel"]:
+            if vehicle_type in ["Petrol", "Hybrid"]:
+                liquid_fuel = "Petrol"
+            else:
+                liquid_fuel = "Diesel"
 
-        # Calculate the litres of liquid fuel if needed
-        if liquid_fuel:
+            # Calculate the litres of liquid fuel
             litres_per_100km = FUEL_CONSUMPTION_LITRES_PER_100KM[vehicle_type][
                 self.vehicle_size
             ]
             yearly_fuel_litres = (yearly_distance_thousand_km * 10) * litres_per_100km
-        else:
-            yearly_fuel_litres = 0
+
+            # No battery usage
+            yearly_total_kwh = 0
+            public_charging_kwh = 0
+            home_charging_timeseries = ElectricityUsageDetailed()
+
+            # Finally, return the DrivingYearlyFuelUsageProfile.
+            return DrivingYearlyFuelUsageProfile(
+                elx_connection_days=DAYS_IN_YEAR,
+                electricity_kwh=home_charging_timeseries,
+                petrol_litres=yearly_fuel_litres if liquid_fuel == "Petrol" else 0,
+                diesel_litres=yearly_fuel_litres if liquid_fuel == "Diesel" else 0,
+                public_ev_charger_kwh=public_charging_kwh,
+                thousand_km=yearly_distance_thousand_km,
+            )
 
         # Calculate the battery usage if needed (i.e. plug-in hybrid or pure electric)
         if vehicle_type in ["Plug-in hybrid", "Electric"]:
@@ -100,18 +110,33 @@ class DrivingAnswers(BaseModel):
             home_charging_timeseries = ElectricityUsageDetailed(
                 shift_able_uncontrolled_kwh=home_charging_kwh * charging_profile
             )
-        else:
-            # No battery usage
-            yearly_total_kwh = 0
-            public_charging_kwh = 0
-            home_charging_timeseries = ElectricityUsageDetailed()
 
-        # Finally, return the DrivingYearlyFuelUsageProfile.
-        return DrivingYearlyFuelUsageProfile(
-            elx_connection_days=DAYS_IN_YEAR,
-            electricity_kwh=home_charging_timeseries,
-            petrol_litres=yearly_fuel_litres if liquid_fuel == "Petrol" else 0,
-            diesel_litres=yearly_fuel_litres if liquid_fuel == "Diesel" else 0,
-            public_ev_charger_kwh=public_charging_kwh,
-            thousand_km=yearly_distance_thousand_km,
-        )
+            # If it's plug-in hybrid, we also have fuel usage
+            if vehicle_type == "Plug-in hybrid":
+                liquid_fuel = "Petrol"
+                litres_per_100km = FUEL_CONSUMPTION_LITRES_PER_100KM[vehicle_type][
+                    self.vehicle_size
+                ]
+                yearly_fuel_litres = (
+                    yearly_distance_thousand_km * 10
+                ) * litres_per_100km
+                return DrivingYearlyFuelUsageProfile(
+                    elx_connection_days=DAYS_IN_YEAR,
+                    electricity_kwh=home_charging_timeseries,
+                    petrol_litres=yearly_fuel_litres,
+                    diesel_litres=0,
+                    public_ev_charger_kwh=public_charging_kwh,
+                    thousand_km=yearly_distance_thousand_km,
+                )
+
+            # Otherwise it's pure electric
+            return DrivingYearlyFuelUsageProfile(
+                elx_connection_days=DAYS_IN_YEAR,
+                electricity_kwh=home_charging_timeseries,
+                petrol_litres=0,
+                diesel_litres=0,
+                public_ev_charger_kwh=public_charging_kwh,
+                thousand_km=yearly_distance_thousand_km,
+            )
+
+        raise ValueError(f"Unknown vehicle type: {vehicle_type}")

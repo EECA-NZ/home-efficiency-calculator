@@ -99,7 +99,8 @@ class HotWaterAnswers(BaseModel):
         )
         total_kwh = heat_demand_kwh_per_year / efficiency_factor
 
-        # Build the usage profile only for electric systems
+        # 4) Return early for each source type
+
         if hot_water_heating_source in ELECTRIC_SYSTEMS:
             synthetic_hourly_profile = (
                 solar_friendly_hot_water_electricity_usage_timeseries(
@@ -120,7 +121,6 @@ class HotWaterAnswers(BaseModel):
                 electricity_kwh=electricity_kwh,
             )
 
-        # --- Gas-based systems ---
         if hot_water_heating_source in [
             "Piped gas hot water cylinder",
             "Piped gas instantaneous",
@@ -129,9 +129,8 @@ class HotWaterAnswers(BaseModel):
                 natural_gas_connection_days=DAYS_IN_YEAR,
                 natural_gas_kwh=total_kwh,
             )
-        if hot_water_heating_source in [
-            "Bottled gas instantaneous",
-        ]:
+
+        if hot_water_heating_source in ["Bottled gas instantaneous"]:
             return HotWaterYearlyFuelUsageProfile(
                 lpg_tanks_rental_days=DAYS_IN_YEAR,
                 lpg_kwh=total_kwh,

@@ -89,18 +89,36 @@ class CooktopAnswers(BaseModel):
         # (See 'Cooking' sheet of supporting workbook.)
         factor = usage_factors[cooktop_type]
         total_kwh = (
-            factor.pop("standard_household_kwh")
+            factor["standard_household_kwh"]
             * (1 + your_home.people_in_house)
             / (1 + AVERAGE_HOUSEHOLD_SIZE)
         )
-        factor["electricity_kwh"] = (
-            ElectricityUsageDetailed(
+
+        if cooktop_type in ["Electric induction", "Electric (coil or ceramic)"]:
+            electricity_kwh = ElectricityUsageDetailed(
                 fixed_time_uncontrolled_kwh=total_kwh * cooktop_hourly_usage_profile()
             )
-            if "Electric" in cooktop_type
-            else ElectricityUsageDetailed()
-        )
-        factor["natural_gas_kwh"] = total_kwh if cooktop_type == "Piped gas" else 0
-        factor["lpg_kwh"] = total_kwh if cooktop_type == "Bottled gas" else 0
+            return CooktopYearlyFuelUsageProfile(
+                elx_connection_days=factor["elx_connection_days"],
+                electricity_kwh=electricity_kwh,
+                natural_gas_kwh=0,
+                lpg_kwh=0,
+            )
 
-        return CooktopYearlyFuelUsageProfile(**factor)
+        if cooktop_type == "Piped gas":
+            return CooktopYearlyFuelUsageProfile(
+                natural_gas_connection_days=factor["natural_gas_connection_days"],
+                electricity_kwh=ElectricityUsageDetailed(),
+                natural_gas_kwh=total_kwh,
+                lpg_kwh=0,
+            )
+
+        if cooktop_type == "Bottled gas":
+            return CooktopYearlyFuelUsageProfile(
+                lpg_tanks_rental_days=factor["lpg_tanks_rental_days"],
+                electricity_kwh=ElectricityUsageDetailed(),
+                natural_gas_kwh=0,
+                lpg_kwh=total_kwh,
+            )
+
+        raise ValueError(f"Unknown cooktop type: {cooktop_type}")
