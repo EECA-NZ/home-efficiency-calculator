@@ -81,27 +81,15 @@ class ElectricityPlan(BaseModel):
             fixed_time_uncontrolled_kwh = (
                 usage_profile.electricity_kwh.fixed_time_uncontrolled_kwh
             )
-            fixed_time_controllable_kwh = (
-                usage_profile.electricity_kwh.fixed_time_controllable_kwh
-            )
             shift_able_uncontrolled_kwh = (
                 usage_profile.electricity_kwh.shift_able_uncontrolled_kwh_night_shifted
-            )
-            shift_able_controllable_kwh = (
-                usage_profile.electricity_kwh.shift_able_controllable_kwh_night_shifted
             )
         else:
             fixed_time_uncontrolled_kwh = (
                 usage_profile.electricity_kwh.fixed_time_uncontrolled_kwh
             )
-            fixed_time_controllable_kwh = (
-                usage_profile.electricity_kwh.fixed_time_controllable_kwh
-            )
             shift_able_uncontrolled_kwh = (
                 usage_profile.electricity_kwh.shift_able_uncontrolled_kwh
-            )
-            shift_able_controllable_kwh = (
-                usage_profile.electricity_kwh.shift_able_controllable_kwh
             )
 
         (
@@ -112,9 +100,7 @@ class ElectricityPlan(BaseModel):
         ) = self._compute_variable_cost(
             tariff_structure,
             fixed_time_uncontrolled_kwh,
-            fixed_time_controllable_kwh,
             shift_able_uncontrolled_kwh,
-            shift_able_controllable_kwh,
             solar_kwh,
         )
 
@@ -154,9 +140,7 @@ class ElectricityPlan(BaseModel):
         self,
         tariff_structure,
         fixed_time_uncontrolled_kwh: np.ndarray,
-        fixed_time_controllable_kwh: np.ndarray,
         shift_able_uncontrolled_kwh: np.ndarray,
-        shift_able_controllable_kwh: np.ndarray,
         solar_kwh: np.ndarray,
     ) -> Tuple[float, float, float, float]:
         """
@@ -170,41 +154,26 @@ class ElectricityPlan(BaseModel):
          solar_self_consumption_pct)
         """
         if tariff_structure == {"Day", "Night"}:
-            fixed_time_usage_kwh = (
-                fixed_time_uncontrolled_kwh + fixed_time_controllable_kwh
-            )
-            shift_able_usage_kwh = (
-                shift_able_uncontrolled_kwh + shift_able_controllable_kwh
-            )
+            fixed_time_usage_kwh = fixed_time_uncontrolled_kwh
+            shift_able_usage_kwh = shift_able_uncontrolled_kwh
             return self._compute_variable_cost_day_night(
                 fixed_time_usage_kwh, shift_able_usage_kwh, solar_kwh
             )
 
         if tariff_structure == {"Controlled", "Uncontrolled"}:
             uncontrolled_kwh = fixed_time_uncontrolled_kwh + shift_able_uncontrolled_kwh
-            controlled_kwh = fixed_time_controllable_kwh + shift_able_controllable_kwh
             return self._compute_variable_cost_controlled_uncontrolled(
-                uncontrolled_kwh, controlled_kwh, solar_kwh
+                uncontrolled_kwh, solar_kwh
             )
 
         if tariff_structure == {"All inclusive"}:
-            total_usage_kwh = (
-                fixed_time_uncontrolled_kwh
-                + fixed_time_controllable_kwh
-                + shift_able_uncontrolled_kwh
-                + shift_able_controllable_kwh
-            )
+            total_usage_kwh = fixed_time_uncontrolled_kwh + shift_able_uncontrolled_kwh
             return self._compute_variable_cost_single_rate(
                 total_usage_kwh, solar_kwh, rate_key="All inclusive"
             )
 
         if tariff_structure == {"Uncontrolled"}:
-            total_usage_kwh = (
-                fixed_time_uncontrolled_kwh
-                + fixed_time_controllable_kwh
-                + shift_able_uncontrolled_kwh
-                + shift_able_controllable_kwh
-            )
+            total_usage_kwh = fixed_time_uncontrolled_kwh + shift_able_uncontrolled_kwh
             return self._compute_variable_cost_single_rate(
                 total_usage_kwh, solar_kwh, rate_key="Uncontrolled"
             )
@@ -286,69 +255,6 @@ class ElectricityPlan(BaseModel):
             net_import_cost_nzd,
             solar_offset_savings_nzd,
             total_export_credit_nzd,
-            solar_self_consumption_pct,
-        )
-
-    # --------------------------------------------------------------------
-    #   CONTROLLED/UNCONTROLLED
-    # --------------------------------------------------------------------
-    def _compute_variable_cost_controlled_uncontrolled(
-        self,
-        uncontrolled_kwh: np.ndarray,
-        controlled_kwh: np.ndarray,
-        solar_kwh: np.ndarray,
-    ) -> Tuple[float, float, float, float]:
-        """
-        Allocate solar to uncontrolled usage first (like “day”),
-        then to controlled usage, leftover is exported.
-        """
-        export_rate = self.export_rates.get("Uncontrolled", 0.0)
-        unctrl_rate = self.import_rates["Uncontrolled"]
-        ctrl_rate = self.import_rates["Controlled"]
-
-        # Cost if no solar:
-        baseline_import_cost_nzd = (uncontrolled_kwh * unctrl_rate).sum() + (
-            controlled_kwh * ctrl_rate
-        ).sum()
-
-        # 1) Allocate solar to uncontrolled
-        solar_to_uncontrolled_kwh = np.minimum(uncontrolled_kwh, solar_kwh)
-        # 2) Remainder of solar
-        leftover_solar_kwh = solar_kwh - solar_to_uncontrolled_kwh
-        # 3) Then allocate to controlled
-        solar_to_controlled_kwh = np.minimum(controlled_kwh, leftover_solar_kwh)
-        # 4) Leftover => export
-        leftover_solar_kwh = np.clip(
-            leftover_solar_kwh - solar_to_controlled_kwh, 0, None
-        )
-
-        # Net import
-        net_uncontrolled_kwh = uncontrolled_kwh - solar_to_uncontrolled_kwh
-        net_controlled_kwh = controlled_kwh - solar_to_controlled_kwh
-
-        solar_self_consumption_kwh = solar_to_uncontrolled_kwh + solar_to_controlled_kwh
-        total_usage_kwh = (uncontrolled_kwh + controlled_kwh).sum()
-
-        if total_usage_kwh == 0:
-            solar_self_consumption_pct = 0.0
-        else:
-            solar_self_consumption_pct = (
-                solar_self_consumption_kwh.sum() / total_usage_kwh
-            ) * 100.0
-
-        import_cost_nzd = (net_uncontrolled_kwh * unctrl_rate).sum() + (
-            net_controlled_kwh * ctrl_rate
-        ).sum()
-        export_credit_nzd = (leftover_solar_kwh * export_rate).sum()
-
-        net_import_cost_nzd = import_cost_nzd - export_credit_nzd
-        solar_export_earnings_nzd = export_credit_nzd
-        solar_offset_savings_nzd = baseline_import_cost_nzd - import_cost_nzd
-
-        return (
-            net_import_cost_nzd,
-            solar_offset_savings_nzd,
-            solar_export_earnings_nzd,
             solar_self_consumption_pct,
         )
 

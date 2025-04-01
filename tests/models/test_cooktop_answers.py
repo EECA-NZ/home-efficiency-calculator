@@ -92,9 +92,7 @@ def test_cooking_energy_usage():
         "Electric induction": {
             "elx_connection_days": DAYS_IN_YEAR,
             "electricity_kwh": {
-                "fixed_time_controllable_kwh": 0,
                 "shift_able_uncontrolled_kwh": 0,
-                "shift_able_controllable_kwh": 0,
             },
             "natural_gas_kwh": 0,
             "lpg_kwh": 0,
@@ -105,9 +103,7 @@ def test_cooking_energy_usage():
             "elx_connection_days": 0,
             "electricity_kwh": {
                 "fixed_time_uncontrolled_kwh": 0,
-                "fixed_time_controllable_kwh": 0,
                 "shift_able_uncontrolled_kwh": 0,
-                "shift_able_controllable_kwh": 0,
             },
             "natural_gas_connection_days": DAYS_IN_YEAR,
             "lpg_tanks_rental_days": 0,
@@ -116,9 +112,7 @@ def test_cooking_energy_usage():
             "elx_connection_days": 0,
             "electricity_kwh": {
                 "fixed_time_uncontrolled_kwh": 0,
-                "fixed_time_controllable_kwh": 0,
                 "shift_able_uncontrolled_kwh": 0,
-                "shift_able_controllable_kwh": 0,
             },
             "natural_gas_connection_days": 0,
             "lpg_tanks_rental_days": DAYS_IN_YEAR,
@@ -126,9 +120,7 @@ def test_cooking_energy_usage():
         "Electric (coil or ceramic)": {
             "elx_connection_days": DAYS_IN_YEAR,
             "electricity_kwh": {
-                "fixed_time_controllable_kwh": 0,
                 "shift_able_uncontrolled_kwh": 0,
-                "shift_able_controllable_kwh": 0,
             },
             "natural_gas_kwh": 0,
             "lpg_kwh": 0,

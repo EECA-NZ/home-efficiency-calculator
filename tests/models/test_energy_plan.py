@@ -108,7 +108,7 @@ class TestElectricityPlan(unittest.TestCase):
             elx_connection_days=DAYS_IN_YEAR,
             electricity_kwh=ElectricityUsageDetailed(
                 fixed_time_uncontrolled_kwh=300 * day_profile,
-                shift_able_controllable_kwh=100 * night_profile,
+                shift_able_uncontrolled_kwh=100 * night_profile,
             ),
             natural_gas_connection_days=0,
             natural_gas_kwh=0,
@@ -212,19 +212,6 @@ class TestElectricityPlan(unittest.TestCase):
         cost = self.electricity_plan_uncontrolled.calculate_cost(self.profile)
         self.assertAlmostEqual(cost.fixed_cost_nzd, self.fixed_rate * DAYS_IN_YEAR)
         self.assertAlmostEqual(cost.variable_cost_nzd, (300 + 100) * self.uncontrolled)
-
-    def test_uncontrolled_controlled(self):
-        """
-        Test electricity plan with variable pricing pattern
-        {"Uncontrolled", "Controlled"}.
-        """
-        cost = self.electricity_plan_uncontrolled_controlled.calculate_cost(
-            self.profile
-        )
-        self.assertAlmostEqual(cost.fixed_cost_nzd, self.fixed_rate * DAYS_IN_YEAR)
-        self.assertAlmostEqual(
-            cost.variable_cost_nzd, 300 * self.uncontrolled + 100 * self.controlled
-        )
 
     def test_unexpected_keys(self):
         """
