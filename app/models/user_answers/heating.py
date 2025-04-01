@@ -16,6 +16,7 @@ from ...constants import (
     LIVING_AREA_FRACTION,
     LOG_BURNER_SPACE_HEATING_EFFICIENCY,
     LPG_SPACE_HEATING_EFFICIENCY,
+    SPACE_HEATING_SETPOINT,
     STANDARD_HOME_KWH_HEATING_DEMAND_PER_HEATING_DEGREE_DAY,
     THERMAL_ENVELOPE_QUALITY,
 )
@@ -121,7 +122,7 @@ class HeatingAnswers(BaseModel):
                         * space_heating_profile(
                             postcode=your_home.postcode,
                             heating_during_day=self.heating_during_day,
-                            setpoint=21.0,
+                            setpoint=SPACE_HEATING_SETPOINT,
                         )
                     )
                 ),
@@ -137,7 +138,7 @@ class HeatingAnswers(BaseModel):
                         * space_heating_profile(
                             postcode=your_home.postcode,
                             heating_during_day=self.heating_during_day,
-                            setpoint=21.0,
+                            setpoint=SPACE_HEATING_SETPOINT,
                         )
                     )
                 ),
