@@ -58,28 +58,36 @@ class HeatingAnswers(BaseModel):
     ]
 
     def energy_usage_pattern(
-        self, your_home, solar, use_alternative: bool = False
+        self, your_home, solar_aware: bool, use_alternative: bool = False
     ) -> HeatingYearlyFuelUsageProfile:
         """
         Return the yearly fuel usage profile for space heating.
 
-        The profile is based on the answers provided by the user.
+        This method calculates the annual energy usage for space heating based on
+        the user's inputs (main heating source, insulation quality, etc.). The
+        calculation provides an hourly usage profile if solar_aware is True. For
+        space heating, any electricity demand is assumed to be at time-of-use.
 
         Parameters
         ----------
         your_home : YourHomeAnswers
-            Answers to questions about the user's home.
+            Answers to questions about the user's home (e.g., postcode).
+        solar_aware : bool
+            If True, produce a detailed usage profile (allocating daytime
+            load by hour of the year). If False, a simpler aggregated profile
+            is returned (no 8760 data), reducing computational overhead.
+        use_alternative : bool, optional
+            If True, use the alternative main heating source provided by the user,
+            rather than their current source.
 
         Returns
         -------
         HeatingYearlyFuelUsageProfile
-            The yearly fuel usage profile for space heating.
+            The yearly fuel usage profile for space heating, including fuel or
+            electricity consumption as appropriate. If electric, a year's hourly
+            usage profile (8760 hours) is provided if solar_aware is True.
         """
-        # solar is currently unused here but required for signature
-        # compatibility with other components, which are assumed
-        # to alter their electricity consumption patterns based
-        # on presence or absence of solar.
-        _ = solar
+        _ = solar_aware
 
         main_heating_source = (
             self.alternative_main_heating_source

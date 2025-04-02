@@ -53,25 +53,37 @@ class HotWaterAnswers(BaseModel):
     ] = None
 
     def energy_usage_pattern(
-        self, your_home, solar, use_alternative: bool = False
+        self, your_home, solar_aware, use_alternative: bool = False
     ) -> HotWaterYearlyFuelUsageProfile:
         """
         Return the yearly fuel usage profile for hot water heating.
 
-        The profile is based on the answers provided by the user.
+        This method calculates how much energy is required for hot water based on
+        user inputs (hot water usage level, heater source, etc.). If solar_aware is
+        True, a usage profile is estimated based on the user inputs that also aligns
+        with solar generation patterns. This 'solar-friendly' profile can be used to
+        estimate the opportunity for solar electricity self-consumption.
 
         Parameters
         ----------
         your_home : YourHomeAnswers
-            Answers to questions about the user's home.
+            Answers to questions about the user's home (e.g., postcode).
+        solar_aware : bool
+            If True, generate a timeseries that attempts to align hot water heating
+            with solar availability. If False, a simpler aggregated profile
+            is returned (no 8760 data), reducing computational overhead.
+        use_alternative : bool, optional
+            If True, use the alternative hot water heating source provided by the
+            user, rather than their current source.
 
         Returns
         -------
         HotWaterYearlyFuelUsageProfile
-            The yearly fuel usage profile for hot water heating.
+            The yearly fuel usage profile for hot water heating. If electric, a year's
+            hourly usage profile (8760 hours) is provided if solar_aware is True.
         """
         # Unused for now but match expected function signature
-        _ = solar
+        _ = solar_aware
 
         hot_water_heating_source = (
             self.alternative_hot_water_heating_source

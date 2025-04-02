@@ -52,13 +52,37 @@ class DrivingAnswers(BaseModel):
 
     # pylint: disable=unused-argument
     def energy_usage_pattern(
-        self, your_home, solar, use_alternative: bool = False
+        self, your_home, solar_aware: bool, use_alternative: bool = False
     ) -> DrivingYearlyFuelUsageProfile:
         """
         Return the yearly fuel usage profile for driving.
 
-        The profile is based on the answers provided by the user.
+        This method computes the fuel (petrol/diesel) or electricity usage needed
+        for the user's driving patterns, including partial electric usage if it's
+        a plug-in hybrid. If solar_aware is True, a usage profile is estimated
+        for domestic electric vehicle charging that is consistent with the usage
+        and also shaped to be 'solar-friendly' (align with solar production).
+
+        Parameters
+        ----------
+        your_home : YourHomeAnswers
+            Answers to questions about the user's home (e.g., location).
+        solar_aware : bool
+            If True, create a timeseries for EV charging that tries to maximize
+            daytime charging to benefit from solar. If False, a simpler aggregated
+            profile is returned (no 8760 data), reducing computational overhead.
+        use_alternative : bool, optional
+            If True, use the alternative vehicle type instead of the current type.
+
+        Returns
+        -------
+        DrivingYearlyFuelUsageProfile
+            The yearly fuel usage profile for driving, including both
+            liquid fuel and/or electricity consumption. If electric, a year's
+            hourly usage profile (8760 hours) is provided if solar_aware is True.
         """
+
+        _ = solar_aware
         vehicle_type = (
             self.alternative_vehicle_type if use_alternative else self.vehicle_type
         )
