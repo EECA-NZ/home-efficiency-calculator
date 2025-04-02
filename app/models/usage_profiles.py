@@ -379,7 +379,6 @@ class YearlyFuelUsageReport(BaseModel):
     """
 
     electricity_kwh: float
-    solar_generation_kwh: float
     natural_gas_kwh: float = Field(0.0, description="Natural gas usage")
     lpg_kwh: float = Field(0.0, description="LPG usage")
     wood_kwh: float = Field(0.0, description="Wood usage")
@@ -394,14 +393,13 @@ class YearlyFuelUsageReport(BaseModel):
             return round(value, decimal_places)
 
         super().__init__(
-            electricity_kwh=round_float(
-                profile.electricity_kwh.fixed_time_kwh.sum()
-                + profile.electricity_kwh.shift_able_kwh.sum()
-            ),
-            solar_generation_kwh=(
-                round_float(profile.solar_generation_kwh.total)
+            electricity_kwh=(
+                round_float(
+                    profile.electricity_kwh.total_usage.sum()
+                    - profile.solar_generation_kwh.total
+                )
                 if profile.solar_generation_kwh.has_solar
-                else 0.0
+                else round_float(profile.electricity_kwh.total_usage.sum())
             ),
             natural_gas_kwh=round_float(profile.natural_gas_kwh),
             lpg_kwh=round_float(profile.lpg_kwh),
