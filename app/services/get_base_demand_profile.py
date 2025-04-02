@@ -124,6 +124,6 @@ def other_electricity_energy_usage_profile():
     return HouseholdOtherElectricityUsage(
         elx_connection_days=DAYS_IN_YEAR,
         electricity_kwh=ElectricityUsage(
-            fixed_time_uncontrolled_kwh=np.array(uncontrolled_fixed_kwh)
+            fixed_time_kwh=np.array(uncontrolled_fixed_kwh)
         ),
     )

@@ -104,8 +104,8 @@ class TestElectricityPlan(unittest.TestCase):
         self.profile = HouseholdYearlyFuelUsageProfile(
             elx_connection_days=DAYS_IN_YEAR,
             electricity_kwh=ElectricityUsage(
-                fixed_time_uncontrolled_kwh=300 * day_profile,
-                shift_able_uncontrolled_kwh=100 * night_profile,
+                fixed_time_kwh=300 * day_profile,
+                shift_able_kwh=100 * night_profile,
             ),
             natural_gas_connection_days=0,
             natural_gas_kwh=0,
@@ -159,7 +159,7 @@ class TestElectricityPlan(unittest.TestCase):
             import_rates={"Uncontrolled": self.uncontrolled},
             export_rates={"Uncontrolled": self.feed_in_tariff},
         )
-        self.electricity_plan_uncontrolled_controlled = ElectricityPlan(
+        self.electricity_plan_controlled = ElectricityPlan(
             name="UncontrolledPlan",
             fixed_rate=self.fixed_rate,
             import_rates={

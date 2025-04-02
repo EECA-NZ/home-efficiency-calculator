@@ -35,8 +35,8 @@ def test_water_heating_energy_usage():
     fixed_kwh = total_kwh - anytime_kwh
 
     electricity_kwh = ElectricityUsage(
-        shift_able_uncontrolled_kwh=anytime_kwh * day_profile,
-        fixed_time_uncontrolled_kwh=fixed_kwh * day_profile,
+        shift_able_kwh=anytime_kwh * day_profile,
+        fixed_time_kwh=fixed_kwh * day_profile,
     )
 
     hot_water_sources = {

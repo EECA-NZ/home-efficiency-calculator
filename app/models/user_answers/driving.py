@@ -132,7 +132,7 @@ class DrivingAnswers(BaseModel):
                 home_charging_kwh, charger_kw=DEFAULT_CHARGER_KW, year=CALENDAR_YEAR
             )
             home_charging_timeseries = ElectricityUsage(
-                shift_able_uncontrolled_kwh=home_charging_kwh * charging_profile
+                shift_able_kwh=home_charging_kwh * charging_profile
             )
 
             # If it's plug-in hybrid, we also have fuel usage

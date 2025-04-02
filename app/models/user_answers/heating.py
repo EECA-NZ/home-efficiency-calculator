@@ -124,7 +124,7 @@ class HeatingAnswers(BaseModel):
         if main_heating_source == "Heat pump":
             return HeatingYearlyFuelUsageProfile(
                 electricity_kwh=ElectricityUsage(
-                    fixed_time_uncontrolled_kwh=(
+                    fixed_time_kwh=(
                         heating_energy_service_demand
                         / HEAT_PUMP_COP_BY_CLIMATE_ZONE[climate_zone]
                         * space_heating_profile(
@@ -140,7 +140,7 @@ class HeatingAnswers(BaseModel):
         if main_heating_source == "Electric heater":
             return HeatingYearlyFuelUsageProfile(
                 electricity_kwh=ElectricityUsage(
-                    fixed_time_uncontrolled_kwh=(
+                    fixed_time_kwh=(
                         heating_energy_service_demand
                         / ELECTRIC_HEATER_SPACE_HEATING_EFFICIENCY
                         * space_heating_profile(

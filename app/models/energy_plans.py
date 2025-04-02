@@ -78,19 +78,11 @@ class ElectricityPlan(BaseModel):
         solar_kwh = usage_profile.solar_generation_kwh.fixed_time_generation_kwh
 
         if use_night_shift:
-            fixed_time_uncontrolled_kwh = (
-                usage_profile.electricity_kwh.fixed_time_uncontrolled_kwh
-            )
-            shift_able_uncontrolled_kwh = (
-                usage_profile.electricity_kwh.shift_able_uncontrolled_kwh_night_shifted
-            )
+            fixed_time_kwh = usage_profile.electricity_kwh.fixed_time_kwh
+            shift_able_kwh = usage_profile.electricity_kwh.shift_able_kwh_night_shifted
         else:
-            fixed_time_uncontrolled_kwh = (
-                usage_profile.electricity_kwh.fixed_time_uncontrolled_kwh
-            )
-            shift_able_uncontrolled_kwh = (
-                usage_profile.electricity_kwh.shift_able_uncontrolled_kwh
-            )
+            fixed_time_kwh = usage_profile.electricity_kwh.fixed_time_kwh
+            shift_able_kwh = usage_profile.electricity_kwh.shift_able_kwh
 
         (
             variable_cost_nzd,
@@ -99,8 +91,8 @@ class ElectricityPlan(BaseModel):
             solar_self_consumption_pct,
         ) = self._compute_variable_cost(
             tariff_structure,
-            fixed_time_uncontrolled_kwh,
-            shift_able_uncontrolled_kwh,
+            fixed_time_kwh,
+            shift_able_kwh,
             solar_kwh,
         )
 
@@ -139,8 +131,8 @@ class ElectricityPlan(BaseModel):
     def _compute_variable_cost(
         self,
         tariff_structure,
-        fixed_time_uncontrolled_kwh: np.ndarray,
-        shift_able_uncontrolled_kwh: np.ndarray,
+        fixed_time_kwh: np.ndarray,
+        shift_able_kwh: np.ndarray,
         solar_kwh: np.ndarray,
     ) -> Tuple[float, float, float, float]:
         """
@@ -154,26 +146,26 @@ class ElectricityPlan(BaseModel):
          solar_self_consumption_pct)
         """
         if tariff_structure == {"Day", "Night"}:
-            fixed_time_usage_kwh = fixed_time_uncontrolled_kwh
-            shift_able_usage_kwh = shift_able_uncontrolled_kwh
+            fixed_time_usage_kwh = fixed_time_kwh
+            shift_able_usage_kwh = shift_able_kwh
             return self._compute_variable_cost_day_night(
                 fixed_time_usage_kwh, shift_able_usage_kwh, solar_kwh
             )
 
         if tariff_structure == {"Controlled", "Uncontrolled"}:
-            uncontrolled_kwh = fixed_time_uncontrolled_kwh + shift_able_uncontrolled_kwh
+            uncontrolled_kwh = fixed_time_kwh + shift_able_kwh
             return self._compute_variable_cost_controlled_uncontrolled(
                 uncontrolled_kwh, solar_kwh
             )
 
         if tariff_structure == {"All inclusive"}:
-            total_usage_kwh = fixed_time_uncontrolled_kwh + shift_able_uncontrolled_kwh
+            total_usage_kwh = fixed_time_kwh + shift_able_kwh
             return self._compute_variable_cost_single_rate(
                 total_usage_kwh, solar_kwh, rate_key="All inclusive"
             )
 
         if tariff_structure == {"Uncontrolled"}:
-            total_usage_kwh = fixed_time_uncontrolled_kwh + shift_able_uncontrolled_kwh
+            total_usage_kwh = fixed_time_kwh + shift_able_kwh
             return self._compute_variable_cost_single_rate(
                 total_usage_kwh, solar_kwh, rate_key="Uncontrolled"
             )

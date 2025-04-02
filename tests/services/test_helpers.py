@@ -138,7 +138,7 @@ def test_other_electricity_energy_usage_profile_1():
     assert isinstance(profile.electricity_kwh, ElectricityUsage)
 
     # 4. The usage array should have 8760 elements
-    usage_array = profile.electricity_kwh.fixed_time_uncontrolled_kwh
+    usage_array = profile.electricity_kwh.fixed_time_kwh
     assert usage_array.shape == (8760,)
 
     # 5. Calculate the expected total annual usage
@@ -187,7 +187,7 @@ def test_other_electricity_energy_usage_profile_2():
     assert isinstance(profile.electricity_kwh, ElectricityUsage)
 
     # 4. The usage array should have 8760 elements
-    usage_array = profile.electricity_kwh.fixed_time_uncontrolled_kwh
+    usage_array = profile.electricity_kwh.fixed_time_kwh
     assert usage_array.shape == (8760,)
 
     # 5. Calculate the expected total annual usage

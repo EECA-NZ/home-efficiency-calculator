@@ -92,7 +92,7 @@ def test_cooking_energy_usage():
         "Electric induction": {
             "elx_connection_days": DAYS_IN_YEAR,
             "electricity_kwh": {
-                "shift_able_uncontrolled_kwh": 0,
+                "shift_able_kwh": 0,
             },
             "natural_gas_kwh": 0,
             "lpg_kwh": 0,
@@ -102,8 +102,8 @@ def test_cooking_energy_usage():
         "Piped gas": {
             "elx_connection_days": 0,
             "electricity_kwh": {
-                "fixed_time_uncontrolled_kwh": 0,
-                "shift_able_uncontrolled_kwh": 0,
+                "fixed_time_kwh": 0,
+                "shift_able_kwh": 0,
             },
             "natural_gas_connection_days": DAYS_IN_YEAR,
             "lpg_tanks_rental_days": 0,
@@ -111,8 +111,8 @@ def test_cooking_energy_usage():
         "Bottled gas": {
             "elx_connection_days": 0,
             "electricity_kwh": {
-                "fixed_time_uncontrolled_kwh": 0,
-                "shift_able_uncontrolled_kwh": 0,
+                "fixed_time_kwh": 0,
+                "shift_able_kwh": 0,
             },
             "natural_gas_connection_days": 0,
             "lpg_tanks_rental_days": DAYS_IN_YEAR,
@@ -120,7 +120,7 @@ def test_cooking_energy_usage():
         "Electric (coil or ceramic)": {
             "elx_connection_days": DAYS_IN_YEAR,
             "electricity_kwh": {
-                "shift_able_uncontrolled_kwh": 0,
+                "shift_able_kwh": 0,
             },
             "natural_gas_kwh": 0,
             "lpg_kwh": 0,
@@ -173,7 +173,7 @@ def manual_cost_calculation_electric_induction():
     energy_plan = get_energy_plan("6012", "None")
     day_usage = COOKTOP.energy_usage_pattern(
         YOUR_HOME, SOLAR, use_alternative=True
-    ).electricity_kwh.fixed_time_uncontrolled_kwh.sum()
+    ).electricity_kwh.fixed_time_kwh.sum()
     cost_per_kwh_day = energy_plan.electricity_plan.import_rates["Day"]
     annual_running_cost = day_usage * cost_per_kwh_day
     return annual_running_cost
