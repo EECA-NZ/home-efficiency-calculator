@@ -9,10 +9,7 @@ from pytest import approx
 
 from app.constants import DAYS_IN_YEAR
 from app.models.energy_plans import ElectricityPlan
-from app.models.usage_profiles import (
-    ElectricityUsageDetailed,
-    HouseholdYearlyFuelUsageProfile,
-)
+from app.models.usage_profiles import ElectricityUsage, HouseholdYearlyFuelUsageProfile
 from app.services.get_energy_plans import (
     edb_zone_to_electricity_plan,
     get_energy_plan,
@@ -106,7 +103,7 @@ class TestElectricityPlan(unittest.TestCase):
     def setUp(self):
         self.profile = HouseholdYearlyFuelUsageProfile(
             elx_connection_days=DAYS_IN_YEAR,
-            electricity_kwh=ElectricityUsageDetailed(
+            electricity_kwh=ElectricityUsage(
                 fixed_time_uncontrolled_kwh=300 * day_profile,
                 shift_able_uncontrolled_kwh=100 * night_profile,
             ),

@@ -19,7 +19,7 @@ from ...constants import (
 )
 from ...services.usage_profile_helpers import flat_day_night_profiles
 from ...services.usage_profile_helpers.driving import solar_friendly_ev_charging_profile
-from ..usage_profiles import DrivingYearlyFuelUsageProfile, ElectricityUsageDetailed
+from ..usage_profiles import DrivingYearlyFuelUsageProfile, ElectricityUsage
 
 
 class DrivingAnswers(BaseModel):
@@ -107,7 +107,7 @@ class DrivingAnswers(BaseModel):
             # No battery usage
             yearly_total_kwh = 0
             public_charging_kwh = 0
-            home_charging_timeseries = ElectricityUsageDetailed()
+            home_charging_timeseries = ElectricityUsage()
 
             # Finally, return the DrivingYearlyFuelUsageProfile.
             return DrivingYearlyFuelUsageProfile(
@@ -131,7 +131,7 @@ class DrivingAnswers(BaseModel):
             charging_profile = solar_friendly_ev_charging_profile(
                 home_charging_kwh, charger_kw=DEFAULT_CHARGER_KW, year=CALENDAR_YEAR
             )
-            home_charging_timeseries = ElectricityUsageDetailed(
+            home_charging_timeseries = ElectricityUsage(
                 shift_able_uncontrolled_kwh=home_charging_kwh * charging_profile
             )
 

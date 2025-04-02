@@ -21,7 +21,7 @@ from ...services.hot_water_helpers import (
 from ...services.usage_profile_helpers.hot_water import (
     solar_friendly_hot_water_electricity_usage_timeseries,
 )
-from ..usage_profiles import ElectricityUsageDetailed, HotWaterYearlyFuelUsageProfile
+from ..usage_profiles import ElectricityUsage, HotWaterYearlyFuelUsageProfile
 
 ELECTRIC_SYSTEMS = [
     "Electric hot water cylinder",
@@ -124,7 +124,7 @@ class HotWaterAnswers(BaseModel):
             )
             anytime_kwh = total_kwh * HOT_WATER_FLEXIBLE_KWH_FRACTION
             fixed_kwh = total_kwh - anytime_kwh
-            electricity_kwh = ElectricityUsageDetailed(
+            electricity_kwh = ElectricityUsage(
                 fixed_time_uncontrolled_kwh=fixed_kwh * synthetic_hourly_profile,
                 shift_able_uncontrolled_kwh=anytime_kwh * synthetic_hourly_profile,
             )

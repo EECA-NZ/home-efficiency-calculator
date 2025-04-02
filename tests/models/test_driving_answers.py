@@ -14,7 +14,7 @@ from app.constants import (
     FUEL_CONSUMPTION_LITRES_PER_100KM,
 )
 from app.models.energy_plans import HouseholdEnergyPlan
-from app.models.usage_profiles import ElectricityUsageDetailed, YearlyFuelUsageProfile
+from app.models.usage_profiles import ElectricityUsage, YearlyFuelUsageProfile
 from app.models.user_answers import DrivingAnswers, SolarAnswers, YourHomeAnswers
 from app.services.cost_calculator import calculate_savings_for_option
 from app.services.get_energy_plans import postcode_to_electricity_plan
@@ -145,7 +145,7 @@ def test_savings_calculations():
     petrol_energy_costs = petrol_plan.calculate_cost(
         YearlyFuelUsageProfile(
             elx_connection_days=365.25,
-            electricity_kwh=ElectricityUsageDetailed(),
+            electricity_kwh=ElectricityUsage(),
             natural_gas_connection_days=0,
             natural_gas_kwh=0,
             lpg_tanks_rental_days=0,
@@ -169,7 +169,7 @@ def test_savings_calculations():
     electric_energy_costs = electric_plan.calculate_cost(
         YearlyFuelUsageProfile(
             elx_connection_days=365.25,
-            electricity_kwh=ElectricityUsageDetailed(
+            electricity_kwh=ElectricityUsage(
                 shift_able_uncontrolled_kwh=anytime_kwh * day_profile
             ),
             natural_gas_connection_days=0,

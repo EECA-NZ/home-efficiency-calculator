@@ -12,7 +12,7 @@ from ...constants import (
     STANDARD_HOUSEHOLD_COOKTOP_ENERGY_USAGE_KWH,
 )
 from ...services.usage_profile_helpers.cooktop import cooktop_hourly_usage_profile
-from ..usage_profiles import CooktopYearlyFuelUsageProfile, ElectricityUsageDetailed
+from ..usage_profiles import CooktopYearlyFuelUsageProfile, ElectricityUsage
 
 
 class CooktopAnswers(BaseModel):
@@ -106,7 +106,7 @@ class CooktopAnswers(BaseModel):
         )
 
         if cooktop_type in ["Electric induction", "Electric (coil or ceramic)"]:
-            electricity_kwh = ElectricityUsageDetailed(
+            electricity_kwh = ElectricityUsage(
                 fixed_time_uncontrolled_kwh=total_kwh * cooktop_hourly_usage_profile()
             )
             return CooktopYearlyFuelUsageProfile(
@@ -119,7 +119,7 @@ class CooktopAnswers(BaseModel):
         if cooktop_type == "Piped gas":
             return CooktopYearlyFuelUsageProfile(
                 natural_gas_connection_days=factor["natural_gas_connection_days"],
-                electricity_kwh=ElectricityUsageDetailed(),
+                electricity_kwh=ElectricityUsage(),
                 natural_gas_kwh=total_kwh,
                 lpg_kwh=0,
             )
@@ -127,7 +127,7 @@ class CooktopAnswers(BaseModel):
         if cooktop_type == "Bottled gas":
             return CooktopYearlyFuelUsageProfile(
                 lpg_tanks_rental_days=factor["lpg_tanks_rental_days"],
-                electricity_kwh=ElectricityUsageDetailed(),
+                electricity_kwh=ElectricityUsage(),
                 natural_gas_kwh=0,
                 lpg_kwh=total_kwh,
             )

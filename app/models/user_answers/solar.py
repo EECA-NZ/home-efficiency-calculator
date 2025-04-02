@@ -6,7 +6,7 @@ import numpy as np
 from pydantic import BaseModel
 
 from ...services import get_solar_generation
-from ..usage_profiles import SolarGenerationTimeseries, SolarYearlyFuelGenerationProfile
+from ..usage_profiles import SolarGeneration, SolarYearlyFuelGenerationProfile
 
 
 class SolarAnswers(BaseModel):
@@ -38,13 +38,13 @@ class SolarAnswers(BaseModel):
             The yearly fuel usage profile for solar energy generation.
         """
         if self.add_solar:
-            hourly_solar_generation_kwh = SolarGenerationTimeseries(
+            hourly_solar_generation_kwh = SolarGeneration(
                 fixed_time_generation_kwh=get_solar_generation.hourly_pmax(
                     your_home.postcode
                 )
             )
         else:
-            hourly_solar_generation_kwh = SolarGenerationTimeseries(
+            hourly_solar_generation_kwh = SolarGeneration(
                 fixed_time_generation_kwh=np.zeros(8760)
             )
         return SolarYearlyFuelGenerationProfile(
