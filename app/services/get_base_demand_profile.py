@@ -119,11 +119,12 @@ def other_electricity_energy_usage_profile():
 
     value_col = "Power IT Light Other White"
     uncontrolled_fixed_kwh = other_electricity_usage_df[value_col].astype(float)
-    uncontrolled_fixed_kwh *= total_annual_kwh / uncontrolled_fixed_kwh.sum()
+    uncontrolled_fixed_kwh /= uncontrolled_fixed_kwh.sum()
 
     return HouseholdOtherElectricityUsage(
         elx_connection_days=DAYS_IN_YEAR,
         electricity_kwh=ElectricityUsage(
-            fixed_time_kwh=np.array(uncontrolled_fixed_kwh)
+            fixed_time_kwh=total_annual_kwh,
+            fixed_time_profile=np.array(uncontrolled_fixed_kwh),
         ),
     )

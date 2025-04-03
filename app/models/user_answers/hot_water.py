@@ -112,7 +112,6 @@ class HotWaterAnswers(BaseModel):
         total_kwh = heat_demand_kwh_per_year / efficiency_factor
 
         # 4) Return early for each source type
-
         if hot_water_heating_source in ELECTRIC_SYSTEMS:
             synthetic_hourly_profile = (
                 solar_friendly_hot_water_electricity_usage_timeseries(
@@ -121,12 +120,16 @@ class HotWaterAnswers(BaseModel):
                     HOT_WATER_POWER_INPUT_KW,
                     hot_water_heating_source,
                 )
+                if solar_aware
+                else None
             )
             anytime_kwh = total_kwh * HOT_WATER_FLEXIBLE_KWH_FRACTION
             fixed_kwh = total_kwh - anytime_kwh
             electricity_kwh = ElectricityUsage(
-                fixed_time_kwh=fixed_kwh * synthetic_hourly_profile,
-                shift_able_kwh=anytime_kwh * synthetic_hourly_profile,
+                fixed_time_kwh=fixed_kwh,
+                shift_able_kwh=anytime_kwh,
+                fixed_time_profile=synthetic_hourly_profile,
+                shift_able_profile=synthetic_hourly_profile,
             )
             return HotWaterYearlyFuelUsageProfile(
                 elx_connection_days=DAYS_IN_YEAR,

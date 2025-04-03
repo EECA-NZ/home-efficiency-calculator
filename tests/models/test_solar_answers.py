@@ -27,8 +27,6 @@ def test_total_generation():
     for the default your_home which
     is in Wellington.
     """
-    total_generation = SOLAR.energy_generation(
-        YOUR_HOME
-    ).solar_generation_kwh.fixed_time_generation_kwh.sum()
+    total_generation = SOLAR.energy_generation(YOUR_HOME).solar_generation_kwh.total
     assert SOLAR.add_solar
     assert total_generation == approx(6779.145125, rel=1e-4)

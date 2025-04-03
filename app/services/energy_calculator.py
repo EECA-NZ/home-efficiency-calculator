@@ -222,13 +222,9 @@ def emissions_kg_co2e(usage_profile: YearlyFuelUsageProfile) -> float:
     """
     Return the household's yearly CO2 emissions in kg.
     """
-    # List of emissions components
     components = [
         (-usage_profile.solar_generation_kwh.total, "electricity_kg_co2e_per_kwh"),
-        (
-            usage_profile.electricity_kwh.total_usage.sum(),
-            "electricity_kg_co2e_per_kwh",
-        ),
+        (usage_profile.electricity_kwh.annual_kwh, "electricity_kg_co2e_per_kwh"),
         (usage_profile.natural_gas_kwh, "natural_gas_kg_co2e_per_kwh"),
         (usage_profile.lpg_kwh, "lpg_kg_co2e_per_kwh"),
         (usage_profile.wood_kwh, "wood_kg_co2e_per_kwh"),
@@ -237,10 +233,8 @@ def emissions_kg_co2e(usage_profile: YearlyFuelUsageProfile) -> float:
         (usage_profile.public_ev_charger_kwh, "electricity_kg_co2e_per_kwh"),
     ]
 
-    # Calculate emissions with a default of 0 if the emission factor is missing
     total_emissions = sum(
-        usage * EMISSIONS_FACTORS.get(emissions_factor_name, 0)
-        for usage, emissions_factor_name in components
+        usage * EMISSIONS_FACTORS.get(factor_name, 0)
+        for usage, factor_name in components
     )
-
     return total_emissions

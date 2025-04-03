@@ -50,6 +50,7 @@ def calculate_savings_for_option(option, field, answers, your_home, solar):
     Returns:
     - A dictionary structured to fit into the SavingsData model.
     """
+
     if type(answers).__name__ == "DrivingAnswers":
         current_plan = get_energy_plan(your_home.postcode, answers.vehicle_type)
         alternative_plan = get_energy_plan(your_home.postcode, option)
@@ -79,7 +80,6 @@ def calculate_savings_for_option(option, field, answers, your_home, solar):
     emissions_reduction_percentage = safe_percentage_reduction(
         current_emissions_kg_co2e, alternative_emissions_kg_co2e
     )
-
     return {
         "variable_cost_nzd": {
             "current": current_cost.variable_cost_nzd,

@@ -14,7 +14,6 @@ from app.models.user_answers import (
     DrivingAnswers,
     HeatingAnswers,
     HotWaterAnswers,
-    SolarAnswers,
     YourHomeAnswers,
 )
 from app.services.get_base_demand_profile import other_electricity_energy_usage_profile
@@ -36,7 +35,6 @@ FLOAT_FORMAT = "%.6f"
 DEFAULT_POSTCODE = "6012"
 EXPORT_RATE = 0.12  # NZD per kWh for exported electricity
 TIMESERIES_SUM = 1000.0  # Sum of hour columns for each row
-SOLAR = SolarAnswers(add_solar=True)
 
 # Constant for the lookup directory. Relative to the script location.
 if TEST_MODE:
@@ -147,7 +145,7 @@ def generate_vehicle_solar_lookup_table(output_dir="."):
                         people_in_house=3,
                         postcode=DEFAULT_POSTCODE,
                     ),
-                    solar=SOLAR,
+                    solar_aware=True,
                     use_alternative=False,
                 )
                 total_kwh = energy.electricity_kwh.total_usage.sum()
@@ -200,7 +198,7 @@ def generate_hot_water_solar_lookup_table(output_dir="."):
                         people_in_house=p,
                         postcode=pc,
                     )
-                    energy = hot_water.energy_usage_pattern(your_home, SOLAR)
+                    energy = hot_water.energy_usage_pattern(your_home, solar_aware=True)
                     total_kwh = energy.electricity_kwh.total_usage.sum()
 
                     if total_kwh > 0:
@@ -254,7 +252,7 @@ def generate_space_heating_solar_lookup_table(output_dir="."):
                             people_in_house=3,
                             postcode=pc,
                         ),
-                        solar=SOLAR,
+                        solar_aware=True,
                     )
                     total_kwh = heating_energy_use.electricity_kwh.total_usage.sum()
 
@@ -304,7 +302,7 @@ def generate_cooktop_solar_lookup_table(output_dir="."):
                 people_in_house=p,
                 postcode=DEFAULT_POSTCODE,
             )
-            energy = cooktop.energy_usage_pattern(your_home, SOLAR)
+            energy = cooktop.energy_usage_pattern(your_home, solar_aware=True)
             total_kwh = energy.electricity_kwh.total_usage.sum()
 
             if total_kwh > 0:

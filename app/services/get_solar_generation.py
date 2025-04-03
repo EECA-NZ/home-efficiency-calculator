@@ -85,6 +85,7 @@ def hourly_pmax(postcode: str) -> pd.Series:
                 zone,
                 zone_key,
             )
-            return pmax_series
+            # return a copy to protect against external changes
+            return pmax_series.copy()
 
     raise ValueError(f"No CSV file found for climate zone containing '{zone}'.")

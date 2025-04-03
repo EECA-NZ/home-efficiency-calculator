@@ -128,11 +128,19 @@ class DrivingAnswers(BaseModel):
             public_charging_kwh = yearly_total_kwh * EV_PUBLIC_CHARGING_FRACTION
             home_charging_kwh = yearly_total_kwh - public_charging_kwh
 
-            charging_profile = solar_friendly_ev_charging_profile(
-                home_charging_kwh, charger_kw=DEFAULT_CHARGER_KW, year=CALENDAR_YEAR
+            charging_profile = (
+                solar_friendly_ev_charging_profile(
+                    home_charging_kwh, charger_kw=DEFAULT_CHARGER_KW, year=CALENDAR_YEAR
+                )
+                if solar_aware
+                else None
             )
+
             home_charging_timeseries = ElectricityUsage(
-                shift_able_kwh=home_charging_kwh * charging_profile
+                fixed_time_kwh=0.0,
+                fixed_time_profile=None,
+                shift_able_kwh=home_charging_kwh,
+                shift_able_profile=charging_profile,
             )
 
             # If it's plug-in hybrid, we also have fuel usage

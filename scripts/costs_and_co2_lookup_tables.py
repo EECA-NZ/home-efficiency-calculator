@@ -131,7 +131,6 @@ def calculate_cost_and_emissions(your_home, answers):
     cache_key = (
         your_home.people_in_house,
         your_home.postcode,
-        your_home.disconnect_gas,
         tuple(sorted(answers.__dict__.items())),
     )
 
@@ -144,7 +143,7 @@ def calculate_cost_and_emissions(your_home, answers):
     else:
         vehicle_type = DEFAULT_VEHICLE_TYPE
     my_plan = get_energy_plan_cached(your_home.postcode, vehicle_type)
-    (_, variable_cost_nzd, _, _, _) = my_plan.calculate_cost(energy_usage_profile)
+    variable_cost_nzd = my_plan.calculate_cost(energy_usage_profile).variable_cost_nzd
     my_emissions_kg_co2e = emissions_kg_co2e(energy_usage_profile)
     result = {
         "variable_cost_nzd": variable_cost_nzd,
@@ -205,7 +204,6 @@ def generate_heating_lookup_table():
         your_home = YourHomeAnswers(
             people_in_house=people,
             postcode=postcode,
-            disconnect_gas=disconnect,
         )
         heating = HeatingAnswers(
             main_heating_source=heating_source,

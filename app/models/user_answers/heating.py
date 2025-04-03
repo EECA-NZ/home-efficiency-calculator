@@ -87,8 +87,6 @@ class HeatingAnswers(BaseModel):
             electricity consumption as appropriate. If electric, a year's hourly
             usage profile (8760 hours) is provided if solar_aware is True.
         """
-        _ = solar_aware
-
         main_heating_source = (
             self.alternative_main_heating_source
             if use_alternative
@@ -124,15 +122,19 @@ class HeatingAnswers(BaseModel):
         if main_heating_source == "Heat pump":
             return HeatingYearlyFuelUsageProfile(
                 electricity_kwh=ElectricityUsage(
-                    fixed_time_kwh=(
-                        heating_energy_service_demand
-                        / HEAT_PUMP_COP_BY_CLIMATE_ZONE[climate_zone]
-                        * space_heating_profile(
+                    fixed_time_kwh=heating_energy_service_demand
+                    / HEAT_PUMP_COP_BY_CLIMATE_ZONE[climate_zone],
+                    fixed_time_profile=(
+                        space_heating_profile(
                             postcode=your_home.postcode,
                             heating_during_day=self.heating_during_day,
                             setpoint=SPACE_HEATING_SETPOINT,
                         )
-                    )
+                        if solar_aware
+                        else None
+                    ),
+                    shift_able_kwh=0.0,
+                    shift_able_profile=None,
                 ),
                 elx_connection_days=DAYS_IN_YEAR,
             )
@@ -140,15 +142,19 @@ class HeatingAnswers(BaseModel):
         if main_heating_source == "Electric heater":
             return HeatingYearlyFuelUsageProfile(
                 electricity_kwh=ElectricityUsage(
-                    fixed_time_kwh=(
-                        heating_energy_service_demand
-                        / ELECTRIC_HEATER_SPACE_HEATING_EFFICIENCY
-                        * space_heating_profile(
+                    fixed_time_kwh=heating_energy_service_demand
+                    / ELECTRIC_HEATER_SPACE_HEATING_EFFICIENCY,
+                    fixed_time_profile=(
+                        space_heating_profile(
                             postcode=your_home.postcode,
                             heating_during_day=self.heating_during_day,
                             setpoint=SPACE_HEATING_SETPOINT,
                         )
-                    )
+                        if solar_aware
+                        else None
+                    ),
+                    shift_able_kwh=0.0,
+                    shift_able_profile=None,
                 ),
                 elx_connection_days=DAYS_IN_YEAR,
             )
