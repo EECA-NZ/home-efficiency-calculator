@@ -9,48 +9,64 @@ from dataclasses import dataclass
 from typing import Optional
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field
 
-from app.services.usage_profile_helpers import (
-    day_night_flag,
-    daytime_total_usage,
-    ensure_8760_array,
-    night_shift,
-    nighttime_total_usage,
-)
-
-day_mask = day_night_flag()
+FLAT_8760 = np.full(8760, 1 / 8760)
 
 
-class ElectricityUsage(BaseModel):
+class TrustedBaseModel(BaseModel):
     """
-    Annual electricity usage for a time-slice,
-    stored as NumPy arrays, representing hours of the year.
+    A 'trusted' Pydantic base class that disables assignment validation
+    and extra overhead for maximum performance.
+
+    You still get structure, but no automatic re-validation on set or
+    complex post-init checks.
+    """
+
+    model_config = ConfigDict(
+        validate_assignment=False,  # do not re-check on attribute assignment
+        extra="ignore",  # ignore unknown fields
+        arbitrary_types_allowed=True,
+    )
+
+
+class ElectricityUsage(TrustedBaseModel):
+    """
+    Aggregated electricity usage over the year.
+    Hourly profiles can be included to represent
+    the variation of electricity usage over the year
+    when solar generation is present, to estimate
+    self-consumption and export.
 
     Attributes:
-      fixed_time_kwh: Usage that is fixed to time of use (kWh).
-      shift_able_kwh: Usage that can be time-shifted between day and night (kWh).
-      fixed_time_profile: Optional dimensionless hourly usage array (8760 elements),
-        normalized to sum to 1.0.
-      shift_able_profile: Optional dimensionless hourly usage array (8760 elements),
-        normalized to sum to 1.0.
+        fixed_day_kwh: float, fixed daytime usage (kWh).
+        fixed_ngt_kwh: float, fixed nighttime usage (kWh).
+        shift_abl_kwh: float, shiftable anytime usage (kWh).
+
+        fixed_profile: np.ndarray | None
+            Optional 8760 hourly usage profile (dimensionless) for
+            (fixed_day_kwh + fixed_ngt_kwh). Must sum to 1 if provided.
+        shift_profile: np.ndarray | None
+            Optional 8760 hourly usage profile (dimensionless) for
+            shift_abl_kwh. Must sum to 1 if provided.
+
+    These profiles are primarily used for solar self-consumption
+    overlap calculations. For day/night tariff cost calculations,
+    the float usage fields can be used directly.
     """
 
-    fixed_time_kwh: float = Field(
-        0.0,
-        description="Usage that is fixed to time of use (kWh).",
-    )
-    shift_able_kwh: float = Field(
-        0.0,
-        description="Usage that can be time-shifted between day and night (kWh).",
-    )
-    fixed_time_profile: np.ndarray | None = Field(
+    fixed_day_kwh: float = Field(0.0, description="Fixed daytime usage (kWh).")
+    fixed_ngt_kwh: float = Field(0.0, description="Fixed nighttime usage (kWh).")
+    shift_abl_kwh: float = Field(0.0, description="Shiftable anytime usage (kWh).")
+
+    # Profile for (fixed_day_kwh + fixed_ngt_kwh)
+    fixed_profile: np.ndarray | None = Field(
         default=None,
-        description="Optional 8760 hourly usage profile for fixed_time_kwh.",
+        description="Optional 8760 usage profile for (fixed_day_kwh + fixed_ngt_kwh).",
     )
-    shift_able_profile: np.ndarray | None = Field(
-        default=None,
-        description="Optional 8760 hourly usage profile for shift_able_kwh.",
+    # Profile for shift_abl_kwh
+    shift_profile: np.ndarray | None = Field(
+        default=None, description="Optional 8760 usage profile for shift_abl_kwh."
     )
 
     model_config = ConfigDict(
@@ -59,95 +75,81 @@ class ElectricityUsage(BaseModel):
         extra="ignore",
     )
 
-    @field_validator("fixed_time_profile", "shift_able_profile", mode="before")
-    @classmethod
-    def validate_arrays(cls, value):
-        """
-        Ensure that the value, if provided, is an array of correct shape (8760,).
-        Raises a ValueError if it's not None but isn't shaped (8760,).
-        """
-        if value is None:
-            return None
-        return ensure_8760_array(value)
-
-    @model_validator(mode="after")
-    def set_default_profiles(self):
-        """
-        Ensure consistency and usability:
-
-        - If a kWh value is zero and its profile is None, but the other profile
-          is provided, set a flat profile (uniform distribution summing to 1).
-        - If a kWh value is non-zero, the corresponding profile must be provided
-          if the other profile is provided.
-        - If provided, profiles must sum approximately to 1.
-        """
-
-        def flat_profile():
-            return np.full(8760, 1 / 8760)
-
-        # Check and handle fixed_time_profile
-        if self.fixed_time_kwh == 0:
-            if self.fixed_time_profile is None and self.shift_able_profile is not None:
-                self.fixed_time_profile = flat_profile()
-        else:
-            if self.fixed_time_profile is None and self.shift_able_profile is not None:
-                raise ValueError("fixed_time_profile should have been provided.")
-            if self.fixed_time_profile is not None:
-                if not np.isclose(self.fixed_time_profile.sum(), 1.0, atol=1e-6):
-                    raise ValueError("fixed_time_profile must sum to 1.")
-
-        # Check and handle shift_able_profile
-        if self.shift_able_kwh == 0:
-            if self.shift_able_profile is None and self.fixed_time_profile is not None:
-                self.shift_able_profile = flat_profile()
-        else:
-            if self.shift_able_profile is None and self.fixed_time_profile is not None:
-                raise ValueError("shift_able_profile should have been provided")
-            if self.shift_able_profile is not None:
-                if not np.isclose(self.shift_able_profile.sum(), 1.0, atol=1e-6):
-                    raise ValueError("shift_able_profile must sum to 1.")
-
-        return self
-
     def __add__(self, other: "ElectricityUsage") -> "ElectricityUsage":
         """
         Element-wise addition of two ElectricityUsage objects.
-        Allows profiles to be None if the corresponding kWh is zero.
+        Allows profiles to be None if the corresponding kWh is zero
+        OR if both sides have nonzero kWh but both sides have profile=None
+        (meaning neither side is tracking an hourly profile).
         """
+
         if not isinstance(other, ElectricityUsage):
             raise TypeError(f"Cannot add ElectricityUsage with {type(other)}")
 
-        def normalized_sum_profiles(a_kwh, a_prof, b_kwh, b_prof):
-            if a_kwh == 0 and b_kwh == 0:
-                return None
-            if a_kwh == 0:
-                return b_prof
-            if b_kwh == 0:
-                return a_prof
-            combined_profile = a_kwh * a_prof + b_kwh * b_prof
-            summed_profile = combined_profile.sum()
-            if summed_profile == 0:
-                raise ValueError("Sum of profiles is zero, cannot normalize.")
-            return combined_profile / summed_profile
+        def normalized_sum_profiles(kwh_a, prof_a, kwh_b, prof_b):
+            """
+            Combine two dimensionless profiles (prof_a, prof_b)
+            weighted by kwh_a, kwh_b. Returns a new dimensionless
+            profile that sums to 1.0, or None in these cases:
+            - both sides are zero usage
+            - one side has zero usage => use the other's
+            profile (which could be None or an array)
+            - both have nonzero usage AND both have
+            prof=None => return None
+            (meaning "we do not track an hourly profile" for the sum either)
 
-        fixed_time_profile = normalized_sum_profiles(
-            self.fixed_time_kwh,
-            self.fixed_time_profile,
-            other.fixed_time_kwh,
-            other.fixed_time_profile,
+            If both have nonzero usage but exactly one side
+            is None and the other is an array, we raise a ValueError,
+            because we can't combine a real timeseries with a missing one.
+            """
+            # If both usage are zero, no profile is needed
+            if kwh_a == 0 and kwh_b == 0:
+                return None
+            # If one usage is zero, return the other side's profile as-is
+            if kwh_a == 0:
+                return prof_b
+            if kwh_b == 0:
+                return prof_a
+
+            # Now both kwh_a and kwh_b are nonzero
+            # If both profiles are None, that means
+            # "no timeseries" for either side => result is None
+            if prof_a is None and prof_b is None:
+                return None
+            # If exactly one is None and the other is an array => mismatch
+            if (prof_a is None) != (prof_b is None):
+                raise ValueError("Cannot combine nonzero usage: one profile is None.")
+
+            # Otherwise, both must be arrays => combine them
+            combined = kwh_a * prof_a + kwh_b * prof_b
+            total = combined.sum()
+            if total == 0:
+                raise ValueError("Sum of weighted profiles is zero, cannot normalize.")
+            return combined / total
+
+        # Combine total fixed usage
+        total_fixed_kwh_self = self.fixed_day_kwh + self.fixed_ngt_kwh
+        total_fixed_kwh_other = other.fixed_day_kwh + other.fixed_ngt_kwh
+
+        new_fixed_profile = normalized_sum_profiles(
+            total_fixed_kwh_self,
+            self.fixed_profile,
+            total_fixed_kwh_other,
+            other.fixed_profile,
         )
-        shift_able_profile = normalized_sum_profiles(
-            self.shift_able_kwh,
-            self.shift_able_profile,
-            other.shift_able_kwh,
-            other.shift_able_profile,
+        new_shift_profile = normalized_sum_profiles(
+            self.shift_abl_kwh,
+            self.shift_profile,
+            other.shift_abl_kwh,
+            other.shift_profile,
         )
 
         return ElectricityUsage(
-            fixed_time_kwh=self.fixed_time_kwh + other.fixed_time_kwh,
-            shift_able_kwh=self.shift_able_kwh + other.shift_able_kwh,
-            fixed_time_profile=fixed_time_profile,
-            shift_able_profile=shift_able_profile,
+            fixed_day_kwh=self.fixed_day_kwh + other.fixed_day_kwh,
+            fixed_ngt_kwh=self.fixed_ngt_kwh + other.fixed_ngt_kwh,
+            shift_abl_kwh=self.shift_abl_kwh + other.shift_abl_kwh,
+            fixed_profile=new_fixed_profile,
+            shift_profile=new_shift_profile,
         )
 
     def __radd__(self, other):
@@ -162,102 +164,37 @@ class ElectricityUsage(BaseModel):
     def annual_kwh(self) -> float:
         """
         Total annual kWh, returned as a scalar float.
-        This does NOT require that profiles be present.
         """
-        return self.fixed_time_kwh + self.shift_able_kwh
-
-    @functools.cached_property
-    def total_usage(self) -> np.ndarray:
-        """
-        Total electricity usage timeseries (kWh) for the year.
-        Profiles must be provided; raises AssertionError otherwise.
-        """
-        assert (
-            self.fixed_time_profile is not None and self.shift_able_profile is not None
-        ), "Both fixed_time_profile and shift_able_profile must be provided."
-        return (
-            self.fixed_time_kwh * self.fixed_time_profile
-            + self.shift_able_kwh * self.shift_able_profile
-        )
-
-    @functools.cached_property
-    def total_usage_night_shifted(self) -> np.ndarray:
-        """
-        Total electricity usage timeseries (kWh) for the year,
-        if all shiftable consumption is shifted to night-time.
-        """
-        assert (
-            self.fixed_time_profile is not None and self.shift_able_profile is not None
-        ), "Both fixed_time_profile and shift_able_profile must be provided."
-        return (
-            self.fixed_time_kwh * self.fixed_time_profile
-            + self.shift_able_kwh * night_shift(self.shift_able_profile)
-        )
+        return self.fixed_day_kwh + self.fixed_ngt_kwh + self.shift_abl_kwh
 
     @functools.cached_property
     def total_fixed_time_usage(self) -> np.ndarray:
         """
-        Fixed-time electricity usage timeseries (kWh).
+        Fixed-time electricity usage timeseries (kWh):
+        (fixed_day_kwh + fixed_ngt_kwh) * fixed_profile
+        Raises AssertionError if usage is nonzero but no profile was provided.
         """
-        assert (
-            self.fixed_time_profile is not None
-        ), "fixed_time_profile must be provided."
-        return self.fixed_time_kwh * self.fixed_time_profile
+        total_fixed_kwh = self.fixed_day_kwh + self.fixed_ngt_kwh
+        if total_fixed_kwh > 0:
+            assert (
+                self.fixed_profile is not None
+            ), "fixed_profile must be provided for nonzero fixed usage."
+            return total_fixed_kwh * self.fixed_profile
+        return np.zeros(8760)
 
     @functools.cached_property
     def total_shift_able_usage(self) -> np.ndarray:
         """
-        Shiftable electricity usage timeseries (kWh).
+        Shiftable electricity usage timeseries (kWh):
+        shift_abl_kwh * shift_profile
+        Raises AssertionError if usage is nonzero but no profile was provided.
         """
-        assert (
-            self.shift_able_profile is not None
-        ), "shift_able_profile must be provided."
-        return self.shift_able_kwh * self.shift_able_profile
-
-    @functools.cached_property
-    def daytime_total_usage(self) -> np.ndarray:
-        """
-        Daytime electricity usage timeseries (kWh).
-        """
-        return daytime_total_usage(self.total_usage)
-
-    @functools.cached_property
-    def nighttime_total_usage(self) -> np.ndarray:
-        """
-        Nighttime electricity usage timeseries (kWh).
-        """
-        return nighttime_total_usage(self.total_usage)
-
-    @functools.cached_property
-    def daytime_total_usage_night_shifted(self) -> np.ndarray:
-        """
-        Daytime electricity usage timeseries after shifting (kWh).
-        """
-        return daytime_total_usage(self.total_usage_night_shifted)
-
-    @functools.cached_property
-    def nighttime_total_usage_night_shifted(self) -> np.ndarray:
-        """
-        Nighttime electricity usage timeseries after shifting (kWh).
-        """
-        return nighttime_total_usage(self.total_usage_night_shifted)
-
-    @functools.cached_property
-    def shift_able_kwh_night_shifted(self) -> np.ndarray:
-        """
-        Shiftable electricity usage timeseries after night shift (kWh).
-        """
-        assert (
-            self.shift_able_profile is not None
-        ), "shift_able_profile must be provided."
-        return self.shift_able_kwh * night_shift(self.shift_able_profile)
-
-    @functools.cached_property
-    def total_night_shifted(self) -> np.ndarray:
-        """
-        Total electricity usage timeseries (kWh), shiftable usage night-shifted.
-        """
-        return self.total_usage_night_shifted
+        if self.shift_abl_kwh > 0:
+            assert (
+                self.shift_profile is not None
+            ), "shift_profile must be provided for nonzero shiftable usage."
+            return self.shift_abl_kwh * self.shift_profile
+        return np.zeros(8760)
 
 
 @dataclass
@@ -284,7 +221,7 @@ class EnergyCostBreakdown:
     solar: SolarSavingsBreakdown | None = None
 
 
-class SolarGeneration(BaseModel):
+class SolarGeneration(TrustedBaseModel):
     """
     Annual electricity generation by solar PV in a
     Typical Meteorological Year (TMY). The system
@@ -313,43 +250,6 @@ class SolarGeneration(BaseModel):
         validate_assignment=True,
         extra="ignore",
     )
-
-    @field_validator("solar_generation_profile", mode="before")
-    @classmethod
-    def validate_arrays(cls, value):
-        """
-        Ensure that the value, if provided, is an array of correct shape (8760,).
-        Raises a ValueError if it's not None but isn't shaped (8760,).
-        """
-        if value is None:
-            return None
-        return ensure_8760_array(value)
-
-    @model_validator(mode="after")
-    def validate_consistency(self):
-        """
-        Validation rules:
-        - If solar_generation_kwh is None or 0, profile must be None.
-        - If solar_generation_kwh > 0, profile must exist and sum to ~1.
-        """
-        if self.solar_generation_kwh is None or self.solar_generation_kwh == 0:
-            if self.solar_generation_profile is not None:
-                raise ValueError(
-                    "solar_generation_profile must be None"
-                    "if solar_generation_kwh is None or 0."
-                )
-        else:
-            if self.solar_generation_profile is not None:
-                # pylint: disable=no-member
-                if not np.isclose(self.solar_generation_profile.sum(), 1.0, atol=1e-6):
-                    raise ValueError("solar_generation_profile must sum to 1.")
-            else:
-                raise ValueError(
-                    "solar_generation_profile must be provided"
-                    "when solar_generation_kwh > 0."
-                )
-
-        return self
 
     def __add__(self, other: "SolarGeneration") -> "SolarGeneration":
         """
@@ -409,7 +309,7 @@ class SolarGeneration(BaseModel):
         return self.solar_generation_kwh * self.solar_generation_profile
 
 
-class YearlyFuelUsageProfile(BaseModel):
+class YearlyFuelUsageProfile(TrustedBaseModel):
     """
     Base class for yearly fuel usage profiles for different household areas.
     In addition to fuel usage, includes associated consumption parameters e.g.
@@ -505,7 +405,7 @@ class YearlyFuelUsageProfile(BaseModel):
         return self.__add__(other)
 
 
-class YearlyFuelUsageReport(BaseModel):
+class YearlyFuelUsageReport(TrustedBaseModel):
     """
     Report class for yearly fuel usage profiles for different household areas.
     In addition to fuel usage, includes associated consumption parameters e.g.

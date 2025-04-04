@@ -104,10 +104,11 @@ class TestElectricityPlan(unittest.TestCase):
         self.profile = HouseholdYearlyFuelUsageProfile(
             elx_connection_days=DAYS_IN_YEAR,
             electricity_kwh=ElectricityUsage(
-                fixed_time_kwh=300,
-                fixed_time_profile=day_profile,
-                shift_able_kwh=100,
-                shift_able_profile=night_profile,
+                fixed_day_kwh=300,
+                fixed_ngt_kwh=0,
+                fixed_profile=day_profile,
+                shift_abl_kwh=100,
+                shift_profile=night_profile,
             ),
             natural_gas_connection_days=0,
             natural_gas_kwh=0,

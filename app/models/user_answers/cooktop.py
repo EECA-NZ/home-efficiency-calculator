@@ -107,12 +107,11 @@ class CooktopAnswers(BaseModel):
 
         if cooktop_type in ["Electric induction", "Electric (coil or ceramic)"]:
             electricity_kwh = ElectricityUsage(
-                fixed_time_kwh=total_kwh,
-                fixed_time_profile=(
-                    cooktop_hourly_usage_profile() if solar_aware else None
-                ),
-                shift_able_kwh=0.0,
-                shift_able_profile=None,
+                fixed_day_kwh=total_kwh,
+                fixed_ngt_kwh=0.0,
+                fixed_profile=(cooktop_hourly_usage_profile() if solar_aware else None),
+                shift_abl_kwh=0.0,
+                shift_profile=None,
             )
             return CooktopYearlyFuelUsageProfile(
                 elx_connection_days=factor["elx_connection_days"],

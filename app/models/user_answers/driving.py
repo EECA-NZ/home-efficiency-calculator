@@ -137,10 +137,11 @@ class DrivingAnswers(BaseModel):
             )
 
             home_charging_timeseries = ElectricityUsage(
-                fixed_time_kwh=0.0,
-                fixed_time_profile=None,
-                shift_able_kwh=home_charging_kwh,
-                shift_able_profile=charging_profile,
+                fixed_day_kwh=0.0,
+                fixed_ngt_kwh=0.0,
+                fixed_profile=None,
+                shift_abl_kwh=home_charging_kwh,
+                shift_profile=charging_profile,
             )
 
             # If it's plug-in hybrid, we also have fuel usage

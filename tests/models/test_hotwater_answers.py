@@ -35,10 +35,11 @@ def test_water_heating_energy_usage():
     fixed_kwh = total_kwh - anytime_kwh
 
     electricity_kwh = ElectricityUsage(
-        shift_able_kwh=anytime_kwh,
-        shift_able_profile=day_profile,
-        fixed_time_kwh=fixed_kwh,
-        fixed_time_profile=day_profile,
+        fixed_day_kwh=0.0,
+        fixed_ngt_kwh=fixed_kwh,
+        fixed_profile=day_profile,
+        shift_abl_kwh=anytime_kwh,
+        shift_profile=day_profile,
     )
 
     hot_water_sources = {
@@ -69,16 +70,14 @@ def test_water_heating_energy_usage():
             == expected_energy_profile.elx_connection_days
         )
         assert (
-            hot_water_energy_use.electricity_kwh.total_fixed_time_usage.sum()
+            hot_water_energy_use.electricity_kwh.fixed_day_kwh
+            + hot_water_energy_use.electricity_kwh.fixed_ngt_kwh
             == approx(
                 expected_energy_profile.electricity_kwh.total_fixed_time_usage.sum()
             )
         )
-        assert (
-            hot_water_energy_use.electricity_kwh.total_shift_able_usage.sum()
-            == approx(
-                expected_energy_profile.electricity_kwh.total_shift_able_usage.sum()
-            )
+        assert hot_water_energy_use.electricity_kwh.shift_abl_kwh == approx(
+            expected_energy_profile.electricity_kwh.total_shift_able_usage.sum()
         )
         assert (
             hot_water_energy_use.natural_gas_connection_days

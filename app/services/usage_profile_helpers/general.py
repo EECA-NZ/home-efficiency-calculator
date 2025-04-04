@@ -193,3 +193,7 @@ def nighttime_total_usage(usage_profile: np.ndarray) -> np.ndarray:
     """
     day_mask = day_night_flag()
     return usage_profile * ~day_mask
+
+
+day_flag = day_night_flag()
+night_flag = ~day_flag

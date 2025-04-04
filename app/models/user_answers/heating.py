@@ -120,11 +120,12 @@ class HeatingAnswers(BaseModel):
             )
 
         if main_heating_source == "Heat pump":
-            return HeatingYearlyFuelUsageProfile(
+            heating = HeatingYearlyFuelUsageProfile(
                 electricity_kwh=ElectricityUsage(
-                    fixed_time_kwh=heating_energy_service_demand
+                    fixed_day_kwh=heating_energy_service_demand
                     / HEAT_PUMP_COP_BY_CLIMATE_ZONE[climate_zone],
-                    fixed_time_profile=(
+                    fixed_ngt_kwh=0.0,
+                    fixed_profile=(
                         space_heating_profile(
                             postcode=your_home.postcode,
                             heating_during_day=self.heating_during_day,
@@ -133,18 +134,20 @@ class HeatingAnswers(BaseModel):
                         if solar_aware
                         else None
                     ),
-                    shift_able_kwh=0.0,
-                    shift_able_profile=None,
+                    shift_abl_kwh=0.0,
+                    shift_profile=None,
                 ),
                 elx_connection_days=DAYS_IN_YEAR,
             )
+            return heating
 
         if main_heating_source == "Electric heater":
             return HeatingYearlyFuelUsageProfile(
                 electricity_kwh=ElectricityUsage(
-                    fixed_time_kwh=heating_energy_service_demand
+                    fixed_day_kwh=heating_energy_service_demand
                     / ELECTRIC_HEATER_SPACE_HEATING_EFFICIENCY,
-                    fixed_time_profile=(
+                    fixed_ngt_kwh=0.0,
+                    fixed_profile=(
                         space_heating_profile(
                             postcode=your_home.postcode,
                             heating_during_day=self.heating_during_day,
@@ -153,8 +156,8 @@ class HeatingAnswers(BaseModel):
                         if solar_aware
                         else None
                     ),
-                    shift_able_kwh=0.0,
-                    shift_able_profile=None,
+                    shift_abl_kwh=0.0,
+                    shift_profile=None,
                 ),
                 elx_connection_days=DAYS_IN_YEAR,
             )

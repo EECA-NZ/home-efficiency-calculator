@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 
 from app.models.usage_profiles import ElectricityUsage, HouseholdOtherElectricityUsage
+from app.services.usage_profile_helpers import day_flag, night_flag
 
 from ..constants import DAYS_IN_YEAR, OTHER_ELX_KWH_PER_DAY
 from .get_climate_zone import climate_zone
@@ -119,12 +120,18 @@ def other_electricity_energy_usage_profile():
 
     value_col = "Power IT Light Other White"
     uncontrolled_fixed_kwh = other_electricity_usage_df[value_col].astype(float)
+    uncontrolled_fixed_kwh = (
+        uncontrolled_fixed_kwh * total_annual_kwh / uncontrolled_fixed_kwh.sum()
+    )
+    fixed_day_kwh = (uncontrolled_fixed_kwh * day_flag).sum()
+    fixed_ngt_kwh = (uncontrolled_fixed_kwh * night_flag).sum()
     uncontrolled_fixed_kwh /= uncontrolled_fixed_kwh.sum()
 
     return HouseholdOtherElectricityUsage(
         elx_connection_days=DAYS_IN_YEAR,
         electricity_kwh=ElectricityUsage(
-            fixed_time_kwh=total_annual_kwh,
-            fixed_time_profile=np.array(uncontrolled_fixed_kwh),
+            fixed_day_kwh=fixed_day_kwh,
+            fixed_ngt_kwh=fixed_ngt_kwh,
+            fixed_profile=np.array(uncontrolled_fixed_kwh),
         ),
     )

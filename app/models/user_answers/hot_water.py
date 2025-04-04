@@ -126,10 +126,11 @@ class HotWaterAnswers(BaseModel):
             anytime_kwh = total_kwh * HOT_WATER_FLEXIBLE_KWH_FRACTION
             fixed_kwh = total_kwh - anytime_kwh
             electricity_kwh = ElectricityUsage(
-                fixed_time_kwh=fixed_kwh,
-                shift_able_kwh=anytime_kwh,
-                fixed_time_profile=synthetic_hourly_profile,
-                shift_able_profile=synthetic_hourly_profile,
+                fixed_day_kwh=fixed_kwh,
+                fixed_ngt_kwh=0.0,  # Night usage is flexible
+                fixed_profile=synthetic_hourly_profile,
+                shift_abl_kwh=anytime_kwh,
+                shift_profile=synthetic_hourly_profile,
             )
             return HotWaterYearlyFuelUsageProfile(
                 elx_connection_days=DAYS_IN_YEAR,

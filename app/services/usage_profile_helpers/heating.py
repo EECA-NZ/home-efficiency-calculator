@@ -235,4 +235,4 @@ def space_heating_profile(
     if total > 0:
         net_scheduled /= total
 
-    return pd.Series(net_scheduled, index=df.index, name="heating_profile")
+    return pd.Series(net_scheduled, index=df.index, name="heating_profile").to_numpy()

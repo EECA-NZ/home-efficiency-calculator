@@ -116,10 +116,13 @@ def estimate_usage_from_profile(
     cooktop = answers.cooktop
     driving = answers.driving
     solar = get_solar_answers(answers)
+    solar_aware = solar.add_solar if solar else False
 
     # Initialize the profiles with default empty profiles to handle None scenarios
     heating_profile = (
-        heating.energy_usage_pattern(your_home, solar, use_alternative=use_alternatives)
+        heating.energy_usage_pattern(
+            your_home, solar_aware, use_alternative=use_alternatives
+        )
         if heating is not None
         and (
             not use_alternatives or heating.alternative_main_heating_source is not None
@@ -128,7 +131,7 @@ def estimate_usage_from_profile(
     )
     hot_water_profile = (
         hot_water.energy_usage_pattern(
-            your_home, solar, use_alternative=use_alternatives
+            your_home, solar_aware, use_alternative=use_alternatives
         )
         if hot_water is not None
         and (
@@ -138,13 +141,17 @@ def estimate_usage_from_profile(
         else YearlyFuelUsageProfile()
     )
     cooktop_profile = (
-        cooktop.energy_usage_pattern(your_home, solar, use_alternative=use_alternatives)
+        cooktop.energy_usage_pattern(
+            your_home, solar_aware, use_alternative=use_alternatives
+        )
         if cooktop is not None
         and (not use_alternatives or cooktop.alternative_cooktop is not None)
         else YearlyFuelUsageProfile()
     )
     driving_profile = (
-        driving.energy_usage_pattern(your_home, solar, use_alternative=use_alternatives)
+        driving.energy_usage_pattern(
+            your_home, solar_aware, use_alternative=use_alternatives
+        )
         if driving is not None
         and (not use_alternatives or driving.alternative_vehicle_type is not None)
         else YearlyFuelUsageProfile()
