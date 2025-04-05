@@ -25,6 +25,8 @@ scaled Carnot COP based on (21°C - T_outside).
 Finally, we normalize to produce a shape factor summing to 1.
 """
 
+import logging
+
 import numpy as np
 import pandas as pd
 
@@ -32,6 +34,9 @@ from ...constants import HEAT_PUMP_COP_BY_CLIMATE_ZONE
 from ..get_climate_zone import climate_zone
 from ..get_temperatures import hourly_ta
 from .hot_water import carnot_cop
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Time window constants
 FULL_DAY_WINDOW = (7, 21)  # "full day" means 7am–9pm
@@ -234,5 +239,7 @@ def space_heating_profile(
     total = net_scheduled.sum()
     if total > 0:
         net_scheduled /= total
+
+    logger.info("HERE IN HEATING USAGE PROFILE HELPERS")
 
     return pd.Series(net_scheduled, index=df.index, name="heating_profile").to_numpy()

@@ -3,11 +3,16 @@ Map climate zones to hourly temperature profiles.
 """
 
 import importlib.resources as pkg_resources
+import logging
 import os
 
 import pandas as pd
 
 from .get_climate_zone import climate_zone
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 # -------------------------------------------------------------------------
 # Preload temperature data into memory for faster subsequent lookups.
@@ -22,6 +27,7 @@ def _load_all_zone_temp_data(data_dir) -> dict[str, pd.Series]:
     zone_data = {}
     for csv_file in data_dir.iterdir():
         if csv_file.suffix.lower() == ".csv":
+            logger.warning("READING %s", csv_file)
             df = pd.read_csv(csv_file, dtype={"Hour": int, "niwaTA": float})
             df.rename(columns={"niwaTA": "TA"}, inplace=True)
             df["datetime"] = pd.date_range("2019-01-01", periods=len(df), freq="h")

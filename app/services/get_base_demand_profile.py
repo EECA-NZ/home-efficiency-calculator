@@ -3,6 +3,7 @@ Map climate zones to hourly 'other' electricity demand profiles.
 """
 
 import importlib.resources as pkg_resources
+import logging
 import os
 
 import numpy as np
@@ -13,6 +14,9 @@ from app.services.usage_profile_helpers import day_flag, night_flag
 
 from ..constants import DAYS_IN_YEAR, OTHER_ELX_KWH_PER_DAY
 from .get_climate_zone import climate_zone
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # --------------------------------------------------------------------------------
 # In-memory cache for base demands from CSV files. We build two dictionaries:
@@ -29,6 +33,7 @@ def _load_all_zone_data(data_dir) -> dict[str, pd.Series]:
     zone_data = {}
     for csv_file in data_dir.iterdir():
         if csv_file.suffix.lower() == ".csv":
+            logger.warning("READING %s", csv_file)
             df = pd.read_csv(csv_file, dtype={"Hour": int, "power_model": float})
             df.rename(columns={"power_model": "base_demand"}, inplace=True)
             df["datetime"] = pd.date_range("2019-01-01", periods=len(df), freq="h")
@@ -99,6 +104,15 @@ def base_demand(postcode: str) -> pd.Series:
     )
 
 
+other_electricity_energy_usage_csv = (
+    pkg_resources.files("resources.power_demand_by_time_of_use_data.output")
+    / "it_light_other_white_tou_8760.csv"
+)
+logger.warning("READING %s", other_electricity_energy_usage_csv)
+with other_electricity_energy_usage_csv.open("r", encoding="utf-8") as other_csv_file:
+    other_electricity_usage_df = pd.read_csv(other_csv_file, dtype=str)
+
+
 def other_electricity_energy_usage_profile():
     """
     Create an electricity usage profile for appliances not considered by the app.
@@ -111,12 +125,6 @@ def other_electricity_energy_usage_profile():
         + OTHER_ELX_KWH_PER_DAY["Laundry"]["kWh/day"]
         + OTHER_ELX_KWH_PER_DAY["Other"]["kWh/day"]
     )
-    other_electricity_energy_usage_csv = (
-        pkg_resources.files("resources.power_demand_by_time_of_use_data.output")
-        / "it_light_other_white_tou_8760.csv"
-    )
-    with other_electricity_energy_usage_csv.open("r", encoding="utf-8") as csv_file:
-        other_electricity_usage_df = pd.read_csv(csv_file, dtype=str)
 
     value_col = "Power IT Light Other White"
     uncontrolled_fixed_kwh = other_electricity_usage_df[value_col].astype(float)

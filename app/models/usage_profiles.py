@@ -196,6 +196,15 @@ class ElectricityUsage(TrustedBaseModel):
             return self.shift_abl_kwh * self.shift_profile
         return np.zeros(8760)
 
+    @functools.cached_property
+    def total_usage(self) -> np.ndarray:
+        """
+        Shiftable electricity usage timeseries (kWh):
+        shift_abl_kwh * shift_profile
+        Raises AssertionError if usage is nonzero but no profile was provided.
+        """
+        return self.total_fixed_time_usage + self.total_shift_able_usage
+
 
 @dataclass
 class SolarSavingsBreakdown:

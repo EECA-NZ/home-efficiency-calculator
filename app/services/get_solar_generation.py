@@ -28,6 +28,7 @@ def _load_all_zone_solar_data(data_dir) -> dict[str, pd.Series]:
     zone_data = {}
     for csv_file in data_dir.iterdir():
         if csv_file.suffix.lower() == ".csv":
+            logger.warning("READING %s", csv_file)
             df = pd.read_csv(csv_file, dtype={"Hour": int, "pmax": float})
             df["pmax"] = 5 / 4 * df["pmax"]  # Adjust pmax values for a 5kW system
             zone_data[csv_file.stem.lower()] = df["pmax"].to_numpy()

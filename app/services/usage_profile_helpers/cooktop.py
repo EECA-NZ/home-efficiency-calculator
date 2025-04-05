@@ -6,7 +6,12 @@ table implementation bundles cooktop usage with "other"
 electricity usage.
 """
 
+import logging
+
 import numpy as np
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def cooktop_hourly_usage_profile() -> np.ndarray:
@@ -33,5 +38,7 @@ def cooktop_hourly_usage_profile() -> np.ndarray:
 
     # Normalize the profile
     profile /= profile.sum()
+
+    logger.info("HERE IN COOKTOP USAGE PROFILE HELPERS")
 
     return profile

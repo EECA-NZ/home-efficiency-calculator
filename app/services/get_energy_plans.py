@@ -94,6 +94,7 @@ def plan_dictionaries(plan_type: str, plan_class):
     )
 
     try:
+        logger.warning("READING %s", postcode_to_edb_csv_path)
         with postcode_to_edb_csv_path.open("r", encoding="utf-8") as csv_file:
             postcode_to_edb = pd.read_csv(csv_file, dtype=str)
     except FileNotFoundError as e:
@@ -105,6 +106,7 @@ def plan_dictionaries(plan_type: str, plan_class):
             pkg_resources.files(f"resources.{plan_type}_plans.output")
             / f"selected_{plan_type}_plan_tariffs_by_edb_gst_inclusive.csv"
         )
+        logger.warning("READING %s", selected_plans_csv_path)
         with selected_plans_csv_path.open("r", encoding="utf-8") as csv_file:
             edb_to_plan_tariff = pd.read_csv(csv_file, dtype=str)
     except (FileNotFoundError, ModuleNotFoundError) as e:

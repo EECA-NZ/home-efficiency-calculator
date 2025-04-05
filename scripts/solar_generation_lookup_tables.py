@@ -303,7 +303,7 @@ def generate_cooktop_solar_lookup_table(output_dir="."):
                 postcode=DEFAULT_POSTCODE,
             )
             energy = cooktop.energy_usage_pattern(your_home, solar_aware=True)
-            total_kwh = energy.electricity_kwh.total_usage.sum()
+            total_kwh = energy.electricity_kwh.annual_kwh
 
             if total_kwh > 0:
                 profile = (

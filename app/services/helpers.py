@@ -2,11 +2,16 @@
 Module for generic helper functions.
 """
 
+import logging
+
 import numpy as np
 import pandas as pd
 from pydantic import BaseModel
 
 from ..constants import HEATING_PERIOD_FACTOR
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def answer_options(my_object, field):
@@ -100,6 +105,7 @@ def load_lookup_timeseries(
       A NumPy array of length = hour_count,
       scaled by (annual_total_kwh / 1000).
     """
+    logger.warning("READING %s", lookup_csv_path)
     df = pd.read_csv(lookup_csv_path)
     if row_prefix.strip() == "":
         match_len = 0

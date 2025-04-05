@@ -4,6 +4,8 @@ This module provides functions to optimize the cost of energy for a household.
 
 # pylint: disable=too-many-locals
 
+import logging
+
 import numpy as np
 
 from ..constants import CHECKBOX_BEHAVIOUR, DAYS_IN_YEAR
@@ -16,10 +18,11 @@ from ..services.other_answers_helpers import get_other_answers
 from .energy_calculator import emissions_kg_co2e
 from .get_energy_plans import get_energy_plan
 from .helpers import safe_percentage_reduction
-from .solar_helpers import get_solar_answers
+
+logger = logging.getLogger(__name__)
 
 
-def costs_and_emissions(answers, your_plan, solar, your_home):
+def costs_and_emissions(answers, your_plan, solar_aware, your_home):
     """
     Calculate the current household energy costs and emissions.
 
@@ -34,7 +37,7 @@ def costs_and_emissions(answers, your_plan, solar, your_home):
     - emissions [float] in kg CO2e
     """
     energy_use = (
-        answers.energy_usage_pattern(your_home, solar)
+        answers.energy_usage_pattern(your_home, solar_aware)
         if answers
         else YearlyFuelUsageProfile()
     )
@@ -43,7 +46,7 @@ def costs_and_emissions(answers, your_plan, solar, your_home):
     return cost, my_emissions_kg_co2e
 
 
-def calculate_savings_for_option(option, field, answers, your_home, solar):
+def calculate_savings_for_option(option, field, answers, your_home, solar_aware):
     """
     Calculate the savings and emissions reduction for a given option.
 
@@ -57,15 +60,14 @@ def calculate_savings_for_option(option, field, answers, your_home, solar):
     else:
         current_plan = get_energy_plan(your_home.postcode, "None")
         alternative_plan = get_energy_plan(your_home.postcode, "None")
-
     current_cost, current_emissions_kg_co2e = costs_and_emissions(
-        answers, current_plan, solar, your_home
+        answers, current_plan, solar_aware, your_home
     )
 
     alternative_answers = answers.model_copy()
     setattr(alternative_answers, field, option)
     alternative_cost, alternative_emissions_kg_co2e = costs_and_emissions(
-        alternative_answers, alternative_plan, solar, your_home
+        alternative_answers, alternative_plan, solar_aware, your_home
     )
 
     absolute_cost_savings = (
@@ -96,7 +98,7 @@ def calculate_savings_for_option(option, field, answers, your_home, solar):
     }
 
 
-def generate_savings_options(answers, field, your_home, solar):
+def generate_savings_options(answers, field, your_home, solar_aware):
     """
     For each fuel switching option, calculate the savings in dollars and the
     percentage reduction in emissions, formatted to fit directly into a Pydantic model.
@@ -108,18 +110,17 @@ def generate_savings_options(answers, field, your_home, solar):
 
     options = getattr(type(answers).model_fields[field], "annotation").__args__
 
+    logger.info("Generating savings options for %s", field)
     return_dictionary = {}
     for option in options:
         return_dictionary[option] = calculate_savings_for_option(
-            option, field, answers, your_home, solar
+            option, field, answers, your_home, solar_aware
         )
-
-    current_fuel_use = answers.energy_usage_pattern(your_home, solar)
-
+    current_fuel_use = answers.energy_usage_pattern(your_home, solar_aware)
     return return_dictionary, current_fuel_use
 
 
-def calculate_savings_for_option_provided(answers, your_home, solar):
+def calculate_savings_for_option_provided(answers, your_home, solar_aware):
     """
     Calculate the savings and emissions reduction for a given option.
     """
@@ -137,69 +138,7 @@ def calculate_savings_for_option_provided(answers, your_home, solar):
         field = "vehicle_type"
     else:
         raise ValueError("Invalid answers type")
-    return calculate_savings_for_option(option, field, answers, your_home, solar)
-
-
-def calculate_component_savings_without_solar(profile):
-    """
-    Calculate the savings and emissions reductions for each component.
-
-    Returns:
-    - A dictionary of savings and emissions reductions for each component.
-    """
-    response = {}
-    total_current_variable_costs = 0
-    total_alternative_variable_costs = 0
-    total_current_emissions = 0
-    total_alternative_emissions = 0
-
-    household_components = [
-        ("heating", "main_heating_source"),
-        ("hot_water", "hot_water_heating_source"),
-        ("cooktop", "cooktop"),
-        ("driving", "vehicle_type"),
-    ]
-
-    solar = get_solar_answers(profile)
-
-    for component, field in household_components:
-        component_attr = getattr(profile, component, None)
-        if component_attr is None:
-            continue
-
-        alternative_field = f"alternative_{field}"
-        if (
-            hasattr(component_attr, field)
-            and hasattr(component_attr, alternative_field)
-            and getattr(component_attr, field) is not None
-            and getattr(component_attr, alternative_field) is not None
-        ):
-            savings_dict = calculate_savings_for_option_provided(
-                component_attr, profile.your_home, solar
-            )
-
-            savings_dict = round_floats_to_2_dp(savings_dict)
-            response[component] = SavingsResponse(
-                variable_cost_nzd=SavingsData(**savings_dict["variable_cost_nzd"]),
-                emissions_kg_co2e=SavingsData(**savings_dict["emissions_kg_co2e"]),
-            )
-
-            total_current_variable_costs += savings_dict["variable_cost_nzd"]["current"]
-            total_alternative_variable_costs += savings_dict["variable_cost_nzd"][
-                "alternative"
-            ]
-            total_current_emissions += savings_dict["emissions_kg_co2e"]["current"]
-            total_alternative_emissions += savings_dict["emissions_kg_co2e"][
-                "alternative"
-            ]
-
-    totals = {
-        "total_current_variable_costs": total_current_variable_costs,
-        "total_alternative_variable_costs": total_alternative_variable_costs,
-        "total_current_emissions": total_current_emissions,
-        "total_alternative_emissions": total_alternative_emissions,
-    }
-    return response, totals
+    return calculate_savings_for_option(option, field, answers, your_home, solar_aware)
 
 
 def assemble_fuel_savings(totals):

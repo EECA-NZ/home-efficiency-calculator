@@ -2,10 +2,15 @@
 Driving (EV charging) electricity usage profile calculation.
 """
 
+import logging
+
 import numpy as np
 import pandas as pd
 
 from .general import flat_day_night_profiles
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def ev_charging_profile() -> np.ndarray:
@@ -205,5 +210,7 @@ def solar_friendly_ev_charging_profile(
     total_kwh = profile.sum()
     if total_kwh > 0:
         profile /= total_kwh
+
+    logger.info("HERE IN DRIVING USAGE PROFILE HELPERS")
 
     return profile.to_numpy()

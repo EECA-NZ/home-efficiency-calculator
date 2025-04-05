@@ -12,6 +12,8 @@ used to construct an hourly profile of hot water electricity usage.
 
 # pylint: disable=too-many-arguments, too-many-positional-arguments
 
+import logging
+
 import numpy as np
 import pandas as pd
 
@@ -19,6 +21,9 @@ from ...constants import HOT_WATER_HEAT_PUMP_COP_BY_CLIMATE_ZONE
 from ..get_climate_zone import climate_zone
 from ..get_temperatures import hourly_ta
 from .general import flat_day_night_profiles
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Default time window constants
 MORNING_WINDOW_START = "09:00:00"  # e.g., start of morning heating window
@@ -156,6 +161,7 @@ def daily_electricity_kwh(
     pd.Series
         Daily kWh demand (indexed by date).
     """
+    logger.info("HERE IN HOT_WATER USAGE PROFILE HELPERS")
     daily_temp, climate = get_daily_temp_series_and_cz(postcode)
     inlet_temp = daily_temp.rolling(window=30, min_periods=1).mean()
 
