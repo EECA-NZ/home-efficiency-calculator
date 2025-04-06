@@ -9,28 +9,14 @@ from dataclasses import dataclass
 from typing import Optional
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+from app.services.usage_profile_helpers import ensure_8760_array
 
 FLAT_8760 = np.full(8760, 1 / 8760)
 
 
-class TrustedBaseModel(BaseModel):
-    """
-    A 'trusted' Pydantic base class that disables assignment validation
-    and extra overhead for maximum performance.
-
-    You still get structure, but no automatic re-validation on set or
-    complex post-init checks.
-    """
-
-    model_config = ConfigDict(
-        validate_assignment=False,  # do not re-check on attribute assignment
-        extra="ignore",  # ignore unknown fields
-        arbitrary_types_allowed=True,
-    )
-
-
-class ElectricityUsage(TrustedBaseModel):
+class ElectricityUsage(BaseModel):
     """
     Aggregated electricity usage over the year.
     Hourly profiles can be included to represent
@@ -74,6 +60,57 @@ class ElectricityUsage(TrustedBaseModel):
         validate_assignment=True,
         extra="ignore",
     )
+
+    @field_validator("fixed_profile", "shift_profile", mode="before")
+    @classmethod
+    def validate_arrays(cls, value):
+        """
+        Ensure that the value, if provided, is an array of correct shape (8760,).
+        Raises a ValueError if it's not None but isn't shaped (8760,).
+        """
+        if value is None:
+            return None
+        return ensure_8760_array(value)
+
+    @model_validator(mode="after")
+    def set_default_profiles(self):
+        """
+        Ensure consistency and usability:
+
+        - If a kWh value is zero and its profile is None, but the other profile
+          is provided, set a flat profile (uniform distribution summing to 1).
+        - If a kWh value is non-zero, the corresponding profile must be provided
+          if the other profile is provided.
+        - If provided, profiles must sum approximately to 1.
+        """
+
+        def flat_profile():
+            return np.full(8760, 1 / 8760)
+
+        # Check and handle fixed_profile
+        fixed_time_kwh = self.fixed_day_kwh + self.fixed_ngt_kwh
+        if fixed_time_kwh == 0:
+            if self.fixed_profile is None and self.shift_profile is not None:
+                self.fixed_profile = flat_profile()
+        else:
+            if self.fixed_profile is None and self.shift_profile is not None:
+                raise ValueError("fixed_profile should have been provided.")
+            if self.fixed_profile is not None:
+                if not np.isclose(self.fixed_profile.sum(), 1.0, atol=1e-6):
+                    raise ValueError("fixed_profile must sum to 1.")
+
+        # Check and handle shift_profile
+        if self.shift_abl_kwh == 0:
+            if self.shift_profile is None and self.fixed_profile is not None:
+                self.shift_profile = flat_profile()
+        else:
+            if self.shift_profile is None and self.fixed_profile is not None:
+                raise ValueError("shift_profile should have been provided")
+            if self.shift_profile is not None:
+                if not np.isclose(self.shift_profile.sum(), 1.0, atol=1e-6):
+                    raise ValueError("shift_profile must sum to 1.")
+
+        return self
 
     def __add__(self, other: "ElectricityUsage") -> "ElectricityUsage":
         """
@@ -230,7 +267,7 @@ class EnergyCostBreakdown:
     solar: SolarSavingsBreakdown | None = None
 
 
-class SolarGeneration(TrustedBaseModel):
+class SolarGeneration(BaseModel):
     """
     Annual electricity generation by solar PV in a
     Typical Meteorological Year (TMY). The system
@@ -259,6 +296,43 @@ class SolarGeneration(TrustedBaseModel):
         validate_assignment=True,
         extra="ignore",
     )
+
+    @field_validator("solar_generation_profile", mode="before")
+    @classmethod
+    def validate_arrays(cls, value):
+        """
+        Ensure that the value, if provided, is an array of correct shape (8760,).
+        Raises a ValueError if it's not None but isn't shaped (8760,).
+        """
+        if value is None:
+            return None
+        return ensure_8760_array(value)
+
+    @model_validator(mode="after")
+    def validate_consistency(self):
+        """
+        Validation rules:
+        - If solar_generation_kwh is None or 0, profile must be None.
+        - If solar_generation_kwh > 0, profile must exist and sum to ~1.
+        """
+        if self.solar_generation_kwh is None or self.solar_generation_kwh == 0:
+            if self.solar_generation_profile is not None:
+                raise ValueError(
+                    "solar_generation_profile must be None"
+                    "if solar_generation_kwh is None or 0."
+                )
+        else:
+            if self.solar_generation_profile is not None:
+                # pylint: disable=no-member
+                if not np.isclose(self.solar_generation_profile.sum(), 1.0, atol=1e-6):
+                    raise ValueError("solar_generation_profile must sum to 1.")
+            else:
+                raise ValueError(
+                    "solar_generation_profile must be provided"
+                    "when solar_generation_kwh > 0."
+                )
+
+        return self
 
     def __add__(self, other: "SolarGeneration") -> "SolarGeneration":
         """
@@ -318,7 +392,7 @@ class SolarGeneration(TrustedBaseModel):
         return self.solar_generation_kwh * self.solar_generation_profile
 
 
-class YearlyFuelUsageProfile(TrustedBaseModel):
+class YearlyFuelUsageProfile(BaseModel):
     """
     Base class for yearly fuel usage profiles for different household areas.
     In addition to fuel usage, includes associated consumption parameters e.g.
@@ -414,7 +488,7 @@ class YearlyFuelUsageProfile(TrustedBaseModel):
         return self.__add__(other)
 
 
-class YearlyFuelUsageReport(TrustedBaseModel):
+class YearlyFuelUsageReport(BaseModel):
     """
     Report class for yearly fuel usage profiles for different household areas.
     In addition to fuel usage, includes associated consumption parameters e.g.

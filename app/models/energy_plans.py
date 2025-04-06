@@ -8,7 +8,7 @@ Pydantic overhead by using a 'trusted' base model.
 from typing import Dict, Tuple
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 from app.models.usage_profiles import EnergyCostBreakdown, SolarSavingsBreakdown
 
@@ -55,22 +55,7 @@ def compute_solar_offset(usage_profile) -> Tuple[float, float, float]:
     return (shift_self_consumption_kwh, fixed_self_consumption_kwh, export_kwh)
 
 
-class TrustedPlanBase(BaseModel):
-    """
-    A 'trusted' base model for plans, disabling extra overhead.
-
-    You still get some structure, but minimal re-validation.
-    """
-
-    # Turn off assignment validation, allow extras, etc.
-    model_config = ConfigDict(
-        validate_assignment=False,
-        extra="ignore",
-        arbitrary_types_allowed=True,
-    )
-
-
-class ElectricityPlan(TrustedPlanBase):
+class ElectricityPlan(BaseModel):
     """
     Electricity plan for a household.
     """
@@ -154,7 +139,7 @@ class ElectricityPlan(TrustedPlanBase):
         )
 
 
-class NaturalGasPlan(TrustedPlanBase):
+class NaturalGasPlan(BaseModel):
     """
     Natural gas plan for a household.
     """
@@ -182,7 +167,7 @@ class NaturalGasPlan(TrustedPlanBase):
         )
 
 
-class LPGPlan(TrustedPlanBase):
+class LPGPlan(BaseModel):
     """
     LPG plan for a household.
     """
@@ -204,7 +189,7 @@ class LPGPlan(TrustedPlanBase):
         )
 
 
-class WoodPrice(TrustedPlanBase):
+class WoodPrice(BaseModel):
     """
     Wood plan for a household.
     """
@@ -222,7 +207,7 @@ class WoodPrice(TrustedPlanBase):
         )
 
 
-class PetrolPrice(TrustedPlanBase):
+class PetrolPrice(BaseModel):
     """
     Petrol plan for a household.
     """
@@ -240,7 +225,7 @@ class PetrolPrice(TrustedPlanBase):
         )
 
 
-class DieselPrice(TrustedPlanBase):
+class DieselPrice(BaseModel):
     """
     Diesel plan for a household.
     """
@@ -258,7 +243,7 @@ class DieselPrice(TrustedPlanBase):
         )
 
 
-class PublicChargingPrice(TrustedPlanBase):
+class PublicChargingPrice(BaseModel):
     """
     Public charging plan for a household.
     """
@@ -276,7 +261,7 @@ class PublicChargingPrice(TrustedPlanBase):
         )
 
 
-class NonEnergyVehicleCosts(TrustedPlanBase):
+class NonEnergyVehicleCosts(BaseModel):
     """
     Non-energy costs of vehicle ownership.
     """
@@ -301,7 +286,7 @@ class NonEnergyVehicleCosts(TrustedPlanBase):
         )
 
 
-class HouseholdEnergyPlan(TrustedPlanBase):
+class HouseholdEnergyPlan(BaseModel):
     """
     Overall household energy plan.
 
