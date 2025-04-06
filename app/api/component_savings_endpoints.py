@@ -23,9 +23,9 @@ from ..models.user_answers import (
     YourHomeAnswers,
 )
 from ..services.cost_calculator import generate_savings_options
-from ..services.get_climate_zone import climate_zone
-from ..services.get_energy_plans import postcode_to_edb_zone
 from ..services.helpers import round_floats_to_2_dp
+from ..services.postcode_lookups.get_climate_zone import climate_zone
+from ..services.postcode_lookups.get_energy_plans import postcode_to_edb_zone
 
 # Set up logging
 logger = logging.getLogger(__name__)

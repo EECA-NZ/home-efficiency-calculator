@@ -8,7 +8,7 @@ import os
 
 import pandas as pd
 
-from .get_climate_zone import climate_zone
+from ..postcode_lookups.get_climate_zone import climate_zone
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

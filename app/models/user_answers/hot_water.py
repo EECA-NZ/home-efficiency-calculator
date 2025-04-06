@@ -11,15 +11,15 @@ from ...constants import (
     HOT_WATER_FLEXIBLE_KWH_FRACTION,
     HOT_WATER_POWER_INPUT_KW,
 )
-from ...services import get_climate_zone
-from ...services.hot_water_helpers import (
+from ...services.postcode_lookups.get_climate_zone import climate_zone
+from ...services.profile_helpers.hot_water import (
+    solar_friendly_hot_water_electricity_usage_timeseries,
+)
+from ...services.usage_calculation.hot_water_helpers import (
     hot_water_heating_efficiency,
     other_water_kwh_per_year,
     shower_kwh_per_year,
     standing_loss_kwh_per_year,
-)
-from ...services.usage_profile_helpers.hot_water import (
-    solar_friendly_hot_water_electricity_usage_timeseries,
 )
 from ..usage_profiles import ElectricityUsage, HotWaterYearlyFuelUsageProfile
 
@@ -90,25 +90,23 @@ class HotWaterAnswers(BaseModel):
             if use_alternative
             else self.hot_water_heating_source
         )
-        climate_zone = get_climate_zone.climate_zone(your_home.postcode)
+        cz = climate_zone(your_home.postcode)
 
         # 1) How much hot water energy the household needs, before heater efficiency
         energy_service_demand_kwh_per_year = shower_kwh_per_year(
-            self.hot_water_usage, climate_zone, your_home.people_in_house
-        ) + other_water_kwh_per_year(climate_zone, your_home.people_in_house)
+            self.hot_water_usage, cz, your_home.people_in_house
+        ) + other_water_kwh_per_year(cz, your_home.people_in_house)
 
         # 2) Add standing losses
         heat_demand_kwh_per_year = (
             energy_service_demand_kwh_per_year
             + standing_loss_kwh_per_year(
-                hot_water_heating_source, your_home.people_in_house, climate_zone
+                hot_water_heating_source, your_home.people_in_house, cz
             )
         )
 
         # 3) Factor in heater efficiency (or COP for heat pumps)
-        efficiency_factor = hot_water_heating_efficiency(
-            hot_water_heating_source, climate_zone
-        )
+        efficiency_factor = hot_water_heating_efficiency(hot_water_heating_source, cz)
         total_kwh = heat_demand_kwh_per_year / efficiency_factor
 
         # 4) Return early for each source type

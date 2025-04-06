@@ -12,7 +12,7 @@ demonstration purposes, the function returns dummy values.
 import logging
 
 from app.services.driving_helpers import get_vehicle_type
-from app.services.get_energy_plans import get_energy_plan
+from app.services.postcode_lookups.get_energy_plans import get_energy_plan
 
 from ..constants import EMISSIONS_FACTORS
 from ..models.user_answers import SolarAnswers

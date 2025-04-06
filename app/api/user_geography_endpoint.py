@@ -9,8 +9,8 @@ from fastapi import APIRouter, HTTPException
 
 from ..models.response_models import UserGeography
 from ..models.user_answers import YourHomeAnswers
-from ..services.get_climate_zone import climate_zone
-from ..services.get_energy_plans import postcode_to_edb_zone
+from ..services.postcode_lookups.get_climate_zone import climate_zone
+from ..services.postcode_lookups.get_energy_plans import postcode_to_edb_zone
 
 router = APIRouter()
 

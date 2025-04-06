@@ -6,7 +6,7 @@ Class for storing user answers on geography and household size.
 from pydantic import BaseModel, conint, constr, field_validator, model_validator
 
 from app.constants import EXCLUDE_POSTCODES
-from app.services.get_climate_zone import postcode_dict
+from app.services.postcode_lookups.get_climate_zone import postcode_dict
 
 known_postcodes = set(postcode_dict.keys())
 exclude_postcodes = [

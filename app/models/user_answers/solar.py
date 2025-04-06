@@ -4,7 +4,7 @@ Class for storing user answers on solar generation.
 
 from pydantic import BaseModel
 
-from ...services import get_solar_generation
+from ...services.postcode_lookups import get_solar_generation
 from ..usage_profiles import SolarGeneration, SolarYearlyFuelGenerationProfile
 
 

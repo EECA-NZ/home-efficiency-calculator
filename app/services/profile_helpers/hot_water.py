@@ -18,8 +18,8 @@ import numpy as np
 import pandas as pd
 
 from ...constants import HOT_WATER_HEAT_PUMP_COP_BY_CLIMATE_ZONE
-from ..get_climate_zone import climate_zone
-from ..get_temperatures import hourly_ta
+from ..postcode_lookups.get_climate_zone import climate_zone
+from ..postcode_lookups.get_temperatures import hourly_ta
 from .general import flat_day_night_profiles
 
 logging.basicConfig(level=logging.INFO)

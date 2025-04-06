@@ -10,14 +10,16 @@ from app.constants import DAY_NIGHT_FRAC, DAYS_IN_YEAR, OTHER_ELX_KWH_PER_DAY
 from app.models.usage_profiles import ElectricityUsage, HouseholdOtherElectricityUsage
 from app.models.user_answers import SolarAnswers
 from app.services.configuration import get_default_electricity_plan
-from app.services.get_base_demand_profile import other_electricity_energy_usage_profile
 from app.services.helpers import add_gst
-from app.services.hot_water_helpers import (
+from app.services.profile_helpers.get_base_demand_profile import (
+    other_electricity_energy_usage_profile,
+)
+from app.services.solar_helpers import get_solar_answers
+from app.services.usage_calculation.hot_water_helpers import (
     other_water_kwh_per_year,
     shower_kwh_per_year,
     standing_loss_kwh_per_year,
 )
-from app.services.solar_helpers import get_solar_answers
 
 
 def test_add_gst():

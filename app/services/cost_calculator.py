@@ -12,12 +12,11 @@ from ..constants import CHECKBOX_BEHAVIOUR, DAYS_IN_YEAR
 from ..models.response_models import SavingsData, SavingsResponse
 from ..models.usage_profiles import EnergyCostBreakdown, YearlyFuelUsageProfile
 from ..services.energy_calculator import uses_lpg, uses_natural_gas
-from ..services.get_energy_plans import get_energy_plan
 from ..services.helpers import round_floats_to_2_dp, safe_percentage_reduction
 from ..services.other_answers_helpers import get_other_answers
 from .energy_calculator import emissions_kg_co2e
-from .get_energy_plans import get_energy_plan
 from .helpers import safe_percentage_reduction
+from .postcode_lookups.get_energy_plans import get_energy_plan
 
 logger = logging.getLogger(__name__)
 

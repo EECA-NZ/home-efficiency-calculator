@@ -14,7 +14,7 @@ from app.services.configuration import (
     get_default_your_home_answers,
 )
 from app.services.cost_calculator import calculate_savings_for_option
-from app.services.get_energy_plans import get_energy_plan
+from app.services.postcode_lookups.get_energy_plans import get_energy_plan
 
 MY_ENERGY_PLAN = get_energy_plan("6012", "None")
 

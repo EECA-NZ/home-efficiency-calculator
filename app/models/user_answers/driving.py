@@ -17,8 +17,8 @@ from ...constants import (
     EV_PUBLIC_CHARGING_FRACTION,
     FUEL_CONSUMPTION_LITRES_PER_100KM,
 )
-from ...services.usage_profile_helpers import flat_day_night_profiles
-from ...services.usage_profile_helpers.driving import solar_friendly_ev_charging_profile
+from ...services.profile_helpers import flat_day_night_profiles
+from ...services.profile_helpers.driving import solar_friendly_ev_charging_profile
 from ..usage_profiles import DrivingYearlyFuelUsageProfile, ElectricityUsage
 
 

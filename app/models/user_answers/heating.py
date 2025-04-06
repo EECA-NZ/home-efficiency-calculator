@@ -20,9 +20,9 @@ from ...constants import (
     STANDARD_HOME_KWH_HEATING_DEMAND_PER_HEATING_DEGREE_DAY,
     THERMAL_ENVELOPE_QUALITY,
 )
-from ...services import get_climate_zone
 from ...services.helpers import heating_frequency_factor
-from ...services.usage_profile_helpers.heating import space_heating_profile
+from ...services.postcode_lookups.get_climate_zone import climate_zone
+from ...services.profile_helpers.heating import space_heating_profile
 from ..usage_profiles import ElectricityUsage, HeatingYearlyFuelUsageProfile
 
 
@@ -92,11 +92,11 @@ class HeatingAnswers(BaseModel):
             if use_alternative
             else self.main_heating_source
         )
-        climate_zone = get_climate_zone.climate_zone(your_home.postcode)
+        cz = climate_zone(your_home.postcode)
 
         # Calculate the total kWh of space heating demand (service energy)
         heating_energy_service_demand = (
-            HEATING_DEGREE_DAYS[climate_zone]
+            HEATING_DEGREE_DAYS[cz]
             * STANDARD_HOME_KWH_HEATING_DEMAND_PER_HEATING_DEGREE_DAY
             * LIVING_AREA_FRACTION
             * THERMAL_ENVELOPE_QUALITY[self.insulation_quality]
@@ -123,7 +123,7 @@ class HeatingAnswers(BaseModel):
             heating = HeatingYearlyFuelUsageProfile(
                 electricity_kwh=ElectricityUsage(
                     fixed_day_kwh=heating_energy_service_demand
-                    / HEAT_PUMP_COP_BY_CLIMATE_ZONE[climate_zone],
+                    / HEAT_PUMP_COP_BY_CLIMATE_ZONE[cz],
                     fixed_ngt_kwh=0.0,
                     fixed_profile=(
                         space_heating_profile(

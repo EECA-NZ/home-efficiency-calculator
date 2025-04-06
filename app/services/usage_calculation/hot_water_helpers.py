@@ -2,7 +2,7 @@
 Module for generic helper functions.
 """
 
-from ..constants import (
+from ...constants import (
     AVERAGE_AIR_TEMPERATURE_BY_CLIMATE_ZONE,
     DAYS_IN_YEAR,
     ELECTRIC_HOT_WATER_CYLINDER_LOSSES_55_DEGREE_DELTA_T_KWH_PER_DAY,

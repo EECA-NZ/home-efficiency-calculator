@@ -13,8 +13,8 @@ from fastapi.testclient import TestClient
 from pytest import approx
 
 from app.main import app
-from app.services.get_climate_zone import climate_zone
-from app.services.get_energy_plans import get_energy_plan
+from app.services.postcode_lookups.get_climate_zone import climate_zone
+from app.services.postcode_lookups.get_energy_plans import get_energy_plan
 
 # pylint: disable=fixme, too-many-locals, too-many-statements
 

@@ -31,8 +31,8 @@ import numpy as np
 import pandas as pd
 
 from ...constants import HEAT_PUMP_COP_BY_CLIMATE_ZONE
-from ..get_climate_zone import climate_zone
-from ..get_temperatures import hourly_ta
+from ..postcode_lookups.get_climate_zone import climate_zone
+from ..postcode_lookups.get_temperatures import hourly_ta
 from .hot_water import carnot_cop
 
 logging.basicConfig(level=logging.INFO)

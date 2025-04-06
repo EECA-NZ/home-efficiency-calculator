@@ -10,10 +10,10 @@ import numpy as np
 import pandas as pd
 
 from app.models.usage_profiles import ElectricityUsage, HouseholdOtherElectricityUsage
-from app.services.usage_profile_helpers import day_flag, night_flag
+from app.services.profile_helpers import day_flag, night_flag
 
-from ..constants import DAYS_IN_YEAR, OTHER_ELX_KWH_PER_DAY
-from .get_climate_zone import climate_zone
+from ...constants import DAYS_IN_YEAR, OTHER_ELX_KWH_PER_DAY
+from ..postcode_lookups.get_climate_zone import climate_zone
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

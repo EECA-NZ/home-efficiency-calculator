@@ -10,8 +10,10 @@ from app.models.usage_profiles import (
     YearlyFuelUsageProfile,
 )
 from app.models.user_answers import HouseholdAnswers
-from app.services.get_base_demand_profile import other_electricity_energy_usage_profile
 from app.services.helpers import round_floats_to_2_dp
+from app.services.profile_helpers.get_base_demand_profile import (
+    other_electricity_energy_usage_profile,
+)
 from app.services.solar_helpers import get_solar_answers
 
 

@@ -1,11 +1,11 @@
 """
-Tests for the usage_profile_helpers module.
+Tests for the profile_helpers module.
 """
 
 import numpy as np
 import pytest
 
-from app.services.usage_profile_helpers import (
+from app.services.profile_helpers import (
     day_night_flag,
     daytime_total_usage,
     ensure_8760_array,
