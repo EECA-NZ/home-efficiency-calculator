@@ -6,7 +6,7 @@ input parameters (your_home, heating, hot_water, and driving). For
 demonstration purposes, the function returns dummy values.
 """
 
-# pylint: disable=fixme, no-member
+# pylint: disable=no-member
 
 # import logging and instantiate a logger
 import logging
