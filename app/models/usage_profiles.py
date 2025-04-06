@@ -22,7 +22,10 @@ class ElectricityUsage(BaseModel):
     Hourly profiles can be included to represent
     the variation of electricity usage over the year
     when solar generation is present, to estimate
-    self-consumption and export.
+    self-consumption and export. In the absence of solar,
+    the float usage fields can be used directly e.g.
+    to compute the annual cost of electricity based
+    on a day/night tariff.
 
     Attributes:
         fixed_day_kwh: float, fixed daytime usage (kWh).
@@ -35,10 +38,6 @@ class ElectricityUsage(BaseModel):
         shift_profile: np.ndarray | None
             Optional 8760 hourly usage profile (dimensionless) for
             shift_abl_kwh. Must sum to 1 if provided.
-
-    These profiles are primarily used for solar self-consumption
-    overlap calculations. For day/night tariff cost calculations,
-    the float usage fields can be used directly.
     """
 
     fixed_day_kwh: float = Field(0.0, description="Fixed daytime usage (kWh).")
