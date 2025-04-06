@@ -16,15 +16,6 @@ router = APIRouter()
 def get_solar_savings(profile: HouseholdAnswers):
     """
     Calculate savings and emissions reductions if solar is added to the household.
-    Assumes that the user has already provided information about their household
-    energy usage. We make the assumption that in addition to solar panels, the
-    household installs a home energy management system which enables it to still
-    benefit from night rates for the time-flexible part of its load that isn't able
-    to be met by solar. (We use a simple load-matching model to estimate how much
-    electricity demand can be met by solar, and put the rest onto night rates.)
-
-    Returns:
-    - Savings and emissions reductions attributable to adding solar.
     """
     assert (
         profile.heating.alternative_main_heating_source is not None

@@ -161,24 +161,6 @@ async def create_response(data, component_name):
 async def heating_savings(heating_answers: HeatingAnswers, your_home: YourHomeAnswers):
     """
     Endpoint to calculate savings for heating.
-
-    If an alternative heating source is provided,
-    calculate the savings for that source. Otherwise,
-    generate savings options for all possible heating
-    sources.
-
-    Parameters
-    ----------
-    heating_answers : HeatingAnswers
-        The user's answers for heating.
-
-    your_home : YourHomeAnswers
-        The user's answers for their home.
-
-    Returns
-    -------
-    SavingsResponse
-        The savings for the heating component.
     """
     data = await calculate_component_savings(
         heating_answers,
@@ -195,24 +177,6 @@ async def hot_water_savings(
 ):
     """
     Endpoint to calculate savings for hot water.
-
-    If an alternative hot water source is provided,
-    calculate the savings for that source. Otherwise,
-    generate savings options for all possible hot
-    water sources.
-
-    Parameters
-    ----------
-    hot_water_answers : HotWaterAnswers
-        The user's answers for hot water.
-
-    your_home : YourHomeAnswers
-        The user's answers for their home.
-
-    Returns
-    -------
-    SavingsResponse
-        The savings for the hot water component.
     """
     data = await calculate_component_savings(
         hot_water_answers, "hot_water_heating_source", your_home
@@ -223,25 +187,7 @@ async def hot_water_savings(
 @app.post("/cooktop/savings", response_model=ComponentSavingsResponse)
 async def cooktop_savings(cooktop_answers: CooktopAnswers, your_home: YourHomeAnswers):
     """
-    Endpoint to calculate savings for the cooktop
-
-    If an alternative cooktop is provided,
-    calculate the savings for that cooktop.
-    Otherwise, generate savings options for
-    all possible cooktops.
-
-    Parameters
-    ----------
-    cooktop_answers : CooktopAnswers
-        The user's answers for the cooktop.
-
-    your_home : YourHomeAnswers
-        The user's answers for their home.
-
-    Returns
-    -------
-    SavingsResponse
-        The savings for the cooktop component.
+    Endpoint to calculate savings for the cooktop.
     """
     data = await calculate_component_savings(cooktop_answers, "cooktop", your_home)
     return await create_response(data, "cooktop")
@@ -251,24 +197,6 @@ async def cooktop_savings(cooktop_answers: CooktopAnswers, your_home: YourHomeAn
 async def driving_savings(driving_answers: DrivingAnswers, your_home: YourHomeAnswers):
     """
     Endpoint to calculate savings for driving.
-
-    If an alternative vehicle type is provided,
-    calculate the savings for that vehicle type.
-    Otherwise, generate savings options for all
-    possible vehicle types.
-
-    Parameters
-    ----------
-    driving_answers : DrivingAnswers
-        The user's answers for driving.
-
-    your_home : YourHomeAnswers
-        The user's answers for their home.
-
-    Returns
-    -------
-    SavingsResponse
-        The savings for the driving component.
     """
     data = await calculate_component_savings(driving_answers, "vehicle_type", your_home)
     return await create_response(data, "driving")

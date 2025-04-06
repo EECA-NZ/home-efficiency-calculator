@@ -22,16 +22,6 @@ logger = logging.getLogger(__name__)
 async def get_user_geography(your_home: YourHomeAnswers):
     """
     Retrieve the geographic data for a given user's home based on the postcode.
-
-    Parameters
-    ----------
-    your_home : YourHomeAnswers
-        The home answers containing the postcode.
-
-    Returns
-    -------
-    UserGeography
-        The geographic information including EDB region and climate zone.
     """
     try:
         edb_region = postcode_to_edb_zone(your_home.postcode)

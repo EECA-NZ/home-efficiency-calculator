@@ -15,9 +15,6 @@ router = APIRouter()
 def household_energy_profile(profile: HouseholdAnswers):
     """
     Endpoint to retrieve gas fixed cost savings based on the user's home answers.
-
-    Returns:
-    - Savings and emissions reductions for heating, hot water, cooking, and driving.
     """
     try:
         gas_connection_savings = calculate_fixed_cost_savings(profile)

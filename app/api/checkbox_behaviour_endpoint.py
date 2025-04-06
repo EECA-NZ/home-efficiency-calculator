@@ -15,9 +15,6 @@ router = APIRouter()
 def household_energy_profile(profile: HouseholdAnswers):
     """
     Determine the checkbox behaviour based on the user's home answers.
-
-    Returns:
-    - Checkbox data for configuring gas connection fixed cost checkbox.
     """
     try:
         checkbox = determine_gas_connection_checkbox(profile)
