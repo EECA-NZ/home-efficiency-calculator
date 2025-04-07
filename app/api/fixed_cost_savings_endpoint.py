@@ -5,14 +5,14 @@ Module for the gas fixed cost savings endpoint
 from fastapi import APIRouter, HTTPException
 
 from ..models.response_models import FixedCostsResponse
-from ..models.user_answers import HouseholdAnswers
+from ..models.user_answers import BasicHouseholdAnswers
 from ..services.cost_calculator import calculate_fixed_cost_savings
 
 router = APIRouter()
 
 
 @router.post("/fixed-costs/savings", response_model=FixedCostsResponse)
-def household_energy_profile(profile: HouseholdAnswers):
+def household_energy_profile(profile: BasicHouseholdAnswers) -> FixedCostsResponse:
     """
     Endpoint to retrieve gas fixed cost savings based on the user's home answers.
     """

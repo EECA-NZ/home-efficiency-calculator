@@ -15,7 +15,7 @@ from app.services.helpers import get_vehicle_type
 from app.services.postcode_lookups.get_energy_plans import get_energy_plan
 
 from ...constants import EMISSIONS_FACTORS
-from ...models.user_answers import SolarAnswers
+from ...models.user_answers import HouseholdAnswers, SolarAnswers
 from ...services.energy_calculator import estimate_usage_from_profile
 
 # Set up logging
@@ -67,9 +67,16 @@ def calculate_solar_savings(profile):
             "No vehicle type selected. Self-consumption may be underestimated."
         )
 
-    profile.solar = SolarAnswers(add_solar=True)
+    profile_with_solar = HouseholdAnswers(
+        your_home=profile.your_home,
+        heating=profile.heating,
+        hot_water=profile.hot_water,
+        cooktop=profile.cooktop,
+        driving=profile.driving,
+        solar=SolarAnswers(add_solar=True),
+    )
     with_solar_energy_usage_profile = estimate_usage_from_profile(
-        profile,
+        profile_with_solar,
         use_alternatives=True,
         include_other_electricity=True,
     )

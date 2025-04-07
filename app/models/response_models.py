@@ -78,22 +78,3 @@ class FixedCostsResponse(BaseModel):
     """
 
     gas_connection_savings: dict[str, SavingsResponse]
-
-
-class HouseholdSavingsResponse(BaseModel):
-    """
-    Response model for the household energy profile endpoint.
-    """
-
-    heating_fuel_savings: Optional[SavingsResponse]
-    hot_water_fuel_savings: Optional[SavingsResponse]
-    cooktop_fuel_savings: Optional[SavingsResponse]
-    driving_fuel_savings: Optional[SavingsResponse]
-    total_fuel_savings: SavingsResponse
-    # solar_savings: Optional[SolarSavingsResponse]
-    gas_connection_savings: dict[str, SavingsResponse]
-    checkbox: CheckboxData
-    total_savings: SavingsResponse
-    user_geography: UserGeography
-    current_fuel_use: YearlyFuelUsageReport
-    alternative_fuel_use: YearlyFuelUsageReport

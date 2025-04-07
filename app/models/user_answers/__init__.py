@@ -15,6 +15,24 @@ from .solar import SolarAnswers
 from .your_home import YourHomeAnswers
 
 
+class BasicHouseholdAnswers(BaseModel):
+    """
+    Answers to all questions about the user's household energy usage, excluding
+    solar and 'other' (i.e. willingness to disconnect gas supply).
+
+    This class is used to store all the answers provided by the user.
+
+    The only required field is `your_home`, which contains the answers to questions
+    about the number of occupants and the approximate location of the user's home.
+    """
+
+    your_home: YourHomeAnswers
+    heating: Optional[HeatingAnswers] = None
+    hot_water: Optional[HotWaterAnswers] = None
+    cooktop: Optional[CooktopAnswers] = None
+    driving: Optional[DrivingAnswers] = None
+
+
 class HouseholdAnswers(BaseModel):
     """
     Answers to all questions about the user's household energy usage.

@@ -1,6 +1,5 @@
 """
-Classes representing different energy plans for households, with minimal
-Pydantic overhead by using a 'trusted' base model.
+Classes representing different energy plans for households.
 """
 
 # pylint: disable=too-many-locals
@@ -41,8 +40,8 @@ class ElectricityPlan(BaseModel):
             fixed_self_consumption_kwh,
             export_kwh,
         ) = compute_solar_offset(usage_profile)
-        total_solar_kwh = usage_profile.solar_generation_kwh.total
         self_consumption_kwh = shift_self_consumption_kwh + fixed_self_consumption_kwh
+        total_solar_kwh = self_consumption_kwh + export_kwh
         export_earnings_nzd = export_kwh * export_rate
         self_consumption_pct = (
             (self_consumption_kwh / total_solar_kwh * 100.0)
@@ -50,7 +49,7 @@ class ElectricityPlan(BaseModel):
             else 0.0
         )
 
-        # 3) Bill leftover usage
+        # 3) Bill leftover usage. We distinguish between day, night and shiftable usage.
         day_import_kwh = (
             usage_profile.electricity_kwh.fixed_day_kwh - fixed_self_consumption_kwh
         )
@@ -58,8 +57,15 @@ class ElectricityPlan(BaseModel):
         shift_import_kwh = (
             usage_profile.electricity_kwh.shift_abl_kwh - shift_self_consumption_kwh
         )
-
+        # This calculator assumes that any shiftable usage that is not met by solar is
+        # shifted to take advantage of the night rate (where available). This assumption
+        # implies smart energy management and may slightly overstate financial benefits
+        # of solar under real-world conditions. For present purposes, it allows us to
+        # calculate the incremental savings due to solar without having to model the
+        # household's energy management system in detail and without double counting
+        # the savings associated with shifting usage to the night rate.
         if tariff_keys == {"Day", "Night"}:
+            # Shiftable usage is assumed to be met by solar first, then by night rate.
             variable_cost = (
                 day_import_kwh * self.import_rates["Day"]
                 + (night_import_kwh + shift_import_kwh) * self.import_rates["Night"]
