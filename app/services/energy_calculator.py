@@ -9,12 +9,11 @@ from app.models.usage_profiles import (
     HouseholdYearlyFuelUsageProfile,
     YearlyFuelUsageProfile,
 )
-from app.models.user_answers import HouseholdAnswers
-from app.services.helpers import round_floats_to_2_dp
+from app.models.user_answers import HouseholdAnswers, SolarAnswers
+from app.services.helpers import get_solar_answers, round_floats_to_2_dp
 from app.services.profile_helpers.get_base_demand_profile import (
     other_electricity_energy_usage_profile,
 )
-from app.services.solar_helpers import get_solar_answers
 
 
 def uses_electricity(profile: HouseholdAnswers) -> bool:
@@ -117,7 +116,7 @@ def estimate_usage_from_profile(
     hot_water = answers.hot_water
     cooktop = answers.cooktop
     driving = answers.driving
-    solar = get_solar_answers(answers)
+    solar = SolarAnswers(**get_solar_answers(answers))
     solar_aware = solar.add_solar if solar else False
 
     # Initialize the profiles with default empty profiles to handle None scenarios

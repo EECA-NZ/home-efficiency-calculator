@@ -10,7 +10,7 @@ from typing import Dict
 from pydantic import BaseModel
 
 from app.models.usage_profiles import EnergyCostBreakdown, SolarSavingsBreakdown
-from app.services.solar_helpers import compute_solar_offset
+from app.services.solar_calculator.solar_helpers import compute_solar_offset
 
 
 class ElectricityPlan(BaseModel):

@@ -138,3 +138,72 @@ def load_lookup_timeseries(
         )
     fractions = row[frac_cols].astype(float).to_numpy()
     return (annual_total / 1000.0) * fractions
+
+
+def get_solar_answers(answers) -> dict:
+    """
+    Retrieve the SolarAnswers instance from the given answers object.
+
+    If the answers object contains a non-None 'solar'
+    attribute, that instance is returned.
+    Otherwise, a default SolarAnswers instance with
+    add_solar=False is returned.
+
+    Parameters
+    ----------
+    answers : Any
+        An object that is expected to have a 'solar' attribute.
+
+    Returns
+    -------
+    SolarAnswers
+        The retrieved or default SolarAnswers instance.
+    """
+    # Perform a local import to avoid circular dependencies.
+
+    if hasattr(answers, "solar") and answers.solar is not None:
+        return {"add_solar": answers.solar.add_solar}
+    return {"add_solar": False}
+
+
+def get_vehicle_type(answers, use_alternatives=False) -> str:
+    """
+    Retrieve the vehicle type from the answers.
+
+    Args:
+    - answers: The user's answers.
+    - use_alternatives: Whether to use the alternative vehicle type.
+
+    Returns:
+    - The vehicle type.
+    """
+
+    if hasattr(answers, "driving") and answers.driving is not None:
+        if use_alternatives:
+            if answers.driving.alternative_vehicle_type is not None:
+                return answers.driving.alternative_vehicle_type
+    return "None"
+
+
+def get_other_answers(answers) -> dict:
+    """
+    Retrieve the OtherAnswers instance from the given answers object.
+
+    If the answers object contains a non-None 'other'
+    attribute, that instance is returned.
+
+    Otherwise, a default OtherAnswers instance is returned.
+
+    Parameters
+    ----------
+    answers : Any
+        An object that is expected to have a 'other' attribute.
+
+    Returns
+    -------
+    OtherAnswers
+        The retrieved or default OtherAnswers instance.
+    """
+    if hasattr(answers, "other") and answers.other is not None:
+        return {"fixed_cost_changes": answers.other.fixed_cost_changes}
+    return {"fixed_cost_changes": False}

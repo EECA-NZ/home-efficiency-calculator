@@ -11,12 +11,12 @@ demonstration purposes, the function returns dummy values.
 # import logging and instantiate a logger
 import logging
 
-from app.services.driving_helpers import get_vehicle_type
+from app.services.helpers import get_vehicle_type
 from app.services.postcode_lookups.get_energy_plans import get_energy_plan
 
-from ..constants import EMISSIONS_FACTORS
-from ..models.user_answers import SolarAnswers
-from ..services.energy_calculator import estimate_usage_from_profile
+from ...constants import EMISSIONS_FACTORS
+from ...models.user_answers import SolarAnswers
+from ...services.energy_calculator import estimate_usage_from_profile
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)

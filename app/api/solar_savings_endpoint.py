@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException
 from ..models.response_models import SolarSavingsResponse
 from ..models.user_answers import HouseholdAnswers, SolarAnswers
 from ..services.helpers import round_floats_to_2_dp
-from ..services.solar_calculator import calculate_solar_savings
+from ..services.solar_calculator.calculate_solar_savings import calculate_solar_savings
 
 router = APIRouter()
 

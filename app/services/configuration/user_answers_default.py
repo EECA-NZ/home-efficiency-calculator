@@ -30,7 +30,6 @@ def get_default_other_answers():
     """
     return OtherAnswers(
         fixed_cost_changes=False,
-        adding_solar=False,
     )
 
 

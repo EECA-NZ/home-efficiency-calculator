@@ -11,9 +11,13 @@ import numpy as np
 from ..constants import CHECKBOX_BEHAVIOUR, DAYS_IN_YEAR
 from ..models.response_models import SavingsData, SavingsResponse
 from ..models.usage_profiles import EnergyCostBreakdown, YearlyFuelUsageProfile
+from ..models.user_answers import OtherAnswers
 from ..services.energy_calculator import uses_lpg, uses_natural_gas
-from ..services.helpers import round_floats_to_2_dp, safe_percentage_reduction
-from ..services.other_answers_helpers import get_other_answers
+from ..services.helpers import (
+    get_other_answers,
+    round_floats_to_2_dp,
+    safe_percentage_reduction,
+)
 from .energy_calculator import emissions_kg_co2e
 from .helpers import safe_percentage_reduction
 from .postcode_lookups.get_energy_plans import get_energy_plan
@@ -270,8 +274,7 @@ def calculate_fixed_cost_savings(profile):
     else:
         your_plan = get_energy_plan(profile.your_home.postcode, "None")
 
-    other_answers = get_other_answers(profile)
-
+    other_answers = OtherAnswers(**get_other_answers(profile))
     current_uses_natural_gas = uses_natural_gas(profile)
     current_uses_lpg = uses_lpg(profile)
     alternative_uses_natural_gas = uses_natural_gas(profile, use_alternatives=True)
