@@ -9,7 +9,6 @@ import logging
 import numpy as np
 import pandas as pd
 
-# import app.services.configuration as cfg
 from app.models.energy_plans import ElectricityPlan
 from app.models.user_answers import (
     CooktopAnswers,
@@ -21,7 +20,9 @@ from app.models.user_answers import (
     YourHomeAnswers,
 )
 from app.services.energy_calculator import estimate_usage_from_profile
-from app.services.helpers import other_electricity_energy_usage_profile
+from app.services.profile_helpers.get_base_demand_profile import (
+    other_electricity_energy_usage_profile,
+)
 from resources.plan_choice_helpers.constants import NUMERICAL_COLUMNS
 from resources.plan_choice_helpers.data_loading import eval_or_return
 from resources.plan_choice_helpers.plan_filters import (
@@ -209,7 +210,7 @@ def load_electrified_household_energy_usage_profile():
             vehicle_type="Electric",
         ),
         solar=SolarAnswers(
-            has_solar=False,
+            add_solar=False,
         ),
     )
     household_energy_use = estimate_usage_from_profile(household_profile)

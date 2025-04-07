@@ -1,11 +1,11 @@
 """
-Tests for the usage_profile_helpers module.
+Tests for the profile_helpers module.
 """
 
 import numpy as np
 import pytest
 
-from app.services.usage_profile_helpers import (
+from app.services.profile_helpers import (
     day_night_flag,
     daytime_total_usage,
     ensure_8760_array,
@@ -31,8 +31,8 @@ def naive_night_shift(usage_profile: np.ndarray) -> np.ndarray:
         # Nighttime: [0..6, 21..23]
         night_hours = np.concatenate(
             [
-                np.arange(day_start, day_start + 7),
-                np.arange(day_start + 21, day_end),
+                np.arange(day_start, day_start + 4),
+                np.arange(day_start + 23, day_end),
             ]
         )
         day_usage = shifted_profile[day_hours].sum()

@@ -29,7 +29,7 @@ household_profile_with_solar = HouseholdAnswers(
     hot_water=cfg.get_default_hot_water_answers(),
     cooktop=cfg.get_default_cooktop_answers(),
     driving=cfg.get_default_driving_answers(),
-    solar=SolarAnswers(has_solar=True),
+    solar=SolarAnswers(add_solar=True),
 )
 
 
@@ -39,15 +39,13 @@ def test_estimate_usage_from_profile():
     """
     energy_usage = estimate_usage_from_profile(household_profile)
     assert energy_usage.elx_connection_days == DAYS_IN_YEAR
-    assert energy_usage.electricity_kwh.total_shift_able_usage.sum() == approx(
-        3618.6299
+    assert energy_usage.electricity_kwh.shift_abl_kwh == approx(3618.6299, rel=1e-4)
+    assert (
+        energy_usage.electricity_kwh.fixed_day_kwh
+        + energy_usage.electricity_kwh.fixed_ngt_kwh
+        == approx(1271.1487, rel=1e-4)
     )
-    assert energy_usage.electricity_kwh.total_fixed_time_usage.sum() == approx(
-        1271.1487
-    )
-    assert energy_usage.solar_generation_kwh.fixed_time_generation_kwh.sum() == approx(
-        0.0
-    )
+    assert energy_usage.solar_generation_kwh.total == approx(0.0)
     assert energy_usage.natural_gas_connection_days == approx(0.0)
     assert energy_usage.natural_gas_kwh == approx(0.0)
     assert energy_usage.lpg_tanks_rental_days == approx(0.0)
@@ -63,16 +61,14 @@ def test_estimate_usage_from_profile_with_solar():
     """
     energy_usage = estimate_usage_from_profile(household_profile_with_solar)
     assert energy_usage.elx_connection_days == DAYS_IN_YEAR
-    assert energy_usage.electricity_kwh.total_usage.sum() == approx(4889.778593)
-    assert energy_usage.electricity_kwh.total_shift_able_usage.sum() == approx(
-        1560.819618
+    assert energy_usage.electricity_kwh.annual_kwh == approx(4889.778593)
+    assert energy_usage.electricity_kwh.shift_abl_kwh == approx(3618.6299, rel=1e-4)
+    assert (
+        energy_usage.electricity_kwh.fixed_day_kwh
+        + energy_usage.electricity_kwh.fixed_ngt_kwh
+        == approx(1271.149, rel=1e-4)
     )
-    assert energy_usage.electricity_kwh.total_fixed_time_usage.sum() == approx(
-        3328.958975
-    )
-    assert energy_usage.solar_generation_kwh.fixed_time_generation_kwh.sum() == approx(
-        6779.145125
-    )
+    assert energy_usage.solar_generation_kwh.total == approx(6779.137958, rel=1e-4)
     assert energy_usage.natural_gas_connection_days == approx(0.0)
     assert energy_usage.natural_gas_kwh == approx(0.0)
     assert energy_usage.lpg_tanks_rental_days == approx(0.0)

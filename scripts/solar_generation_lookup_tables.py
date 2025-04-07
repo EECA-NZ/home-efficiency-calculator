@@ -14,13 +14,21 @@ from app.models.user_answers import (
     DrivingAnswers,
     HeatingAnswers,
     HotWaterAnswers,
-    SolarAnswers,
     YourHomeAnswers,
 )
-from app.services.get_climate_zone import postcode_dict
-from app.services.get_energy_plans import postcode_to_electricity_plan_dict
-from app.services.get_solar_generation import hourly_pmax
-from app.services.helpers import other_electricity_energy_usage_profile
+from app.services.postcode_lookups.get_climate_zone import postcode_dict
+from app.services.postcode_lookups.get_energy_plans import (
+    get_energy_plan,
+    postcode_to_electricity_plan_dict,
+)
+from app.services.postcode_lookups.get_solar_generation import hourly_pmax
+from app.services.profile_helpers.get_base_demand_profile import (
+    other_electricity_energy_usage_profile,
+)
+
+# set TEST_MODE to True to run the script in test mode
+TEST_MODE = False
+os.environ["TEST_MODE"] = "True" if TEST_MODE else "False"
 
 # Round numerical outputs
 FLOAT_FORMAT = "%.6f"
@@ -29,10 +37,16 @@ FLOAT_FORMAT = "%.6f"
 DEFAULT_POSTCODE = "6012"
 EXPORT_RATE = 0.12  # NZD per kWh for exported electricity
 TIMESERIES_SUM = 1000.0  # Sum of hour columns for each row
-SOLAR = SolarAnswers(has_solar=True)
 
 # Constant for the lookup directory. Relative to the script location.
-LOOKUP_DIR = os.path.join(os.path.dirname(__file__), "..", "lookup")
+if TEST_MODE:
+    LOOKUP_DIR = os.path.join(
+        os.path.dirname(__file__), "..", "resources", "test_data", "lookup_tables"
+    )
+else:
+    LOOKUP_DIR = os.path.join(
+        os.path.dirname(__file__), "..", "resources", "lookup_tables"
+    )
 
 VEHICLE_PLUGIN_HYBRID = "Plug-in hybrid"
 VEHICLE_ELECTRIC = "Electric"
@@ -132,9 +146,8 @@ def generate_vehicle_solar_lookup_table(output_dir="."):
                     YourHomeAnswers(
                         people_in_house=3,
                         postcode=DEFAULT_POSTCODE,
-                        disconnect_gas=True,
                     ),
-                    solar=SOLAR,
+                    solar_aware=True,
                     use_alternative=False,
                 )
                 total_kwh = energy.electricity_kwh.total_usage.sum()
@@ -186,9 +199,8 @@ def generate_hot_water_solar_lookup_table(output_dir="."):
                     your_home = YourHomeAnswers(
                         people_in_house=p,
                         postcode=pc,
-                        disconnect_gas=True,
                     )
-                    energy = hot_water.energy_usage_pattern(your_home, SOLAR)
+                    energy = hot_water.energy_usage_pattern(your_home, solar_aware=True)
                     total_kwh = energy.electricity_kwh.total_usage.sum()
 
                     if total_kwh > 0:
@@ -241,9 +253,8 @@ def generate_space_heating_solar_lookup_table(output_dir="."):
                         YourHomeAnswers(
                             people_in_house=3,
                             postcode=pc,
-                            disconnect_gas=True,
                         ),
-                        solar=SOLAR,
+                        solar_aware=True,
                     )
                     total_kwh = heating_energy_use.electricity_kwh.total_usage.sum()
 
@@ -292,10 +303,9 @@ def generate_cooktop_solar_lookup_table(output_dir="."):
             your_home = YourHomeAnswers(
                 people_in_house=p,
                 postcode=DEFAULT_POSTCODE,
-                disconnect_gas=True,
             )
-            energy = cooktop.energy_usage_pattern(your_home, SOLAR)
-            total_kwh = energy.electricity_kwh.total_usage.sum()
+            energy = cooktop.energy_usage_pattern(your_home, solar_aware=True)
+            total_kwh = energy.electricity_kwh.annual_kwh
 
             if total_kwh > 0:
                 profile = (
@@ -401,7 +411,10 @@ def transform_plans_to_dataframe():
       import_rates_export, kg_co2e_per_kwh.
     """
     modified_plans = {}
-    for plan in postcode_to_electricity_plan_dict.values():
+    plans = list(postcode_to_electricity_plan_dict.values())
+    # Need to include default plan for fallback
+    plans.append(get_energy_plan("not_a_postcode", "Petrol").electricity_plan)
+    for plan in plans:
         plan_name = plan.name
         rate_dict = plan.import_rates
         fixed_rate = plan.fixed_rate

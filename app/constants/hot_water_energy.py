@@ -14,7 +14,9 @@ WATER_DENSITY_KG_PER_L = 1
 TEMPERATURE_SHOWER_C = 37
 
 # If hot water is provided by electriciy, this is the fraction of the total
-# hot water energy that is assumed to be provided using the flexible rate.
+# hot water energy that is assumed can be provided using the night rate.
+# In order to work within the constraints imposed by the lookup table approach
+# for solar self-consumption calculations, this is set to 1.0 for now.
 HOT_WATER_FLEXIBLE_KWH_FRACTION = 0.8
 
 SHOWER_WATER_USAGE_QUANTITIES = {

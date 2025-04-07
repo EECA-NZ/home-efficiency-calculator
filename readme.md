@@ -3,7 +3,7 @@
 ![Linting](https://github.com/EECA-NZ/home-efficiency-calculator/actions/workflows/pylint.yml/badge.svg)
 ![Tests](https://github.com/EECA-NZ/home-efficiency-calculator/actions/workflows/python-tests.yml/badge.svg)
 [Test Coverage Report](https://eeca-nz.github.io/home-efficiency-calculator/htmlcov)
-[API documentation](http://home-efficiency-calculator.australiaeast.azurecontainer.io:8000/docs)
+[API documentation](https://home-efficiency-calculator-app.azurewebsites.net/docs)
 
 This repository contains the source code for the [Home efficiency calculator](http://home-efficiency-calculator.australiaeast.azurecontainer.io:8000/docs), a FastAPI application designed to provide insights into household energy costs and CO2 emissions.
 
@@ -89,7 +89,6 @@ It is assumed that the user is working in a powershell environment on a Windows 
             "your_home": {
                 "people_in_house": 4,
                 "postcode": "9016",
-                "disconnect_gas": true
             }
         }' `
         -OutFile 'response.json'
@@ -151,7 +150,7 @@ $location = "australiaeast"
 $containerGroupName = "aci-home-efficiency-calculator"
 $acrPassword = az acr credential show -n $acrName --query "passwords[0].value" -o tsv
 $loginServer = az acr show -n $acrName --query loginServer --output tsv
-$image = "home-efficiency-calculator:0.1.0"
+$image = "home-efficiency-calculator:0.2.0"
 $imageTag = "$loginServer/$image"
 ```
 
@@ -206,7 +205,6 @@ curl -Method 'POST' `
         "your_home": {
             "people_in_house": 4,
             "postcode": "6012",
-            "disconnect_gas": true,
         },
         "heating": {
             "main_heating_source": "Piped gas heater",
@@ -230,7 +228,7 @@ curl -Method 'POST' `
             "km_per_week": "200",
         },
         "solar": {
-            "has_solar": true,
+            "add_solar": true,
         }
     }' `
     -OutFile 'response.json'

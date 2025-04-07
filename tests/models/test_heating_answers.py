@@ -44,17 +44,24 @@ def test_space_heating_energy_usage():
         )
 
         # calculate costs by fuel
-        _, heating_electricity_variable_cost = plans["electricity_plan"].calculate_cost(
-            heating_energy_use
+        heating_electricity_variable_cost = (
+            plans["electricity_plan"]
+            .calculate_cost(heating_energy_use)
+            .variable_cost_nzd
         )
-        _, heating_lpg_variable_cost = plans["lpg_plan"].calculate_cost(
-            heating_energy_use
+
+        heating_lpg_variable_cost = (
+            plans["lpg_plan"].calculate_cost(heating_energy_use).variable_cost_nzd
         )
-        _, heating_natural_gas_variable_cost = plans["natural_gas_plan"].calculate_cost(
-            heating_energy_use
+
+        heating_natural_gas_variable_cost = (
+            plans["natural_gas_plan"]
+            .calculate_cost(heating_energy_use)
+            .variable_cost_nzd
         )
-        _, heating_wood_variable_cost = plans["wood_price"].calculate_cost(
-            heating_energy_use
+
+        heating_wood_variable_cost = (
+            plans["wood_price"].calculate_cost(heating_energy_use).variable_cost_nzd
         )
 
         # compare with expected costs
@@ -70,6 +77,7 @@ def test_space_heating_energy_usage():
         expected_wood = expected_energy_cost[main_heating_source].get(
             "wood_variable_cost_nzd", 0
         )
+
         assert heating_electricity_variable_cost == approx(expected_electricity)
         assert heating_lpg_variable_cost == approx(expected_lpg)
         assert heating_natural_gas_variable_cost == approx(expected_natural_gas)

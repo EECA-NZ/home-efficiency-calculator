@@ -81,3 +81,8 @@ LPG_SPACE_HEATING_EFFICIENCY = 0.8
 ELECTRIC_HEATER_SPACE_HEATING_EFFICIENCY = 1.0
 
 LOG_BURNER_SPACE_HEATING_EFFICIENCY = 0.7
+
+# The space heating setpoint is used to determine
+# the temporal distribution of heating demand for
+# the purposes of estimating solar self-consumption.
+SPACE_HEATING_SETPOINT = 21.0  # degrees Celsius

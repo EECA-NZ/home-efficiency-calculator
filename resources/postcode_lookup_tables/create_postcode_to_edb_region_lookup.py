@@ -35,6 +35,9 @@ def main():
 
     print("Loading and transforming EDB boundaries shapefile...")
     my_edb_boundaries_gdf = load_and_transform_shapefile(EDB_REGION_SHAPEFILE)
+    my_edb_boundaries_gdf.loc[
+        my_edb_boundaries_gdf["name"] == "CentraLines Ltd", "name"
+    ] = "Centralines Ltd"
 
     print("Checking consistency of CRS...")
     assert my_postcode_gdf.crs == my_edb_boundaries_gdf.crs

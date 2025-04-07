@@ -17,12 +17,11 @@ from app.models.user_answers import (
     DrivingAnswers,
     HeatingAnswers,
     HotWaterAnswers,
-    SolarAnswers,
     YourHomeAnswers,
 )
 from app.services.energy_calculator import emissions_kg_co2e
-from app.services.get_climate_zone import climate_zone, postcode_dict
-from app.services.get_energy_plans import get_energy_plan
+from app.services.postcode_lookups.get_climate_zone import climate_zone, postcode_dict
+from app.services.postcode_lookups.get_energy_plans import get_energy_plan
 
 # Round numerical outputs to 3 decimal places.
 FLOAT_FORMAT = "%.14f"
@@ -31,14 +30,14 @@ FLOAT_FORMAT = "%.14f"
 logging.basicConfig(level=logging.INFO)
 
 # Constant for the lookup directory. Relative to the script location.
-LOOKUP_DIR = os.path.join(os.path.dirname(__file__), "..", "lookup")
+LOOKUP_DIR = os.path.join(os.path.dirname(__file__), "..", "resources", "lookup_tables")
 DEFAULT_VEHICLE_TYPE = "None"
 REPORT_EVERY_N_ROWS = 1e5
 
 # Ensure the directory exists
 os.makedirs(LOOKUP_DIR, exist_ok=True)
 
-NO_SOLAR = SolarAnswers(has_solar=False)
+SOLAR_AWARE = False
 
 people_in_house = [1, 2, 3, 4, 5, 6]
 # Post-MVP, exclude postcodes - requires coordination with web team
@@ -74,7 +73,7 @@ cooktop_types = [
 vehicle_types = ["Petrol", "Diesel", "Hybrid", "Plug-in hybrid", "Electric"]
 vehicle_sizes = ["Small", "Medium", "Large"]
 km_per_week = ["50 or less", "100", "200", "300", "400 or more"]
-has_solar = [True, False]  # Ignored for now
+add_solar = [True, False]  # Ignored for now
 
 # Cache for expensive functions
 energy_plan_cache = {}
@@ -131,20 +130,19 @@ def calculate_cost_and_emissions(your_home, answers):
     cache_key = (
         your_home.people_in_house,
         your_home.postcode,
-        your_home.disconnect_gas,
         tuple(sorted(answers.__dict__.items())),
     )
 
     if cache_key in cost_emissions_cache:
         return cost_emissions_cache[cache_key]
 
-    energy_usage_profile = answers.energy_usage_pattern(your_home, NO_SOLAR)
+    energy_usage_profile = answers.energy_usage_pattern(your_home, SOLAR_AWARE)
     if answers.__class__.__name__ == "DrivingAnswers":
         vehicle_type = answers.vehicle_type
     else:
         vehicle_type = DEFAULT_VEHICLE_TYPE
     my_plan = get_energy_plan_cached(your_home.postcode, vehicle_type)
-    (_, variable_cost_nzd) = my_plan.calculate_cost(energy_usage_profile)
+    variable_cost_nzd = my_plan.calculate_cost(energy_usage_profile).variable_cost_nzd
     my_emissions_kg_co2e = emissions_kg_co2e(energy_usage_profile)
     result = {
         "variable_cost_nzd": variable_cost_nzd,
@@ -205,7 +203,6 @@ def generate_heating_lookup_table():
         your_home = YourHomeAnswers(
             people_in_house=people,
             postcode=postcode,
-            disconnect_gas=disconnect,
         )
         heating = HeatingAnswers(
             main_heating_source=heating_source,
@@ -259,7 +256,6 @@ def generate_hot_water_lookup_table():
         your_home = YourHomeAnswers(
             people_in_house=people,
             postcode=postcode,
-            disconnect_gas=disconnect,
         )
         hot_water = HotWaterAnswers(
             hot_water_usage=usage,
@@ -307,7 +303,6 @@ def generate_cooktop_lookup_table():
         your_home = YourHomeAnswers(
             people_in_house=people,
             postcode=postcode,
-            disconnect_gas=disconnect,
         )
         cooktop = CooktopAnswers(
             cooktop=cooktop_type,
@@ -365,7 +360,6 @@ def generate_vehicle_lookup_table():
         your_home = YourHomeAnswers(
             people_in_house=people,
             postcode=postcode,
-            disconnect_gas=disconnect,
         )
         driving = DrivingAnswers(
             vehicle_type=vehicle_type,

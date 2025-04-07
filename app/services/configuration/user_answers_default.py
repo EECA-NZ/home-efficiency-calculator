@@ -8,6 +8,7 @@ from ...models.user_answers import (
     HeatingAnswers,
     HotWaterAnswers,
     HouseholdAnswers,
+    OtherAnswers,
     SolarAnswers,
     YourHomeAnswers,
 )
@@ -20,7 +21,16 @@ def get_default_your_home_answers():
 
     Postcode is for Wellington, New Zealand.
     """
-    return YourHomeAnswers(people_in_house=3, postcode="6012", disconnect_gas=False)
+    return YourHomeAnswers(people_in_house=3, postcode="6012")
+
+
+def get_default_other_answers():
+    """
+    Return a default 'other' answers object.
+    """
+    return OtherAnswers(
+        fixed_cost_changes=False,
+    )
 
 
 def get_default_heating_answers():
@@ -29,6 +39,7 @@ def get_default_heating_answers():
     """
     return HeatingAnswers(
         main_heating_source="Heat pump",
+        alternative_main_heating_source="Heat pump",
         heating_during_day="Never",
         insulation_quality="Moderately insulated",
     )
@@ -41,6 +52,7 @@ def get_default_hot_water_answers():
     return HotWaterAnswers(
         hot_water_usage="Average",
         hot_water_heating_source="Electric hot water cylinder",
+        alternative_hot_water_heating_source="Hot water heat pump",
     )
 
 
@@ -50,6 +62,7 @@ def get_default_cooktop_answers():
     """
     return CooktopAnswers(
         cooktop="Electric (coil or ceramic)",
+        alternative_cooktop="Electric induction",
     )
 
 
@@ -61,6 +74,7 @@ def get_default_driving_answers():
         vehicle_size="Medium",
         km_per_week="200",
         vehicle_type="Electric",
+        alternative_vehicle_type="Electric",
     )
 
 
@@ -69,7 +83,7 @@ def get_default_solar_answers():
     Return a default 'solar' answers object.
     """
     return SolarAnswers(
-        has_solar=False,
+        add_solar=False,
     )
 
 
@@ -84,6 +98,7 @@ def get_default_household_answers():
         "cooktop": get_default_cooktop_answers(),
         "driving": get_default_driving_answers(),
         "solar": get_default_solar_answers(),
+        "other": get_default_other_answers(),
     }
 
 
@@ -98,6 +113,7 @@ def get_default_usage_profile():
         cooktop=get_default_cooktop_answers(),
         driving=get_default_driving_answers(),
         solar=get_default_solar_answers(),
+        other=get_default_other_answers(),
     )
     household_energy_use = estimate_usage_from_profile(household_profile)
     return household_energy_use

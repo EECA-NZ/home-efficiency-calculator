@@ -14,14 +14,13 @@ from app.services.configuration import (
     get_default_your_home_answers,
 )
 from app.services.cost_calculator import calculate_savings_for_option
-from app.services.get_energy_plans import get_energy_plan
+from app.services.postcode_lookups.get_energy_plans import get_energy_plan
 
 MY_ENERGY_PLAN = get_energy_plan("6012", "None")
 
 YOUR_HOME = YourHomeAnswers(
     people_in_house=4,
     postcode="6012",
-    disconnect_gas=True,
 )
 
 COOKTOP = CooktopAnswers(
@@ -29,7 +28,7 @@ COOKTOP = CooktopAnswers(
     alternative_cooktop="Electric induction",
 )
 
-SOLAR = SolarAnswers(has_solar=False)
+SOLAR = SolarAnswers(add_solar=False)
 
 
 def validate_energy_usage_fields(energy_usage, expected_fields, cooktop_type):
@@ -59,7 +58,6 @@ def test_invalid_cooktop_type():
     your_home = YourHomeAnswers(
         people_in_house=3,
         postcode="9016",
-        disconnect_gas=True,
     )
     cooktop_answers = CooktopAnswers(
         cooktop="Piped gas",
@@ -94,9 +92,7 @@ def test_cooking_energy_usage():
         "Electric induction": {
             "elx_connection_days": DAYS_IN_YEAR,
             "electricity_kwh": {
-                "fixed_time_controllable_kwh": 0,
-                "shift_able_uncontrolled_kwh": 0,
-                "shift_able_controllable_kwh": 0,
+                "shift_abl_kwh": 0,
             },
             "natural_gas_kwh": 0,
             "lpg_kwh": 0,
@@ -106,10 +102,8 @@ def test_cooking_energy_usage():
         "Piped gas": {
             "elx_connection_days": 0,
             "electricity_kwh": {
-                "fixed_time_uncontrolled_kwh": 0,
-                "fixed_time_controllable_kwh": 0,
-                "shift_able_uncontrolled_kwh": 0,
-                "shift_able_controllable_kwh": 0,
+                "fixed_day_kwh": 0,
+                "shift_abl_kwh": 0,
             },
             "natural_gas_connection_days": DAYS_IN_YEAR,
             "lpg_tanks_rental_days": 0,
@@ -117,10 +111,8 @@ def test_cooking_energy_usage():
         "Bottled gas": {
             "elx_connection_days": 0,
             "electricity_kwh": {
-                "fixed_time_uncontrolled_kwh": 0,
-                "fixed_time_controllable_kwh": 0,
-                "shift_able_uncontrolled_kwh": 0,
-                "shift_able_controllable_kwh": 0,
+                "fixed_day_kwh": 0,
+                "shift_abl_kwh": 0,
             },
             "natural_gas_connection_days": 0,
             "lpg_tanks_rental_days": DAYS_IN_YEAR,
@@ -128,9 +120,7 @@ def test_cooking_energy_usage():
         "Electric (coil or ceramic)": {
             "elx_connection_days": DAYS_IN_YEAR,
             "electricity_kwh": {
-                "fixed_time_controllable_kwh": 0,
-                "shift_able_uncontrolled_kwh": 0,
-                "shift_able_controllable_kwh": 0,
+                "shift_abl_kwh": 0,
             },
             "natural_gas_kwh": 0,
             "lpg_kwh": 0,
@@ -141,11 +131,9 @@ def test_cooking_energy_usage():
 
     # Mapping cooktop type to a function that extracts the primary energy use value.
     energy_usage_getters = {
-        "Electric induction": lambda usage: np.sum(
-            usage.electricity_kwh.total_fixed_time_usage
-        ),
+        "Electric induction": lambda usage: np.sum(usage.electricity_kwh.annual_kwh),
         "Electric (coil or ceramic)": lambda usage: np.sum(
-            usage.electricity_kwh.total_fixed_time_usage
+            usage.electricity_kwh.annual_kwh
         ),
         "Piped gas": lambda usage: usage.natural_gas_kwh,
         "Bottled gas": lambda usage: usage.lpg_kwh,
@@ -183,7 +171,7 @@ def manual_cost_calculation_electric_induction():
     energy_plan = get_energy_plan("6012", "None")
     day_usage = COOKTOP.energy_usage_pattern(
         YOUR_HOME, SOLAR, use_alternative=True
-    ).electricity_kwh.fixed_time_uncontrolled_kwh.sum()
+    ).electricity_kwh.fixed_day_kwh
     cost_per_kwh_day = energy_plan.electricity_plan.import_rates["Day"]
     annual_running_cost = day_usage * cost_per_kwh_day
     return annual_running_cost
@@ -202,13 +190,15 @@ def test_cost_savings_calculations():
     calculated_savings = calculate_savings_for_option(
         "Electric induction", "cooktop", COOKTOP, YOUR_HOME, SOLAR
     )
-    assert gas_energy_costs[1] == approx(
+    assert gas_energy_costs.variable_cost_nzd == approx(
         calculated_savings["variable_cost_nzd"]["current"]
     )
-    assert gas_energy_costs[1] == approx(manual_cost_calculation_natural_gas())
-    assert induction_energy_costs[1] == approx(
+    assert gas_energy_costs.variable_cost_nzd == approx(
+        manual_cost_calculation_natural_gas()
+    )
+    assert induction_energy_costs.variable_cost_nzd == approx(
         calculated_savings["variable_cost_nzd"]["alternative"]
     )
-    assert induction_energy_costs[1] == approx(
+    assert induction_energy_costs.variable_cost_nzd == approx(
         manual_cost_calculation_electric_induction()
     )

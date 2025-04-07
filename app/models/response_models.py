@@ -49,6 +49,17 @@ class ComponentSavingsResponse(BaseModel):
     alternative_fuel_use: Optional[YearlyFuelUsageReport]
 
 
+class SolarSavingsResponse(BaseModel):
+    """
+    Response model for the solar savings endpoint.
+    """
+
+    annual_kwh_generated: float
+    annual_kg_co2e_saving: float
+    annual_earnings_solar_export: float
+    annual_savings_solar_self_consumption: float
+
+
 class CheckboxData(BaseModel):
     """
     Model for configuring the checkbox to configure
@@ -61,6 +72,14 @@ class CheckboxData(BaseModel):
     checkbox_default_on: Optional[bool]
 
 
+class FixedCostsResponse(BaseModel):
+    """
+    Response model for the fixed costs endpoint.
+    """
+
+    gas_connection_savings: dict[str, SavingsResponse]
+
+
 class HouseholdSavingsResponse(BaseModel):
     """
     Response model for the household energy profile endpoint.
@@ -71,6 +90,7 @@ class HouseholdSavingsResponse(BaseModel):
     cooktop_fuel_savings: Optional[SavingsResponse]
     driving_fuel_savings: Optional[SavingsResponse]
     total_fuel_savings: SavingsResponse
+    # solar_savings: Optional[SolarSavingsResponse]
     gas_connection_savings: dict[str, SavingsResponse]
     checkbox: CheckboxData
     total_savings: SavingsResponse

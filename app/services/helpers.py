@@ -2,18 +2,16 @@
 Module for generic helper functions.
 """
 
-import importlib.resources as pkg_resources
+import logging
 
 import numpy as np
 import pandas as pd
 from pydantic import BaseModel
 
-from app.models.usage_profiles import (
-    ElectricityUsageTimeseries,
-    HouseholdOtherElectricityUsageTimeseries,
-)
+from ..constants import HEATING_PERIOD_FACTOR
 
-from ..constants import DAYS_IN_YEAR, HEATING_PERIOD_FACTOR, OTHER_ELX_KWH_PER_DAY
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def answer_options(my_object, field):
@@ -91,30 +89,121 @@ def safe_percentage_reduction(current: float, alternative: float) -> float:
     return 100 * (current - alternative) / current
 
 
-def other_electricity_energy_usage_profile():
+def load_lookup_timeseries(
+    lookup_csv_path: str, row_prefix: str, hour_count: int = 8760
+) -> np.ndarray:
     """
-    Create an electricity usage profile for appliances not considered by the app.
-    This is used for determining the percentage of solar-generated electricity
-    that is consumed by the household.
+    Reads a CSV (with headers) and looks for a row where the first N columns
+    (N = number of commas in row_prefix + 1) match row_prefix when joined with commas.
+
+    Expects:
+      - A column named 'annual_total_kwh'.
+      - Hourly fractional columns named '0' .. '8759' (There are
+        8760 of them, scaled to sum to 1000).
+
+    Returns:
+      A NumPy array of length = hour_count,
+      scaled by (annual_total_kwh / 1000).
     """
-    total_annual_kwh = DAYS_IN_YEAR * (
-        OTHER_ELX_KWH_PER_DAY["Refrigeration"]["kWh/day"]
-        + OTHER_ELX_KWH_PER_DAY["Lighting"]["kWh/day"]
-        + OTHER_ELX_KWH_PER_DAY["Laundry"]["kWh/day"]
-        + OTHER_ELX_KWH_PER_DAY["Other"]["kWh/day"]
-    )
-    other_electricity_energy_usage_csv = (
-        pkg_resources.files("resources.power_demand_by_time_of_use_data.output")
-        / "it_light_other_white_tou_8760.csv"
-    )
-    with other_electricity_energy_usage_csv.open("r", encoding="utf-8") as csv_file:
-        other_electricity_usage_df = pd.read_csv(csv_file, dtype=str)
-    value_col = "Power IT Light Other White"
-    uncontrolled_fixed_kwh = other_electricity_usage_df[value_col].astype(float)
-    uncontrolled_fixed_kwh *= total_annual_kwh / uncontrolled_fixed_kwh.sum()
-    return HouseholdOtherElectricityUsageTimeseries(
-        elx_connection_days=DAYS_IN_YEAR,
-        electricity_kwh=ElectricityUsageTimeseries(
-            fixed_time_uncontrolled_kwh=np.array(uncontrolled_fixed_kwh)
-        ),
-    )
+    logger.warning("READING %s", lookup_csv_path)
+    df = pd.read_csv(lookup_csv_path)
+    if row_prefix.strip() == "":
+        match_len = 0
+    else:
+        prefix_parts = row_prefix.split(",")
+        match_len = len(prefix_parts)
+    if match_len > 0:
+        leading_col_names = df.columns[:match_len]
+        df["_combined"] = df[leading_col_names].astype(str).agg(",".join, axis=1)
+        matched_rows = df[df["_combined"] == row_prefix]
+    else:
+        matched_rows = df
+
+    if len(matched_rows) == 0:
+        raise ValueError(f"No rows found matching prefix: '{row_prefix}'")
+    if len(matched_rows) > 1:
+        raise ValueError(f"Multiple rows found matching prefix: '{row_prefix}'")
+
+    row = matched_rows.iloc[0]
+
+    if "annual_total_kwh" not in row:
+        raise ValueError("CSV does not contain a column named 'annual_total_kwh'.")
+    annual_total = float(row["annual_total_kwh"])
+
+    frac_cols = [str(i) for i in range(hour_count)]
+    if not all(col in row for col in frac_cols):
+        missing = [c for c in frac_cols if c not in row]
+        raise ValueError(
+            f"CSV is missing expected fractional columns, e.g. {missing[:10]}"
+        )
+    fractions = row[frac_cols].astype(float).to_numpy()
+    return (annual_total / 1000.0) * fractions
+
+
+def get_solar_answers(answers) -> dict:
+    """
+    Retrieve the SolarAnswers instance from the given answers object.
+
+    If the answers object contains a non-None 'solar'
+    attribute, that instance is returned.
+    Otherwise, a default SolarAnswers instance with
+    add_solar=False is returned.
+
+    Parameters
+    ----------
+    answers : Any
+        An object that is expected to have a 'solar' attribute.
+
+    Returns
+    -------
+    SolarAnswers
+        The retrieved or default SolarAnswers instance.
+    """
+    # Perform a local import to avoid circular dependencies.
+
+    if hasattr(answers, "solar") and answers.solar is not None:
+        return {"add_solar": answers.solar.add_solar}
+    return {"add_solar": False}
+
+
+def get_vehicle_type(answers, use_alternatives=False) -> str:
+    """
+    Retrieve the vehicle type from the answers.
+
+    Args:
+    - answers: The user's answers.
+    - use_alternatives: Whether to use the alternative vehicle type.
+
+    Returns:
+    - The vehicle type.
+    """
+
+    if hasattr(answers, "driving") and answers.driving is not None:
+        if use_alternatives:
+            if answers.driving.alternative_vehicle_type is not None:
+                return answers.driving.alternative_vehicle_type
+    return "None"
+
+
+def get_other_answers(answers) -> dict:
+    """
+    Retrieve the OtherAnswers instance from the given answers object.
+
+    If the answers object contains a non-None 'other'
+    attribute, that instance is returned.
+
+    Otherwise, a default OtherAnswers instance is returned.
+
+    Parameters
+    ----------
+    answers : Any
+        An object that is expected to have a 'other' attribute.
+
+    Returns
+    -------
+    OtherAnswers
+        The retrieved or default OtherAnswers instance.
+    """
+    if hasattr(answers, "other") and answers.other is not None:
+        return {"fixed_cost_changes": answers.other.fixed_cost_changes}
+    return {"fixed_cost_changes": False}
