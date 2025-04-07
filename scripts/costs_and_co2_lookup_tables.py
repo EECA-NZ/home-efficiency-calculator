@@ -20,8 +20,8 @@ from app.models.user_answers import (
     YourHomeAnswers,
 )
 from app.services.energy_calculator import emissions_kg_co2e
-from app.services.get_climate_zone import climate_zone, postcode_dict
-from app.services.get_energy_plans import get_energy_plan
+from app.services.postcode_lookups.get_climate_zone import climate_zone, postcode_dict
+from app.services.postcode_lookups.get_energy_plans import get_energy_plan
 
 # Round numerical outputs to 3 decimal places.
 FLOAT_FORMAT = "%.14f"

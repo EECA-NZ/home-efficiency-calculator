@@ -16,13 +16,15 @@ from app.models.user_answers import (
     HotWaterAnswers,
     YourHomeAnswers,
 )
-from app.services.get_base_demand_profile import other_electricity_energy_usage_profile
-from app.services.get_climate_zone import postcode_dict
-from app.services.get_energy_plans import (
+from app.services.postcode_lookups.get_climate_zone import postcode_dict
+from app.services.postcode_lookups.get_energy_plans import (
     get_energy_plan,
     postcode_to_electricity_plan_dict,
 )
-from app.services.get_solar_generation import hourly_pmax
+from app.services.postcode_lookups.get_solar_generation import hourly_pmax
+from app.services.profile_helpers.get_base_demand_profile import (
+    other_electricity_energy_usage_profile,
+)
 
 # set TEST_MODE to True to run the script in test mode
 TEST_MODE = False
