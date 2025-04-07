@@ -1,12 +1,12 @@
 # pylint: disable=no-self-argument
 """
-Class for storing user answers on geography, household size and gas disconnection.
+Class for storing user answers on geography and household size.
 """
 
 from pydantic import BaseModel, conint, constr, field_validator, model_validator
 
 from app.constants import EXCLUDE_POSTCODES
-from app.services.get_climate_zone import postcode_dict
+from app.services.postcode_lookups.get_climate_zone import postcode_dict
 
 known_postcodes = set(postcode_dict.keys())
 exclude_postcodes = [
@@ -21,7 +21,6 @@ class YourHomeAnswers(BaseModel):
 
     people_in_house: conint(ge=1, le=6)
     postcode: constr(strip_whitespace=True, pattern=r"^\d{4}$")
-    disconnect_gas: bool
 
     @field_validator("postcode", mode="before")
     def pad_postcode(cls, value):

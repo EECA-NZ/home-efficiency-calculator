@@ -20,18 +20,21 @@ from ..models.user_answers import (
     DrivingAnswers,
     HeatingAnswers,
     HotWaterAnswers,
-    SolarAnswers,
     YourHomeAnswers,
 )
 from ..services.cost_calculator import generate_savings_options
-from ..services.get_climate_zone import climate_zone
-from ..services.get_energy_plans import postcode_to_edb_zone
 from ..services.helpers import round_floats_to_2_dp
+from ..services.postcode_lookups.get_climate_zone import climate_zone
+from ..services.postcode_lookups.get_energy_plans import postcode_to_edb_zone
 
 # Set up logging
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
+
+# These endpoints assume no solar. Solar is modeled
+# as being added *after* the appliance savings.
+SOLAR_AWARE = False
 
 
 # pylint: disable=broad-exception-caught
@@ -39,7 +42,6 @@ async def calculate_component_savings(
     component_answers: Type,
     component_name: str,
     your_home: YourHomeAnswers,
-    solar: SolarAnswers,
 ):
     """
     Calculate the savings for a given component.
@@ -62,9 +64,11 @@ async def calculate_component_savings(
     """
     try:
         options_dict, current_fuel_use = generate_savings_options(
-            component_answers, component_name, your_home, solar
+            component_answers, component_name, your_home, SOLAR_AWARE
         )
-        current_fuel_use = component_answers.energy_usage_pattern(your_home, solar)
+        current_fuel_use = component_answers.energy_usage_pattern(
+            your_home, SOLAR_AWARE
+        )
         current_fuel_use_report = YearlyFuelUsageReport(
             current_fuel_use, decimal_places=2
         )
@@ -79,7 +83,7 @@ async def calculate_component_savings(
                 if key == specific_alternative
             }
             alternative_fuel_use = component_answers.energy_usage_pattern(
-                your_home, solar, use_alternative=True
+                your_home, SOLAR_AWARE, use_alternative=True
             )
             alternative_fuel_use_report = YearlyFuelUsageReport(
                 alternative_fuel_use, decimal_places=2
@@ -157,28 +161,11 @@ async def create_response(data, component_name):
 async def heating_savings(heating_answers: HeatingAnswers, your_home: YourHomeAnswers):
     """
     Endpoint to calculate savings for heating.
-
-    If an alternative heating source is provided,
-    calculate the savings for that source. Otherwise,
-    generate savings options for all possible heating
-    sources.
-
-    Parameters
-    ----------
-    heating_answers : HeatingAnswers
-        The user's answers for heating.
-
-    your_home : YourHomeAnswers
-        The user's answers for their home.
-
-    Returns
-    -------
-    SavingsResponse
-        The savings for the heating component.
     """
-    solar = SolarAnswers(add_solar=False)
     data = await calculate_component_savings(
-        heating_answers, "main_heating_source", your_home, solar
+        heating_answers,
+        "main_heating_source",
+        your_home,
     )
     return await create_response(data, "heating")
 
@@ -190,28 +177,9 @@ async def hot_water_savings(
 ):
     """
     Endpoint to calculate savings for hot water.
-
-    If an alternative hot water source is provided,
-    calculate the savings for that source. Otherwise,
-    generate savings options for all possible hot
-    water sources.
-
-    Parameters
-    ----------
-    hot_water_answers : HotWaterAnswers
-        The user's answers for hot water.
-
-    your_home : YourHomeAnswers
-        The user's answers for their home.
-
-    Returns
-    -------
-    SavingsResponse
-        The savings for the hot water component.
     """
-    solar = SolarAnswers(add_solar=False)
     data = await calculate_component_savings(
-        hot_water_answers, "hot_water_heating_source", your_home, solar
+        hot_water_answers, "hot_water_heating_source", your_home
     )
     return await create_response(data, "hot_water")
 
@@ -219,30 +187,9 @@ async def hot_water_savings(
 @app.post("/cooktop/savings", response_model=ComponentSavingsResponse)
 async def cooktop_savings(cooktop_answers: CooktopAnswers, your_home: YourHomeAnswers):
     """
-    Endpoint to calculate savings for the cooktop
-
-    If an alternative cooktop is provided,
-    calculate the savings for that cooktop.
-    Otherwise, generate savings options for
-    all possible cooktops.
-
-    Parameters
-    ----------
-    cooktop_answers : CooktopAnswers
-        The user's answers for the cooktop.
-
-    your_home : YourHomeAnswers
-        The user's answers for their home.
-
-    Returns
-    -------
-    SavingsResponse
-        The savings for the cooktop component.
+    Endpoint to calculate savings for the cooktop.
     """
-    solar = SolarAnswers(add_solar=False)
-    data = await calculate_component_savings(
-        cooktop_answers, "cooktop", your_home, solar
-    )
+    data = await calculate_component_savings(cooktop_answers, "cooktop", your_home)
     return await create_response(data, "cooktop")
 
 
@@ -250,27 +197,6 @@ async def cooktop_savings(cooktop_answers: CooktopAnswers, your_home: YourHomeAn
 async def driving_savings(driving_answers: DrivingAnswers, your_home: YourHomeAnswers):
     """
     Endpoint to calculate savings for driving.
-
-    If an alternative vehicle type is provided,
-    calculate the savings for that vehicle type.
-    Otherwise, generate savings options for all
-    possible vehicle types.
-
-    Parameters
-    ----------
-    driving_answers : DrivingAnswers
-        The user's answers for driving.
-
-    your_home : YourHomeAnswers
-        The user's answers for their home.
-
-    Returns
-    -------
-    SavingsResponse
-        The savings for the driving component.
     """
-    solar = SolarAnswers(add_solar=False)
-    data = await calculate_component_savings(
-        driving_answers, "vehicle_type", your_home, solar
-    )
+    data = await calculate_component_savings(driving_answers, "vehicle_type", your_home)
     return await create_response(data, "driving")

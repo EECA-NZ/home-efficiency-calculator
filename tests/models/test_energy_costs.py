@@ -65,8 +65,15 @@ def test_calculate_annual_costs():
         ),
     )
     my_costs = my_plan.calculate_cost(my_profile)
-    expected_costs = EXPECTED_COSTS_DEFAULT
-    assert my_costs == approx(expected_costs, rel=1e-4)
+    expected = EXPECTED_COSTS_DEFAULT
+    actual = (
+        my_costs.fixed_cost_nzd,
+        my_costs.variable_cost_nzd,
+        my_costs.solar.self_consumption_savings_nzd if my_costs.solar else 0.0,
+        my_costs.solar.export_earnings_nzd if my_costs.solar else 0.0,
+        my_costs.solar.self_consumption_pct if my_costs.solar else 0.0,
+    )
+    assert actual == approx(expected, rel=1e-4)
 
 
 def test_create_household_energy_profile_to_cost():
@@ -96,7 +103,9 @@ def test_create_household_energy_profile_to_cost():
     )
     household_energy_use = estimate_usage_from_profile(household_profile)
     total_energy_costs = my_plan.calculate_cost(household_energy_use)
-    assert sum(total_energy_costs) > 0
+    assert (
+        total_energy_costs.fixed_cost_nzd + total_energy_costs.variable_cost_nzd
+    ) > 0
 
 
 def test_create_household_energy_profile_to_cost_with_solar():
@@ -127,13 +136,13 @@ def test_create_household_energy_profile_to_cost_with_solar():
     household_energy_use_with_solar = estimate_usage_from_profile(
         household_profile_with_solar
     )
-    (
-        _,
-        _,
-        solar_self_consumption_savings_nzd,
-        solar_export_earnings_nzd,
-        self_consumption_percentage,
-    ) = my_plan.calculate_cost(household_energy_use_with_solar)
+    result = my_plan.calculate_cost(household_energy_use_with_solar)
+    solar = result.solar
+    assert solar is not None
+
+    solar_self_consumption_savings_nzd = solar.self_consumption_savings_nzd
+    solar_export_earnings_nzd = solar.export_earnings_nzd
+    self_consumption_percentage = solar.self_consumption_pct
 
     total_solar_savings_2 = (
         solar_self_consumption_savings_nzd + solar_export_earnings_nzd
@@ -151,4 +160,4 @@ def test_create_household_energy_profile_to_cost_with_solar():
     assert export_tariff == approx(0.12)
     assert total_solar_revenue_if_exported <= total_solar_savings_2
     assert total_solar_savings_2 <= total_solar_savings_if_self_consumed
-    assert self_consumption_percentage == approx(47.81319, rel=1e-4)
+    assert self_consumption_percentage == approx(34.48756, rel=1e-4)

@@ -10,6 +10,8 @@ from fastapi import FastAPI, responses
 
 # Import the app from component_savings_endpoints
 from .api import (  # household_savings_endpoint,
+    checkbox_behaviour_endpoint,
+    fixed_cost_savings_endpoint,
     solar_savings_endpoint,
     user_geography_endpoint,
 )
@@ -34,7 +36,12 @@ async def lifespan(app_instance: FastAPI):
 
 
 # Pass the lifespan handler when creating the FastAPI instance
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    title="Home Energy Savings Calculator",
+    version="0.2.0",
+    description="API for estimating household energy and emissions savings.",
+    lifespan=lifespan,
+)
 
 
 @app.get("/")
@@ -47,9 +54,10 @@ def main():
 
 # Include the router for component savings endpoints
 app.include_router(user_geography_endpoint.router)
-
+app.include_router(checkbox_behaviour_endpoint.router)
 app.include_router(component_savings_app.router)
 app.include_router(solar_savings_endpoint.router)
+app.include_router(fixed_cost_savings_endpoint.router)
 
 # Include the router for the household energy profile
 # app.include_router(household_savings_endpoint.router)

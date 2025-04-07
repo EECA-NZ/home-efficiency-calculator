@@ -1,5 +1,5 @@
 """
-Tests for the driving module in the usage_profile_helpers package.
+Tests for the driving module in the profile_helpers package.
 """
 
 import numpy as np
@@ -7,9 +7,7 @@ import pandas as pd
 
 # Import the function from your new EV charging module
 # Adjust import as appropriate for your project
-from app.services.usage_profile_helpers.driving import (
-    solar_friendly_ev_charging_profile,
-)
+from app.services.profile_helpers.driving import solar_friendly_ev_charging_profile
 
 
 def test_solar_friendly_ev_charging_profile_shape_and_sum():

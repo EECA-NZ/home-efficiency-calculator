@@ -2,7 +2,7 @@
 Tests for the functions defined in app.services.get_energy_plans.py
 """
 
-from app.services.get_energy_plans import get_energy_plan
+from app.services.postcode_lookups.get_energy_plans import get_energy_plan
 
 
 def test_get_energy_plan():

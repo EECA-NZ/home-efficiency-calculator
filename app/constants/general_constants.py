@@ -10,6 +10,8 @@ Sources for emissions factors as follows:
 #   a five-year average (2019-2023) of MBIE numbers
 """
 
+CALENDAR_YEAR = 2019
+
 DAYS_IN_YEAR = 365.25
 
 AVERAGE_HOUSEHOLD_SIZE = 2.69

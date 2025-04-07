@@ -8,6 +8,7 @@ from ...models.user_answers import (
     HeatingAnswers,
     HotWaterAnswers,
     HouseholdAnswers,
+    OtherAnswers,
     SolarAnswers,
     YourHomeAnswers,
 )
@@ -20,7 +21,16 @@ def get_default_your_home_answers():
 
     Postcode is for Wellington, New Zealand.
     """
-    return YourHomeAnswers(people_in_house=3, postcode="6012", disconnect_gas=False)
+    return YourHomeAnswers(people_in_house=3, postcode="6012")
+
+
+def get_default_other_answers():
+    """
+    Return a default 'other' answers object.
+    """
+    return OtherAnswers(
+        fixed_cost_changes=False,
+    )
 
 
 def get_default_heating_answers():
@@ -88,6 +98,7 @@ def get_default_household_answers():
         "cooktop": get_default_cooktop_answers(),
         "driving": get_default_driving_answers(),
         "solar": get_default_solar_answers(),
+        "other": get_default_other_answers(),
     }
 
 
@@ -102,6 +113,7 @@ def get_default_usage_profile():
         cooktop=get_default_cooktop_answers(),
         driving=get_default_driving_answers(),
         solar=get_default_solar_answers(),
+        other=get_default_other_answers(),
     )
     household_energy_use = estimate_usage_from_profile(household_profile)
     return household_energy_use

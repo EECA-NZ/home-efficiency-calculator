@@ -9,10 +9,11 @@ from app.models.usage_profiles import (
     HouseholdYearlyFuelUsageProfile,
     YearlyFuelUsageProfile,
 )
-from app.models.user_answers import HouseholdAnswers
-from app.services.get_base_demand_profile import other_electricity_energy_usage_profile
-from app.services.helpers import round_floats_to_2_dp
-from app.services.solar_helpers import get_solar_answers
+from app.models.user_answers import HouseholdAnswers, SolarAnswers
+from app.services.helpers import get_solar_answers, round_floats_to_2_dp
+from app.services.profile_helpers.get_base_demand_profile import (
+    other_electricity_energy_usage_profile,
+)
 
 
 def uses_electricity(profile: HouseholdAnswers) -> bool:
@@ -115,11 +116,14 @@ def estimate_usage_from_profile(
     hot_water = answers.hot_water
     cooktop = answers.cooktop
     driving = answers.driving
-    solar = get_solar_answers(answers)
+    solar = SolarAnswers(**get_solar_answers(answers))
+    solar_aware = solar.add_solar if solar else False
 
     # Initialize the profiles with default empty profiles to handle None scenarios
     heating_profile = (
-        heating.energy_usage_pattern(your_home, solar, use_alternative=use_alternatives)
+        heating.energy_usage_pattern(
+            your_home, solar_aware, use_alternative=use_alternatives
+        )
         if heating is not None
         and (
             not use_alternatives or heating.alternative_main_heating_source is not None
@@ -128,7 +132,7 @@ def estimate_usage_from_profile(
     )
     hot_water_profile = (
         hot_water.energy_usage_pattern(
-            your_home, solar, use_alternative=use_alternatives
+            your_home, solar_aware, use_alternative=use_alternatives
         )
         if hot_water is not None
         and (
@@ -138,13 +142,17 @@ def estimate_usage_from_profile(
         else YearlyFuelUsageProfile()
     )
     cooktop_profile = (
-        cooktop.energy_usage_pattern(your_home, solar, use_alternative=use_alternatives)
+        cooktop.energy_usage_pattern(
+            your_home, solar_aware, use_alternative=use_alternatives
+        )
         if cooktop is not None
         and (not use_alternatives or cooktop.alternative_cooktop is not None)
         else YearlyFuelUsageProfile()
     )
     driving_profile = (
-        driving.energy_usage_pattern(your_home, solar, use_alternative=use_alternatives)
+        driving.energy_usage_pattern(
+            your_home, solar_aware, use_alternative=use_alternatives
+        )
         if driving is not None
         and (not use_alternatives or driving.alternative_vehicle_type is not None)
         else YearlyFuelUsageProfile()
@@ -222,13 +230,9 @@ def emissions_kg_co2e(usage_profile: YearlyFuelUsageProfile) -> float:
     """
     Return the household's yearly CO2 emissions in kg.
     """
-    # List of emissions components
     components = [
         (-usage_profile.solar_generation_kwh.total, "electricity_kg_co2e_per_kwh"),
-        (
-            usage_profile.electricity_kwh.total_usage.sum(),
-            "electricity_kg_co2e_per_kwh",
-        ),
+        (usage_profile.electricity_kwh.annual_kwh, "electricity_kg_co2e_per_kwh"),
         (usage_profile.natural_gas_kwh, "natural_gas_kg_co2e_per_kwh"),
         (usage_profile.lpg_kwh, "lpg_kg_co2e_per_kwh"),
         (usage_profile.wood_kwh, "wood_kg_co2e_per_kwh"),
@@ -237,10 +241,8 @@ def emissions_kg_co2e(usage_profile: YearlyFuelUsageProfile) -> float:
         (usage_profile.public_ev_charger_kwh, "electricity_kg_co2e_per_kwh"),
     ]
 
-    # Calculate emissions with a default of 0 if the emission factor is missing
     total_emissions = sum(
-        usage * EMISSIONS_FACTORS.get(emissions_factor_name, 0)
-        for usage, emissions_factor_name in components
+        usage * EMISSIONS_FACTORS.get(factor_name, 0)
+        for usage, factor_name in components
     )
-
     return total_emissions

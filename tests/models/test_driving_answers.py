@@ -14,11 +14,11 @@ from app.constants import (
     FUEL_CONSUMPTION_LITRES_PER_100KM,
 )
 from app.models.energy_plans import HouseholdEnergyPlan
-from app.models.usage_profiles import ElectricityUsageTimeseries, YearlyFuelUsageProfile
+from app.models.usage_profiles import ElectricityUsage, YearlyFuelUsageProfile
 from app.models.user_answers import DrivingAnswers, SolarAnswers, YourHomeAnswers
 from app.services.cost_calculator import calculate_savings_for_option
-from app.services.get_energy_plans import postcode_to_electricity_plan
-from app.services.usage_profile_helpers import flat_day_night_profiles
+from app.services.postcode_lookups.get_energy_plans import postcode_to_electricity_plan
+from app.services.profile_helpers import flat_day_night_profiles
 
 day_profile, night_profile = flat_day_night_profiles()
 
@@ -48,7 +48,7 @@ def test_small_electric_car():
     )
     my_driving_energy_usage = my_driving_answers.energy_usage_pattern(YOUR_HOME, SOLAR)
     assert (
-        my_driving_energy_usage.electricity_kwh.shift_able_uncontrolled_kwh.sum()
+        my_driving_energy_usage.electricity_kwh.shift_abl_kwh
         + my_driving_energy_usage.public_ev_charger_kwh
     ) / DAYS_IN_YEAR == approx(5.114202500144706)
 
@@ -145,7 +145,7 @@ def test_savings_calculations():
     petrol_energy_costs = petrol_plan.calculate_cost(
         YearlyFuelUsageProfile(
             elx_connection_days=365.25,
-            electricity_kwh=ElectricityUsageTimeseries(),
+            electricity_kwh=ElectricityUsage(),
             natural_gas_connection_days=0,
             natural_gas_kwh=0,
             lpg_tanks_rental_days=0,
@@ -169,8 +169,8 @@ def test_savings_calculations():
     electric_energy_costs = electric_plan.calculate_cost(
         YearlyFuelUsageProfile(
             elx_connection_days=365.25,
-            electricity_kwh=ElectricityUsageTimeseries(
-                shift_able_uncontrolled_kwh=anytime_kwh * day_profile
+            electricity_kwh=ElectricityUsage(
+                shift_abl_kwh=anytime_kwh, shift_profile=day_profile
             ),
             natural_gas_connection_days=0,
             natural_gas_kwh=0,
@@ -187,13 +187,16 @@ def test_savings_calculations():
         "Electric", "vehicle_type", DRIVING, YOUR_HOME, SOLAR
     )
 
-    assert petrol_energy_costs[1] == approx(
+    assert petrol_energy_costs.variable_cost_nzd == approx(
         calculated_savings["variable_cost_nzd"]["current"]
     )
-    assert petrol_energy_costs[1] == approx(manual_calculation_petrol())
-    assert electric_energy_costs[1] == approx(
+    assert petrol_energy_costs.variable_cost_nzd == approx(manual_calculation_petrol())
+    assert electric_energy_costs.variable_cost_nzd == approx(
         calculated_savings["variable_cost_nzd"]["alternative"]
     )
-    assert (electric_energy_costs[1] == approx(manual_calculation_ev(0.17204))) or (
-        electric_energy_costs[1] == approx(manual_calculation_ev(0.18))
+    assert (
+        electric_energy_costs.variable_cost_nzd
+        == approx(manual_calculation_ev(0.17204))
+    ) or (
+        electric_energy_costs.variable_cost_nzd == approx(manual_calculation_ev(0.18))
     )

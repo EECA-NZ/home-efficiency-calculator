@@ -5,72 +5,53 @@ might not be relevant for some areas.
 """
 
 import functools
+from dataclasses import dataclass
+from typing import Optional
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from app.services.usage_profile_helpers import (
-    day_night_flag,
-    daytime_total_usage,
-    ensure_8760_array,
-    night_shift,
-    nighttime_total_usage,
-    zeros_8760,
-)
+from app.services.profile_helpers import ensure_8760_array
 
-day_mask = day_night_flag()
+FLAT_8760 = np.full(8760, 1 / 8760)
 
 
-class ElectricityUsageTimeseries(BaseModel):
+class ElectricityUsage(BaseModel):
     """
-    Annual electricity usage for a time-slice,
-    stored as NumPy arrays, representing each hour of the year
-    (not as a pandas Series).
+    Aggregated electricity usage over the year.
+    Hourly profiles can be included to represent
+    the variation of electricity usage over the year
+    when solar generation is present, to estimate
+    self-consumption and export. In the absence of solar,
+    the float usage fields can be used directly e.g.
+    to compute the annual cost of electricity based
+    on a day/night tariff.
 
     Attributes:
-      fixed_time_uncontrolled_kwh: Usage that is fixed to time of use
-        and cannot be ripple-controlled (kWh).
-      fixed_time_controllable_kwh: Usage that can be under ripple
-        control (kWh) (E.g. some hot water cylinder load).
-      shift_able_uncontrolled_kwh: Usage that can be time-shifted
-        between day and night but is assumed not to be on the
-        ripple-control circuit (kWh) (E.g. we will put some home EV
-        charging in this bucket.)
-      shift_able_controllable_kwh: Flexible electricity consumption (kWh):
-        if solar generation is present, the consumption can
-        happen during the day, otherwise it can be shifted
-        to take advantage of night rates if preferable. Can also
-        be under ripple control. (E.g. some hot water cylinder load).
+        fixed_day_kwh: float, fixed daytime usage (kWh).
+        fixed_ngt_kwh: float, fixed nighttime usage (kWh).
+        shift_abl_kwh: float, shiftable anytime usage (kWh).
+
+        fixed_profile: np.ndarray | None
+            Optional 8760 hourly usage profile (dimensionless) for
+            (fixed_day_kwh + fixed_ngt_kwh). Must sum to 1 if provided.
+        shift_profile: np.ndarray | None
+            Optional 8760 hourly usage profile (dimensionless) for
+            shift_abl_kwh. Must sum to 1 if provided.
     """
 
-    fixed_time_uncontrolled_kwh: np.ndarray = Field(
-        default_factory=zeros_8760,
-        description="Usage that is fixed to time of use "
-        "and cannot be ripple-controlled (kWh)",
+    fixed_day_kwh: float = Field(0.0, description="Fixed daytime usage (kWh).")
+    fixed_ngt_kwh: float = Field(0.0, description="Fixed nighttime usage (kWh).")
+    shift_abl_kwh: float = Field(0.0, description="Shiftable anytime usage (kWh).")
+
+    # Profile for (fixed_day_kwh + fixed_ngt_kwh)
+    fixed_profile: np.ndarray | None = Field(
+        default=None,
+        description="Optional 8760 usage profile for (fixed_day_kwh + fixed_ngt_kwh).",
     )
-    fixed_time_controllable_kwh: np.ndarray = Field(
-        default_factory=zeros_8760,
-        description="Usage that can be under ripple control (kWh) "
-        "(E.g. some hot water cylinder load).",
-    )
-    shift_able_uncontrolled_kwh: np.ndarray = Field(
-        default_factory=zeros_8760,
-        description=(
-            "Usage that can be time-shifted between day and night but is "
-            "assumed not to be on the ripple-control circuit (kWh) "
-            "(E.g. we will put some home EV charging in this bucket.)"
-        ),
-    )
-    shift_able_controllable_kwh: np.ndarray = Field(
-        default_factory=zeros_8760,
-        description=(
-            "Flexible electricity consumption (kWh): if solar "
-            "generation is present, the consumption can "
-            "happen during the day, otherwise it can be shifted "
-            "to take advantage of night rates if preferable. "
-            "Can also be under ripple control."
-            "(E.g. some hot water cylinder load)."
-        ),
+    # Profile for shift_abl_kwh
+    shift_profile: np.ndarray | None = Field(
+        default=None, description="Optional 8760 usage profile for shift_abl_kwh."
     )
 
     model_config = ConfigDict(
@@ -79,48 +60,133 @@ class ElectricityUsageTimeseries(BaseModel):
         extra="ignore",
     )
 
-    @field_validator(
-        "fixed_time_uncontrolled_kwh",
-        "fixed_time_controllable_kwh",
-        "shift_able_uncontrolled_kwh",
-        "shift_able_controllable_kwh",
-        mode="before",
-    )
+    @field_validator("fixed_profile", "shift_profile", mode="before")
     @classmethod
     def validate_arrays(cls, value):
         """
-        Ensure that the value is an array of correct shape.
-        Raises a ValueError if not an array or if the array
-        is not of shape (8760,).
+        Ensure that the value, if provided, is an array of correct shape (8760,).
+        Raises a ValueError if it's not None but isn't shaped (8760,).
         """
+        if value is None:
+            return None
         return ensure_8760_array(value)
 
-    def __add__(
-        self, other: "ElectricityUsageTimeseries"
-    ) -> "ElectricityUsageTimeseries":
+    @model_validator(mode="after")
+    def set_default_profiles(self):
         """
-        Element-wise addition of two ElectricityUsageTimeseries objects.
+        Ensure consistency and usability:
+
+        - If a kWh value is zero and its profile is None, but the other profile
+          is provided, set a flat profile (uniform distribution summing to 1).
+        - If a kWh value is non-zero, the corresponding profile must be provided
+          if the other profile is provided.
+        - If provided, profiles must sum approximately to 1.
         """
-        if not isinstance(other, ElectricityUsageTimeseries):
-            raise TypeError(
-                f"Cannot add 'ElectricityUsageTimeseries' to '{type(other).__name__}'. "
-                "Ensure 'other' is an ElectricityUsageTimeseries."
-            )
-        try:
-            return ElectricityUsageTimeseries(
-                fixed_time_uncontrolled_kwh=self.fixed_time_uncontrolled_kwh
-                + other.fixed_time_uncontrolled_kwh,
-                fixed_time_controllable_kwh=self.fixed_time_controllable_kwh
-                + other.fixed_time_controllable_kwh,
-                shift_able_uncontrolled_kwh=self.shift_able_uncontrolled_kwh
-                + other.shift_able_uncontrolled_kwh,
-                shift_able_controllable_kwh=self.shift_able_controllable_kwh
-                + other.shift_able_controllable_kwh,
-            )
-        except ValueError as e:
-            raise ValueError(
-                f"Cannot add 'ElectricityUsageTimeseries' objects: {e}"
-            ) from e
+
+        def flat_profile():
+            return np.full(8760, 1 / 8760)
+
+        # Check and handle fixed_profile
+        fixed_time_kwh = self.fixed_day_kwh + self.fixed_ngt_kwh
+        if fixed_time_kwh == 0:
+            if self.fixed_profile is None and self.shift_profile is not None:
+                self.fixed_profile = flat_profile()
+        else:
+            if self.fixed_profile is None and self.shift_profile is not None:
+                raise ValueError("fixed_profile should have been provided.")
+            if self.fixed_profile is not None:
+                if not np.isclose(self.fixed_profile.sum(), 1.0, atol=1e-6):
+                    raise ValueError("fixed_profile must sum to 1.")
+
+        # Check and handle shift_profile
+        if self.shift_abl_kwh == 0:
+            if self.shift_profile is None and self.fixed_profile is not None:
+                self.shift_profile = flat_profile()
+        else:
+            if self.shift_profile is None and self.fixed_profile is not None:
+                raise ValueError("shift_profile should have been provided")
+            if self.shift_profile is not None:
+                if not np.isclose(self.shift_profile.sum(), 1.0, atol=1e-6):
+                    raise ValueError("shift_profile must sum to 1.")
+
+        return self
+
+    def __add__(self, other: "ElectricityUsage") -> "ElectricityUsage":
+        """
+        Element-wise addition of two ElectricityUsage objects.
+        Allows profiles to be None if the corresponding kWh is zero
+        OR if both sides have nonzero kWh but both sides have profile=None
+        (meaning neither side is tracking an hourly profile).
+        """
+
+        if not isinstance(other, ElectricityUsage):
+            raise TypeError(f"Cannot add ElectricityUsage with {type(other)}")
+
+        def normalized_sum_profiles(kwh_a, prof_a, kwh_b, prof_b):
+            """
+            Combine two dimensionless profiles (prof_a, prof_b)
+            weighted by kwh_a, kwh_b. Returns a new dimensionless
+            profile that sums to 1.0, or None in these cases:
+            - both sides are zero usage
+            - one side has zero usage => use the other's
+            profile (which could be None or an array)
+            - both have nonzero usage AND both have
+            prof=None => return None
+            (meaning "we do not track an hourly profile" for the sum either)
+
+            If both have nonzero usage but exactly one side
+            is None and the other is an array, we raise a ValueError,
+            because we can't combine a real timeseries with a missing one.
+            """
+            # If both usage are zero, no profile is needed
+            if kwh_a == 0 and kwh_b == 0:
+                return None
+            # If one usage is zero, return the other side's profile as-is
+            if kwh_a == 0:
+                return prof_b
+            if kwh_b == 0:
+                return prof_a
+
+            # Now both kwh_a and kwh_b are nonzero
+            # If both profiles are None, that means
+            # "no timeseries" for either side => result is None
+            if prof_a is None and prof_b is None:
+                return None
+            # If exactly one is None and the other is an array => mismatch
+            if (prof_a is None) != (prof_b is None):
+                raise ValueError("Cannot combine nonzero usage: one profile is None.")
+
+            # Otherwise, both must be arrays => combine them
+            combined = kwh_a * prof_a + kwh_b * prof_b
+            total = combined.sum()
+            if total == 0:
+                raise ValueError("Sum of weighted profiles is zero, cannot normalize.")
+            return combined / total
+
+        # Combine total fixed usage
+        total_fixed_kwh_self = self.fixed_day_kwh + self.fixed_ngt_kwh
+        total_fixed_kwh_other = other.fixed_day_kwh + other.fixed_ngt_kwh
+
+        new_fixed_profile = normalized_sum_profiles(
+            total_fixed_kwh_self,
+            self.fixed_profile,
+            total_fixed_kwh_other,
+            other.fixed_profile,
+        )
+        new_shift_profile = normalized_sum_profiles(
+            self.shift_abl_kwh,
+            self.shift_profile,
+            other.shift_abl_kwh,
+            other.shift_profile,
+        )
+
+        return ElectricityUsage(
+            fixed_day_kwh=self.fixed_day_kwh + other.fixed_day_kwh,
+            fixed_ngt_kwh=self.fixed_ngt_kwh + other.fixed_ngt_kwh,
+            shift_abl_kwh=self.shift_abl_kwh + other.shift_abl_kwh,
+            fixed_profile=new_fixed_profile,
+            shift_profile=new_shift_profile,
+        )
 
     def __radd__(self, other):
         """
@@ -131,155 +197,76 @@ class ElectricityUsageTimeseries(BaseModel):
         return self.__add__(other)
 
     @functools.cached_property
-    def total_usage(self) -> np.ndarray:
+    def annual_kwh(self) -> float:
         """
-        Total electricity usage timeseries (kWh) for the year.
+        Total annual kWh, returned as a scalar float.
         """
-        return (
-            self.fixed_time_controllable_kwh
-            + self.fixed_time_uncontrolled_kwh
-            + self.shift_able_controllable_kwh
-            + self.shift_able_uncontrolled_kwh
-        )
-
-    @functools.cached_property
-    def shift_able_uncontrolled_kwh_night_shifted(self) -> np.ndarray:
-        """
-        Shiftable uncontrolled electricity usage timeseries (kWh) for the
-        year, if it has been shifted to night-time.
-        """
-        return night_shift(self.shift_able_uncontrolled_kwh)
-
-    @functools.cached_property
-    def shift_able_controllable_kwh_night_shifted(self) -> np.ndarray:
-        """
-        Shiftable controllable electricity usage timeseries (kWh) for the
-        year, if it has been shifted to night-time.
-        """
-        return night_shift(self.shift_able_controllable_kwh)
-
-    @functools.cached_property
-    def total_usage_night_shifted(self) -> np.ndarray:
-        """
-        Total electricity usage timeseries (kWh) for the year,
-        if all consumption that can be shifted to night-time is shifted.
-        """
-        return (
-            self.fixed_time_controllable_kwh
-            + self.fixed_time_uncontrolled_kwh
-            + night_shift(self.shift_able_controllable_kwh)
-            + night_shift(self.shift_able_uncontrolled_kwh)
-        )
-
-    @functools.cached_property
-    def total_uncontrolled_usage(self) -> np.ndarray:
-        """
-        Total uncontrolled electricity usage (kWh) as an array.
-        """
-        return self.fixed_time_uncontrolled_kwh + self.shift_able_uncontrolled_kwh
-
-    @functools.cached_property
-    def total_uncontrolled_night_shifted(self) -> np.ndarray:
-        """
-        Total uncontrolled electricity usage (kWh) over the entire year,
-        if all consumption that can be shifted to night-time is shifted.
-        """
-        return self.fixed_time_uncontrolled_kwh + night_shift(
-            self.shift_able_uncontrolled_kwh
-        )
-
-    @functools.cached_property
-    def total_controllable_usage(self) -> np.ndarray:
-        """
-        Total controllable electricity usage (kWh) over the entire year.
-        """
-        return self.fixed_time_controllable_kwh + self.shift_able_controllable_kwh
-
-    @functools.cached_property
-    def total_controllable_night_shifted(self) -> np.ndarray:
-        """
-        Total controllable electricity usage (kWh) over the entire year,
-        if all consumption that can be shifted to night-time is shifted.
-        """
-        return self.fixed_time_controllable_kwh + night_shift(
-            self.shift_able_controllable_kwh
-        )
-
-    @functools.cached_property
-    def total_shift_able_usage(self) -> np.ndarray:
-        """
-        Total electricity usage (kWh) that can be shifted in time.
-        """
-        return self.shift_able_uncontrolled_kwh + self.shift_able_controllable_kwh
+        return self.fixed_day_kwh + self.fixed_ngt_kwh + self.shift_abl_kwh
 
     @functools.cached_property
     def total_fixed_time_usage(self) -> np.ndarray:
         """
-        Total electricity usage (kWh) that is fixed to a specific time.
+        Fixed-time electricity usage timeseries (kWh):
+        (fixed_day_kwh + fixed_ngt_kwh) * fixed_profile
+        Raises AssertionError if usage is nonzero but no profile was provided.
         """
-        return self.fixed_time_uncontrolled_kwh + self.fixed_time_controllable_kwh
+        total_fixed_kwh = self.fixed_day_kwh + self.fixed_ngt_kwh
+        if total_fixed_kwh > 0:
+            assert (
+                self.fixed_profile is not None
+            ), "fixed_profile must be provided for nonzero fixed usage."
+            return total_fixed_kwh * self.fixed_profile
+        return np.zeros(8760)
 
     @functools.cached_property
-    def daytime_total_usage(self) -> np.ndarray:
+    def total_shift_able_usage(self) -> np.ndarray:
         """
-        Daytime electricity usage (kWh) time series.
+        Shiftable electricity usage timeseries (kWh):
+        shift_abl_kwh * shift_profile
+        Raises AssertionError if usage is nonzero but no profile was provided.
         """
-        return daytime_total_usage(self.total_usage)
+        if self.shift_abl_kwh > 0:
+            assert (
+                self.shift_profile is not None
+            ), "shift_profile must be provided for nonzero shiftable usage."
+            return self.shift_abl_kwh * self.shift_profile
+        return np.zeros(8760)
 
     @functools.cached_property
-    def daytime_total_usage_night_shifted(self) -> np.ndarray:
+    def total_usage(self) -> np.ndarray:
         """
-        Daytime electricity usage (kWh) time series.
+        Shiftable electricity usage timeseries (kWh):
+        shift_abl_kwh * shift_profile
+        Raises AssertionError if usage is nonzero but no profile was provided.
         """
-        return daytime_total_usage(self.total_usage_night_shifted)
-
-    @functools.cached_property
-    def nighttime_total_usage(self) -> np.ndarray:
-        """
-        Nighttime electricity usage (kWh) time series.
-        """
-        return nighttime_total_usage(self.total_usage)
-
-    @functools.cached_property
-    def nighttime_total_usage_night_shifted(self) -> np.ndarray:
-        """
-        Nighttime electricity usage (kWh) time series.
-        """
-        return nighttime_total_usage(self.total_usage_night_shifted)
+        return self.total_fixed_time_usage + self.total_shift_able_usage
 
 
-class ElectricityUsageReport(BaseModel):
+@dataclass
+class SolarSavingsBreakdown:
     """
-    Annual electricity usage (kwh) by category.
-
-    Used for presenting a summary of electricity usage, in cases
-    where an hourly breakdown is not helpful or needed.
+    Stores the financial and energy breakdown of solar savings.
     """
 
-    fixed_time_uncontrolled_kwh: float = Field(
-        0.0,
-        description="Usage that is fixed and cannot be ripple-controlled (kWh)",
-    )
-    fixed_time_controllable_kwh: float = Field(
-        0.0,
-        description="Usage that can be under ripple control (kWh)",
-    )
-    shift_able_uncontrolled_kwh: float = Field(
-        0.0,
-        description="Usage that can be time-shifted from day "
-        "to night but cannot be ripple-controlled (kWh)",
-    )
-    shift_able_controllable_kwh: float = Field(
-        0.0,
-        description="""Flexible electricity consumption (kWh).:
-        if solar generation is present, the consumption can
-        happen during the day, otherwise it can be shifted to
-        take advantage of night rates if preferable. Can also
-        be under ripple control.""",
-    )
+    self_consumption_kwh: float
+    export_kwh: float
+    self_consumption_savings_nzd: float
+    export_earnings_nzd: float
+    self_consumption_pct: float
 
 
-class SolarGenerationTimeseries(BaseModel):
+@dataclass
+class EnergyCostBreakdown:
+    """
+    Contains total fixed and variable costs and (optionally) solar interaction results.
+    """
+
+    fixed_cost_nzd: float
+    variable_cost_nzd: float
+    solar: SolarSavingsBreakdown | None = None
+
+
+class SolarGeneration(BaseModel):
     """
     Annual electricity generation by solar PV in a
     Typical Meteorological Year (TMY). The system
@@ -287,18 +274,20 @@ class SolarGenerationTimeseries(BaseModel):
     Each climate zone has a different solar generation
     profile.
 
-    Stored as NumPy arrays, representing each hour of the year
-    (not as a pandas Series).
-
+    Stored as NumPy arrays, representing each hour of the year.
 
     Attributes:
-        generation_kwh: energy generated in each of the
-        8760 hours of a non-leap year based on TMY data.
+        solar_generation_kwh: Optional total generation in kWh for the year.
+        solar_generation_profile: Optional hourly profile (dimensionless, length 8760),
+            normalized to sum to 1.0.
     """
 
-    fixed_time_generation_kwh: np.ndarray = Field(
-        default_factory=zeros_8760,
-        description="Hourly generation timeseries for a year (kWh)",
+    solar_generation_kwh: Optional[float] = Field(
+        default=None, description="Total annual generation from solar (kWh)."
+    )
+    solar_generation_profile: Optional[np.ndarray] = Field(
+        default=None,
+        description="Hourly profile (8760 values), normalized to sum to 1.0.",
     )
 
     model_config = ConfigDict(
@@ -307,39 +296,73 @@ class SolarGenerationTimeseries(BaseModel):
         extra="ignore",
     )
 
-    @field_validator("fixed_time_generation_kwh", mode="before")
+    @field_validator("solar_generation_profile", mode="before")
     @classmethod
     def validate_arrays(cls, value):
         """
-        Ensure that the value is an array of correct shape.
-        Raises a ValueError if not an array or if the array
-        is not of shape (8760,).
+        Ensure that the value, if provided, is an array of correct shape (8760,).
+        Raises a ValueError if it's not None but isn't shaped (8760,).
         """
+        if value is None:
+            return None
         return ensure_8760_array(value)
 
-    @property
-    def total(self) -> float:
+    @model_validator(mode="after")
+    def validate_consistency(self):
         """
-        Total electricity usage (kWh) over the entire year.
+        Validation rules:
+        - If solar_generation_kwh is None or 0, profile must be None.
+        - If solar_generation_kwh > 0, profile must exist and sum to ~1.
         """
-        return float(np.sum(self.fixed_time_generation_kwh))
+        if self.solar_generation_kwh is None or self.solar_generation_kwh == 0:
+            if self.solar_generation_profile is not None:
+                raise ValueError(
+                    "solar_generation_profile must be None"
+                    "if solar_generation_kwh is None or 0."
+                )
+        else:
+            if self.solar_generation_profile is not None:
+                # pylint: disable=no-member
+                if not np.isclose(self.solar_generation_profile.sum(), 1.0, atol=1e-6):
+                    raise ValueError("solar_generation_profile must sum to 1.")
+            else:
+                raise ValueError(
+                    "solar_generation_profile must be provided"
+                    "when solar_generation_kwh > 0."
+                )
 
-    @property
-    def timeseries(self) -> float:
-        """
-        Total electricity usage (kWh) over the entire year.
-        """
-        return self.fixed_time_generation_kwh
+        return self
 
-    def __add__(
-        self, other: "SolarGenerationTimeseries"
-    ) -> "SolarGenerationTimeseries":
+    def __add__(self, other: "SolarGeneration") -> "SolarGeneration":
         """
-        Element-wise addition of two SolarGenerationTimeseries objects.
+        Element-wise addition of two SolarGeneration objects.
+        Allows profiles to be None if kWh is zero.
         """
-        return SolarGenerationTimeseries(
-            fixed_time_generation_kwh=self.fixed_time_generation_kwh
-            + other.fixed_time_generation_kwh
+
+        def normalized_sum_profiles(a_kwh, a_prof, b_kwh, b_prof):
+            if a_kwh == 0 and b_kwh == 0:
+                return None
+            if a_kwh == 0:
+                return b_prof
+            if b_kwh == 0:
+                return a_prof
+            combined = a_kwh * a_prof + b_kwh * b_prof
+            total = combined.sum()
+            if total == 0:
+                raise ValueError("Sum of profiles is zero, cannot normalize.")
+            return combined / total
+
+        a_kwh = self.solar_generation_kwh or 0.0
+        b_kwh = other.solar_generation_kwh or 0.0
+
+        return SolarGeneration(
+            solar_generation_kwh=a_kwh + b_kwh,
+            solar_generation_profile=normalized_sum_profiles(
+                a_kwh,
+                self.solar_generation_profile,
+                b_kwh,
+                other.solar_generation_profile,
+            ),
         )
 
     def __radd__(self, other):
@@ -350,18 +373,22 @@ class SolarGenerationTimeseries(BaseModel):
             return self
         return self.__add__(other)
 
+    @functools.cached_property
+    def total(self) -> float:
+        """
+        Total electricity generation (kWh) over the year.
+        Returns 0.0 if not set.
+        """
+        return float(self.solar_generation_kwh or 0.0)
 
-class SolarGenerationReport(BaseModel):
-    """
-    Annual electricity generation by solar PV.
-
-    Used for presenting a summary of electricity usage, in cases
-    where an hourly breakdown is not helpful or needed.
-    """
-
-    fixed_time_generation_kwh: float = Field(
-        0.0, description="Total electricity generated by solar panels (kWh)"
-    )
+    @functools.cached_property
+    def timeseries(self) -> np.ndarray:
+        """
+        Hourly generation timeseries (kWh).
+        """
+        if self.solar_generation_kwh is None or self.solar_generation_profile is None:
+            return np.zeros(8760)
+        return self.solar_generation_kwh * self.solar_generation_profile
 
 
 class YearlyFuelUsageProfile(BaseModel):
@@ -372,8 +399,8 @@ class YearlyFuelUsageProfile(BaseModel):
 
     Attributes:
     elx_connection_days: float, number of days with electricity connection
-    electricity_kwh: ElectricityUsageTimeseries, electricity consumption
-    solar_generation_kwh: SolarGenerationTimeseries, generation by solar panels
+    electricity_kwh: ElectricityUsage, electricity consumption
+    solar_generation_kwh: SolarGeneration, generation by solar panels
     natural_gas_connection_days: float, number of days with natural gas
         connection
     natural_gas_kwh: float, natural gas usage
@@ -384,22 +411,18 @@ class YearlyFuelUsageProfile(BaseModel):
     petrol_litres: float, petrol usage
     diesel_litres: float, diesel usage
     public_ev_charger_kwh: float, public EV charger usage
-    thousand_km_petrol: float, thousands of km for RUCs
-    thousand_km_diesel: float, thousands of km for RUCs
-    thousand_km_hybrid: float, thousands of km for RUCs
-    thousand_km_plug_in_hybrid: float, thousands of km for RUCs
-    thousand_km_electric: float, thousands of km for RUCs
+    thousand_km: float, thousands of km for RUCs
     """
 
     elx_connection_days: float = Field(
         default=0.0, description="Number of days with electricity connection"
     )
-    electricity_kwh: ElectricityUsageTimeseries = Field(
-        default_factory=ElectricityUsageTimeseries,
+    electricity_kwh: ElectricityUsage = Field(
+        default_factory=ElectricityUsage,
         description="""Electricity consumption breakdown (kWh).""",
     )
-    solar_generation_kwh: SolarGenerationTimeseries = Field(
-        default_factory=SolarGenerationTimeseries,
+    solar_generation_kwh: SolarGeneration = Field(
+        default_factory=SolarGeneration,
         description="""Electricity generated by solar panels (kWh).""",
     )
     natural_gas_connection_days: float = Field(
@@ -471,27 +494,24 @@ class YearlyFuelUsageReport(BaseModel):
     connection costs + kilometers travelled subject to road user charges.
 
     Attributes are same as for YearlyFuelUsageProfile, but with float values
-    instead of NumPy arrays.
+    instead of NumPy arrays, and simplified for reporting:
+      electricity_kwh: float
+      solar_generation_kwh: float
+      natural_gas_kwh: float
+      lpg_kwh: float
+      wood_kwh: float
+      petrol_litres: float
+      diesel_litres: float
+      public_ev_charger_kwh: float
     """
 
-    elx_connection_days: float = Field(
-        0.0, description="Number of days with electricity connection"
-    )
-    electricity_kwh: ElectricityUsageReport
-    solar_generation_kwh: SolarGenerationReport
-    natural_gas_connection_days: float = Field(
-        0.0, description="Number of days with natural gas connection"
-    )
+    electricity_kwh: float
     natural_gas_kwh: float = Field(0.0, description="Natural gas usage")
-    lpg_tanks_rental_days: float = Field(
-        0.0, description="Number of days with LPG tanks rental"
-    )
     lpg_kwh: float = Field(0.0, description="LPG usage")
     wood_kwh: float = Field(0.0, description="Wood usage")
     petrol_litres: float = Field(0.0, description="Petrol usage")
     diesel_litres: float = Field(0.0, description="Diesel usage")
     public_ev_charger_kwh: float = Field(0.0, description="Public EV charger usage")
-    thousand_km: float = Field(0.0, description="Thousands of km for RUCs")
 
     def __init__(
         self, profile: YearlyFuelUsageProfile, decimal_places: int = 2, **data
@@ -500,37 +520,21 @@ class YearlyFuelUsageReport(BaseModel):
             return round(value, decimal_places)
 
         super().__init__(
-            elx_connection_days=round_float(profile.elx_connection_days),
-            electricity_kwh=ElectricityUsageReport(
-                fixed_time_uncontrolled_kwh=round_float(
-                    profile.electricity_kwh.fixed_time_uncontrolled_kwh.sum()
-                ),
-                fixed_time_controllable_kwh=round_float(
-                    profile.electricity_kwh.fixed_time_controllable_kwh.sum()
-                ),
-                shift_able_uncontrolled_kwh=round_float(
-                    profile.electricity_kwh.shift_able_uncontrolled_kwh.sum()
-                ),
-                shift_able_controllable_kwh=round_float(
-                    profile.electricity_kwh.shift_able_controllable_kwh.sum()
-                ),
-            ),
-            solar_generation_kwh=SolarGenerationReport(
-                fixed_time_generation_kwh=round_float(
-                    profile.solar_generation_kwh.total
-                ),
-            ),
-            natural_gas_connection_days=round_float(
-                profile.natural_gas_connection_days
+            electricity_kwh=(
+                round_float(
+                    profile.electricity_kwh.annual_kwh
+                    - profile.solar_generation_kwh.total
+                )
+                if profile.solar_generation_kwh.solar_generation_kwh is not None
+                and profile.solar_generation_kwh.solar_generation_kwh > 0
+                else round_float(profile.electricity_kwh.annual_kwh)
             ),
             natural_gas_kwh=round_float(profile.natural_gas_kwh),
-            lpg_tanks_rental_days=round_float(profile.lpg_tanks_rental_days),
             lpg_kwh=round_float(profile.lpg_kwh),
             wood_kwh=round_float(profile.wood_kwh),
             petrol_litres=round_float(profile.petrol_litres),
             diesel_litres=round_float(profile.diesel_litres),
             public_ev_charger_kwh=round_float(profile.public_ev_charger_kwh),
-            thousand_km=round_float(profile.thousand_km),
             **data,
         )
 
@@ -595,7 +599,7 @@ class SolarYearlyFuelGenerationProfile(YearlyFuelUsageProfile):
     """
 
 
-class HouseholdOtherElectricityUsageTimeseries(YearlyFuelUsageProfile):
+class HouseholdOtherElectricityUsage(YearlyFuelUsageProfile):
     """
     'Other household electricity' yearly fuel usage profile.
 

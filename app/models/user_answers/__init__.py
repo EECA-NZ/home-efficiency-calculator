@@ -10,6 +10,7 @@ from .cooktop import CooktopAnswers
 from .driving import DrivingAnswers
 from .heating import HeatingAnswers
 from .hot_water import HotWaterAnswers
+from .other import OtherAnswers
 from .solar import SolarAnswers
 from .your_home import YourHomeAnswers
 
@@ -30,3 +31,4 @@ class HouseholdAnswers(BaseModel):
     cooktop: Optional[CooktopAnswers] = None
     driving: Optional[DrivingAnswers] = None
     solar: Optional[SolarAnswers] = None
+    other: Optional[OtherAnswers] = None

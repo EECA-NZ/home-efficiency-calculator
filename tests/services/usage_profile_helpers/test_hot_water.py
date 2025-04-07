@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 
 # Import functions and constants from the module
-from app.services.usage_profile_helpers.hot_water import (
+from app.services.profile_helpers.hot_water import (
     MORNING_WINDOW_END,
     MORNING_WINDOW_START,
     carnot_cop,
@@ -50,7 +50,7 @@ def patch_hourly_ta(request, monkeypatch):
     if any(request.node.iter_markers("no_dummy")):
         return
     monkeypatch.setattr(
-        "app.services.usage_profile_helpers.hot_water.hourly_ta", dummy_hourly_ta
+        "app.services.profile_helpers.hot_water.hourly_ta", dummy_hourly_ta
     )
 
 
