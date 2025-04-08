@@ -88,7 +88,7 @@ LOG_BURNER_SPACE_HEATING_EFFICIENCY = 0.7
 # The space heating setpoint is used to determine
 # the temporal distribution of heating demand for
 # the purposes of estimating solar self-consumption.
-SPACE_HEATING_SETPOINT = 21.0  # degrees Celsius
+SPACE_HEATING_SETPOINT = 20.0  # degrees Celsius
 
 # Time window constants
 FULL_DAY_WINDOW = (7, 21)  # "full day" means 7am–9pm
