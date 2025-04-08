@@ -20,9 +20,9 @@ from ...constants import (
     STANDARD_HOME_KWH_HEATING_DEMAND_PER_HEATING_DEGREE_DAY,
     THERMAL_ENVELOPE_QUALITY,
 )
+from ...models.hourly_profiles.heating import space_heating_profile
 from ...services.helpers import heating_frequency_factor
 from ...services.postcode_lookups.get_climate_zone import climate_zone
-from ...services.profile_helpers.heating import space_heating_profile
 from ..usage_profiles import ElectricityUsage, YearlyFuelUsageProfile
 
 

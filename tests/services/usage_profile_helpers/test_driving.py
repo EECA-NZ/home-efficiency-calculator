@@ -7,7 +7,7 @@ import pandas as pd
 
 # Import the function from your new EV charging module
 # Adjust import as appropriate for your project
-from app.services.profile_helpers.driving import solar_friendly_ev_charging_profile
+from app.models.hourly_profiles.driving import solar_friendly_ev_charging_profile
 
 
 def test_solar_friendly_ev_charging_profile_shape_and_sum():

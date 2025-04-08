@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 
 # Import functions and constants from the module
-from app.services.profile_helpers.hot_water import (
+from app.models.hourly_profiles.hot_water import (
     HEATING_WINDOWS,
     carnot_cop,
     daily_electricity_kwh,
@@ -49,7 +49,7 @@ def patch_hourly_ta(request, monkeypatch):
     if any(request.node.iter_markers("no_dummy")):
         return
     monkeypatch.setattr(
-        "app.services.profile_helpers.hot_water.hourly_ta", dummy_hourly_ta
+        "app.models.hourly_profiles.hot_water.hourly_ta", dummy_hourly_ta
     )
 
 
@@ -137,9 +137,7 @@ def test_normalized_solar_friendly_water_heating_profile_solar_only():
     np.testing.assert_almost_equal(profile.sum(), 1.0)
     # For each day, verify that allocation within the solar window is nonzero.
     for day in dates:
-        solar_start = pd.Timestamp(
-            f"{day.strftime('%Y-%m-%d')} {solar_window_start}"
-        )
+        solar_start = pd.Timestamp(f"{day.strftime('%Y-%m-%d')} {solar_window_start}")
         solar_end = pd.Timestamp(f"{day.strftime('%Y-%m-%d')} {solar_window_end}")
         allocated = profile[solar_start:solar_end].sum()
         assert allocated > 0, f"No energy allocated for solar on {day}"

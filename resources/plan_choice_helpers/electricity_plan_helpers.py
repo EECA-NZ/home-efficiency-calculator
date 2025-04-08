@@ -10,6 +10,9 @@ import numpy as np
 import pandas as pd
 
 from app.models.energy_plans import ElectricityPlan
+from app.models.hourly_profiles.get_base_demand_profile import (
+    other_electricity_energy_usage_profile,
+)
 from app.models.user_answers import (
     CooktopAnswers,
     DrivingAnswers,
@@ -20,9 +23,6 @@ from app.models.user_answers import (
     YourHomeAnswers,
 )
 from app.services.energy_calculator import estimate_usage_from_answers
-from app.services.profile_helpers.get_base_demand_profile import (
-    other_electricity_energy_usage_profile,
-)
 from resources.plan_choice_helpers.constants import NUMERICAL_COLUMNS
 from resources.plan_choice_helpers.data_loading import eval_or_return
 from resources.plan_choice_helpers.plan_filters import (

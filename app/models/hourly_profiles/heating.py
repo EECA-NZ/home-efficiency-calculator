@@ -30,14 +30,15 @@ import logging
 import numpy as np
 import pandas as pd
 
+from app.services.postcode_lookups.get_climate_zone import climate_zone
+from app.services.postcode_lookups.get_temperatures import hourly_ta
+
 from ...constants import (
-    HEAT_PUMP_COP_BY_CLIMATE_ZONE,
-    FULL_DAY_WINDOW,
     BASELINE_WINDOWS,
+    FULL_DAY_WINDOW,
+    HEAT_PUMP_COP_BY_CLIMATE_ZONE,
     SPACE_HEATING_SETPOINT,
 )
-from ..postcode_lookups.get_climate_zone import climate_zone
-from ..postcode_lookups.get_temperatures import hourly_ta
 from .hot_water import carnot_cop
 
 logging.basicConfig(level=logging.INFO)

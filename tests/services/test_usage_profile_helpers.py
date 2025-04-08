@@ -5,7 +5,7 @@ Tests for the profile_helpers module.
 import numpy as np
 import pytest
 
-from app.services.profile_helpers import (
+from app.models.hourly_profiles import (
     day_night_flag,
     daytime_total_usage,
     ensure_8760_array,

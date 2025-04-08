@@ -5,12 +5,12 @@ This module provides functions to estimate a household's yearly fuel usage profi
 # pylint: disable=too-many-locals
 
 from app.constants import DAYS_IN_YEAR, EMISSIONS_FACTORS
+from app.models.hourly_profiles.get_base_demand_profile import (
+    other_electricity_energy_usage_profile,
+)
 from app.models.usage_profiles import YearlyFuelUsageProfile
 from app.models.user_answers import HouseholdAnswers, SolarAnswers
 from app.services.helpers import get_solar_answers, round_floats_to_2_dp
-from app.services.profile_helpers.get_base_demand_profile import (
-    other_electricity_energy_usage_profile,
-)
 
 
 def uses_electricity(answers: HouseholdAnswers) -> bool:

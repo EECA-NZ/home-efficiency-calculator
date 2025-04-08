@@ -11,7 +11,7 @@ from ...constants import (
     DAYS_IN_YEAR,
     STANDARD_HOUSEHOLD_COOKTOP_ENERGY_USAGE_KWH,
 )
-from ...services.profile_helpers.cooktop import cooktop_hourly_usage_profile
+from ...models.hourly_profiles.cooktop import cooktop_hourly_usage_profile
 from ..usage_profiles import ElectricityUsage, YearlyFuelUsageProfile
 
 

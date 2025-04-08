@@ -7,10 +7,10 @@ Test energy consumption profile and behaviour of the HotWaterAnswers class.
 from pytest import approx
 
 from app.constants import DAYS_IN_YEAR, HOT_WATER_FLEXIBLE_KWH_FRACTION
+from app.models.hourly_profiles import flat_day_night_profiles
 from app.models.usage_profiles import ElectricityUsage, YearlyFuelUsageProfile
 from app.models.user_answers import HotWaterAnswers
 from app.services.configuration import get_default_household_answers
-from app.services.profile_helpers import flat_day_night_profiles
 
 # Energy usage is summed over profiles in the tests
 # so we can use a flat daytime profile

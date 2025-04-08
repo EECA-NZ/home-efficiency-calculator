@@ -11,10 +11,10 @@ from ...constants import (
     HOT_WATER_FLEXIBLE_KWH_FRACTION,
     HOT_WATER_POWER_INPUT_KW,
 )
-from ...services.postcode_lookups.get_climate_zone import climate_zone
-from ...services.profile_helpers.hot_water import (
+from ...models.hourly_profiles.hot_water import (
     solar_friendly_hot_water_electricity_usage_timeseries,
 )
+from ...services.postcode_lookups.get_climate_zone import climate_zone
 from ...services.usage_calculation.hot_water_helpers import (
     hot_water_heating_efficiency,
     other_water_kwh_per_year,

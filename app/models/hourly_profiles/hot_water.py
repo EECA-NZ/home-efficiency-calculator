@@ -17,15 +17,16 @@ import logging
 import numpy as np
 import pandas as pd
 
+from app.services.postcode_lookups.get_climate_zone import climate_zone
+from app.services.postcode_lookups.get_temperatures import hourly_ta
+
 from ...constants import (
-    HOT_WATER_HEAT_PUMP_COP_BY_CLIMATE_ZONE,
-    HEATING_WINDOWS,
+    COP_CALCULATION,
     CYLINDER_HOT_WATER_TEMPERATURE,
     DELIVERED_HOT_WATER_TEMPERATURE,
-    COP_CALCULATION,
+    HEATING_WINDOWS,
+    HOT_WATER_HEAT_PUMP_COP_BY_CLIMATE_ZONE,
 )
-from ..postcode_lookups.get_climate_zone import climate_zone
-from ..postcode_lookups.get_temperatures import hourly_ta
 from .general import flat_day_night_profiles
 
 logging.basicConfig(level=logging.INFO)

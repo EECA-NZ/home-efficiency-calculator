@@ -9,6 +9,7 @@ from pytest import approx
 
 from app.constants import DAYS_IN_YEAR
 from app.models.energy_plans import ElectricityPlan
+from app.models.hourly_profiles import flat_day_night_profiles
 from app.models.usage_profiles import ElectricityUsage, YearlyFuelUsageProfile
 from app.services.postcode_lookups.get_energy_plans import (
     edb_zone_to_electricity_plan,
@@ -16,7 +17,6 @@ from app.services.postcode_lookups.get_energy_plans import (
     postcode_to_edb_zone,
     postcode_to_electricity_plan,
 )
-from app.services.profile_helpers import flat_day_night_profiles
 
 day_profile, night_profile = flat_day_night_profiles()
 

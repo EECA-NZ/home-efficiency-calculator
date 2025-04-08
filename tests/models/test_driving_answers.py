@@ -14,11 +14,11 @@ from app.constants import (
     FUEL_CONSUMPTION_LITRES_PER_100KM,
 )
 from app.models.energy_plans import HouseholdEnergyPlan
+from app.models.hourly_profiles import flat_day_night_profiles
 from app.models.usage_profiles import ElectricityUsage, YearlyFuelUsageProfile
 from app.models.user_answers import DrivingAnswers, SolarAnswers, YourHomeAnswers
 from app.services.cost_calculator import calculate_savings_for_option
 from app.services.postcode_lookups.get_energy_plans import postcode_to_electricity_plan
-from app.services.profile_helpers import flat_day_night_profiles
 
 day_profile, night_profile = flat_day_night_profiles()
 

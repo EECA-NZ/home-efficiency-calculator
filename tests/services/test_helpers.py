@@ -7,13 +7,13 @@ Tests for the helpers module.
 from pytest import approx
 
 from app.constants import DAY_NIGHT_FRAC, DAYS_IN_YEAR, OTHER_ELX_KWH_PER_DAY
+from app.models.hourly_profiles.get_base_demand_profile import (
+    other_electricity_energy_usage_profile,
+)
 from app.models.usage_profiles import ElectricityUsage, YearlyFuelUsageProfile
 from app.models.user_answers import SolarAnswers
 from app.services.configuration import get_default_electricity_plan
 from app.services.helpers import add_gst, get_solar_answers
-from app.services.profile_helpers.get_base_demand_profile import (
-    other_electricity_energy_usage_profile,
-)
 from app.services.usage_calculation.hot_water_helpers import (
     other_water_kwh_per_year,
     shower_kwh_per_year,
