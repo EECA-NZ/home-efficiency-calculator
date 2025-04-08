@@ -24,7 +24,7 @@ repos:
         types: [python]
         args: ["--rcfile=.pylintrc"]
         pass_filenames: true
-        stages: [commit]
+        stages: [pre-commit]
         additional_dependencies: []
 
       - id: pylint
@@ -33,7 +33,7 @@ repos:
         language: system
         args: ["--rcfile=.pylintrc", "--recursive=y", "."]
         pass_filenames: false
-        stages: [push]
+        stages: [pre-push]
         additional_dependencies: []
 
   - repo: local
@@ -44,4 +44,4 @@ repos:
         entry: python scripts/pip_audit_hook.py
         additional_dependencies: ["pip-audit"]
         pass_filenames: false
-        stages: [push]
+        stages: [pre-push]
