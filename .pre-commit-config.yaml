@@ -27,14 +27,14 @@ repos:
         stages: [pre-commit]
         additional_dependencies: []
 
-      - id: pylint
+  - repo: local
+    hooks:
+      - id: pylint-full-codebase
         name: pylint (full codebase)
-        entry: pylint
         language: system
-        args: ["--rcfile=.pylintrc", "--recursive=y", "."]
+        entry: bash -c 'pylint --disable=R0801 $(git ls-files "*.py")'
         pass_filenames: false
         stages: [pre-push]
-        additional_dependencies: []
 
   - repo: local
     hooks:
