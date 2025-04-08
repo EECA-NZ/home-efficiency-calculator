@@ -19,8 +19,8 @@ repos:
         name: pylint
         entry: pylint
         language: system
-        types: [python]
-        args: ["--rcfile=.pylintrc"]
+        args: ["--rcfile=.pylintrc", "--recursive=y", "."]
+        pass_filenames: false
         additional_dependencies: []
   - repo: local
     hooks:
