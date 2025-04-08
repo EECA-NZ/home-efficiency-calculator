@@ -28,9 +28,9 @@ class ElectricityUsage(BaseModel):
     on a day/night tariff.
 
     Attributes:
-        fixed_day_kwh: float, fixed daytime usage (kWh).
-        fixed_ngt_kwh: float, fixed nighttime usage (kWh).
-        shift_abl_kwh: float, shiftable anytime usage (kWh).
+        fixed_day_kwh: float, fixed daytime usage (kWh per year).
+        fixed_ngt_kwh: float, fixed nighttime usage (kWh per year).
+        shift_abl_kwh: float, shiftable anytime usage (kWhper year).
 
         fixed_profile: np.ndarray | None
             Optional 8760 hourly usage profile (dimensionless) for
@@ -40,9 +40,11 @@ class ElectricityUsage(BaseModel):
             shift_abl_kwh. Must sum to 1 if provided.
     """
 
-    fixed_day_kwh: float = Field(0.0, description="Fixed daytime usage (kWh).")
-    fixed_ngt_kwh: float = Field(0.0, description="Fixed nighttime usage (kWh).")
-    shift_abl_kwh: float = Field(0.0, description="Shiftable anytime usage (kWh).")
+    fixed_day_kwh: float = Field(0.0, description="Annual fixed daytime usage (kWh).")
+    fixed_ngt_kwh: float = Field(0.0, description="Annual fixed nighttime usage (kWh).")
+    shift_abl_kwh: float = Field(
+        0.0, description="Annual shiftable anytime usage (kWh)."
+    )
 
     # Profile for (fixed_day_kwh + fixed_ngt_kwh)
     fixed_profile: np.ndarray | None = Field(
@@ -490,11 +492,9 @@ class YearlyFuelUsageProfile(BaseModel):
 class YearlyFuelUsageReport(BaseModel):
     """
     Report class for yearly fuel usage profiles for different household areas.
-    In addition to fuel usage, includes associated consumption parameters e.g.
-    connection costs + kilometers travelled subject to road user charges.
 
     Attributes are same as for YearlyFuelUsageProfile, but with float values
-    instead of NumPy arrays, and simplified for reporting:
+    instead of NumPy arrays, and simplified for reporting just energy usage:
       electricity_kwh: float
       solar_generation_kwh: float
       natural_gas_kwh: float

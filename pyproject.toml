@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "home_efficiency_calculator"
-version = "0.1.0"
+version = "0.3.0"
 description = "A web API for household energy cost and CO2 emissions estimates"
 authors = [{ name = "EECA", email = "DataAndAnalytics@eeca.govt.nz" }]
 dependencies = [
