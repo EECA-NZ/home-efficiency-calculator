@@ -12,7 +12,7 @@ from ...constants import (
     STANDARD_HOUSEHOLD_COOKTOP_ENERGY_USAGE_KWH,
 )
 from ...services.profile_helpers.cooktop import cooktop_hourly_usage_profile
-from ..usage_profiles import CooktopYearlyFuelUsageProfile, ElectricityUsage
+from ..usage_profiles import ElectricityUsage, YearlyFuelUsageProfile
 
 
 class CooktopAnswers(BaseModel):
@@ -34,7 +34,7 @@ class CooktopAnswers(BaseModel):
 
     def energy_usage_pattern(
         self, your_home, solar_aware: bool, use_alternative: bool = False
-    ) -> CooktopYearlyFuelUsageProfile:
+    ) -> YearlyFuelUsageProfile:
         """
         Return the yearly fuel usage profile for cooking.
 
@@ -57,7 +57,7 @@ class CooktopAnswers(BaseModel):
 
         Returns
         -------
-        CooktopYearlyFuelUsageProfile
+        YearlyFuelUsageProfile
             The yearly fuel usage profile for cooking, including any necessary
             electricity, natural gas, or LPG consumption. If electric, a year's
             hourly usage profile (8760 hours) is provided if solar_aware is True.
@@ -113,7 +113,7 @@ class CooktopAnswers(BaseModel):
                 shift_abl_kwh=0.0,
                 shift_profile=None,
             )
-            return CooktopYearlyFuelUsageProfile(
+            return YearlyFuelUsageProfile(
                 elx_connection_days=factor["elx_connection_days"],
                 electricity_kwh=electricity_kwh,
                 natural_gas_kwh=0,
@@ -121,7 +121,7 @@ class CooktopAnswers(BaseModel):
             )
 
         if cooktop_type == "Piped gas":
-            return CooktopYearlyFuelUsageProfile(
+            return YearlyFuelUsageProfile(
                 natural_gas_connection_days=factor["natural_gas_connection_days"],
                 electricity_kwh=ElectricityUsage(),
                 natural_gas_kwh=total_kwh,
@@ -129,7 +129,7 @@ class CooktopAnswers(BaseModel):
             )
 
         if cooktop_type == "Bottled gas":
-            return CooktopYearlyFuelUsageProfile(
+            return YearlyFuelUsageProfile(
                 lpg_tanks_rental_days=factor["lpg_tanks_rental_days"],
                 electricity_kwh=ElectricityUsage(),
                 natural_gas_kwh=0,

@@ -19,7 +19,7 @@ from ...constants import (
 )
 from ...services.profile_helpers import flat_day_night_profiles
 from ...services.profile_helpers.driving import solar_friendly_ev_charging_profile
-from ..usage_profiles import DrivingYearlyFuelUsageProfile, ElectricityUsage
+from ..usage_profiles import ElectricityUsage, YearlyFuelUsageProfile
 
 
 class DrivingAnswers(BaseModel):
@@ -53,7 +53,7 @@ class DrivingAnswers(BaseModel):
     # pylint: disable=unused-argument
     def energy_usage_pattern(
         self, your_home, solar_aware: bool, use_alternative: bool = False
-    ) -> DrivingYearlyFuelUsageProfile:
+    ) -> YearlyFuelUsageProfile:
         """
         Return the yearly fuel usage profile for driving.
 
@@ -76,7 +76,7 @@ class DrivingAnswers(BaseModel):
 
         Returns
         -------
-        DrivingYearlyFuelUsageProfile
+        YearlyFuelUsageProfile
             The yearly fuel usage profile for driving, including both
             liquid fuel and/or electricity consumption. If electric, a year's
             hourly usage profile (8760 hours) is provided if solar_aware is True.
@@ -109,8 +109,8 @@ class DrivingAnswers(BaseModel):
             public_charging_kwh = 0
             home_charging_timeseries = ElectricityUsage()
 
-            # Finally, return the DrivingYearlyFuelUsageProfile.
-            return DrivingYearlyFuelUsageProfile(
+            # Finally, return the YearlyFuelUsageProfile.
+            return YearlyFuelUsageProfile(
                 elx_connection_days=DAYS_IN_YEAR,
                 electricity_kwh=home_charging_timeseries,
                 petrol_litres=yearly_fuel_litres if liquid_fuel == "Petrol" else 0,
@@ -153,7 +153,7 @@ class DrivingAnswers(BaseModel):
                 yearly_fuel_litres = (
                     yearly_distance_thousand_km * 10
                 ) * litres_per_100km
-                return DrivingYearlyFuelUsageProfile(
+                return YearlyFuelUsageProfile(
                     elx_connection_days=DAYS_IN_YEAR,
                     electricity_kwh=home_charging_timeseries,
                     petrol_litres=yearly_fuel_litres,
@@ -163,7 +163,7 @@ class DrivingAnswers(BaseModel):
                 )
 
             # Otherwise it's pure electric
-            return DrivingYearlyFuelUsageProfile(
+            return YearlyFuelUsageProfile(
                 elx_connection_days=DAYS_IN_YEAR,
                 electricity_kwh=home_charging_timeseries,
                 petrol_litres=0,

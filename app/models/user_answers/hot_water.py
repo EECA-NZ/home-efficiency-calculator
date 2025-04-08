@@ -21,7 +21,7 @@ from ...services.usage_calculation.hot_water_helpers import (
     shower_kwh_per_year,
     standing_loss_kwh_per_year,
 )
-from ..usage_profiles import ElectricityUsage, HotWaterYearlyFuelUsageProfile
+from ..usage_profiles import ElectricityUsage, YearlyFuelUsageProfile
 
 ELECTRIC_SYSTEMS = [
     "Electric hot water cylinder",
@@ -54,7 +54,7 @@ class HotWaterAnswers(BaseModel):
 
     def energy_usage_pattern(
         self, your_home, solar_aware, use_alternative: bool = False
-    ) -> HotWaterYearlyFuelUsageProfile:
+    ) -> YearlyFuelUsageProfile:
         """
         Return the yearly fuel usage profile for hot water heating.
 
@@ -78,7 +78,7 @@ class HotWaterAnswers(BaseModel):
 
         Returns
         -------
-        HotWaterYearlyFuelUsageProfile
+        YearlyFuelUsageProfile
             The yearly fuel usage profile for hot water heating. If electric, a year's
             hourly usage profile (8760 hours) is provided if solar_aware is True.
         """
@@ -130,7 +130,7 @@ class HotWaterAnswers(BaseModel):
                 shift_abl_kwh=anytime_kwh,
                 shift_profile=synthetic_hourly_profile,
             )
-            return HotWaterYearlyFuelUsageProfile(
+            return YearlyFuelUsageProfile(
                 elx_connection_days=DAYS_IN_YEAR,
                 electricity_kwh=electricity_kwh,
             )
@@ -139,13 +139,13 @@ class HotWaterAnswers(BaseModel):
             "Piped gas hot water cylinder",
             "Piped gas instantaneous",
         ]:
-            return HotWaterYearlyFuelUsageProfile(
+            return YearlyFuelUsageProfile(
                 natural_gas_connection_days=DAYS_IN_YEAR,
                 natural_gas_kwh=total_kwh,
             )
 
         if hot_water_heating_source in ["Bottled gas instantaneous"]:
-            return HotWaterYearlyFuelUsageProfile(
+            return YearlyFuelUsageProfile(
                 lpg_tanks_rental_days=DAYS_IN_YEAR,
                 lpg_kwh=total_kwh,
             )

@@ -5,7 +5,7 @@ Class for storing user answers on solar generation.
 from pydantic import BaseModel
 
 from ...services.postcode_lookups import get_solar_generation
-from ..usage_profiles import SolarGeneration, SolarYearlyFuelGenerationProfile
+from ..usage_profiles import SolarGeneration, YearlyFuelUsageProfile
 
 
 class SolarAnswers(BaseModel):
@@ -20,7 +20,7 @@ class SolarAnswers(BaseModel):
     def energy_generation(
         self,
         your_home,
-    ) -> SolarYearlyFuelGenerationProfile:
+    ) -> YearlyFuelUsageProfile:
         """
         Return the yearly energy generation profile for solar energy generation.
 
@@ -48,6 +48,6 @@ class SolarAnswers(BaseModel):
             )
         else:
             hourly_solar_generation_kwh = SolarGeneration()
-        return SolarYearlyFuelGenerationProfile(
+        return YearlyFuelUsageProfile(
             solar_generation_kwh=hourly_solar_generation_kwh,
         )

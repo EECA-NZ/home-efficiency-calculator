@@ -7,7 +7,7 @@ Tests for the helpers module.
 from pytest import approx
 
 from app.constants import DAY_NIGHT_FRAC, DAYS_IN_YEAR, OTHER_ELX_KWH_PER_DAY
-from app.models.usage_profiles import ElectricityUsage, HouseholdOtherElectricityUsage
+from app.models.usage_profiles import ElectricityUsage, YearlyFuelUsageProfile
 from app.models.user_answers import SolarAnswers
 from app.services.configuration import get_default_electricity_plan
 from app.services.helpers import add_gst, get_solar_answers
@@ -124,13 +124,13 @@ def test_standing_loss_kwh_per_year():
 def test_other_electricity_energy_usage_profile_1():
     """
     Test that other_electricity_energy_usage_profile() returns
-    a HouseholdOtherElectricityUsage with the correct
+    a YearlyFuelUsageProfile with the correct
     allocation of day vs. night usage and total kWh.
     """
     profile = other_electricity_energy_usage_profile()
 
     # 1. Check that the returned object is the correct type
-    assert isinstance(profile, HouseholdOtherElectricityUsage)
+    assert isinstance(profile, YearlyFuelUsageProfile)
 
     # 2. Check connection days
     assert profile.elx_connection_days == DAYS_IN_YEAR
@@ -176,13 +176,13 @@ def test_other_electricity_energy_usage_profile_1():
 def test_other_electricity_energy_usage_profile_2():
     """
     Test that other_electricity_energy_usage_profile() returns
-    a HouseholdOtherElectricityUsage with the correct
+    a YearlyFuelUsageProfile with the correct
     allocation of day vs. night usage and total kWh.
     """
     profile = other_electricity_energy_usage_profile()
 
     # 1. Check that the returned object is the correct type
-    assert isinstance(profile, HouseholdOtherElectricityUsage)
+    assert isinstance(profile, YearlyFuelUsageProfile)
 
     # 2. Check connection days
     assert profile.elx_connection_days == DAYS_IN_YEAR

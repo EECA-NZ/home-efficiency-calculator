@@ -23,7 +23,7 @@ from ...constants import (
 from ...services.helpers import heating_frequency_factor
 from ...services.postcode_lookups.get_climate_zone import climate_zone
 from ...services.profile_helpers.heating import space_heating_profile
-from ..usage_profiles import ElectricityUsage, HeatingYearlyFuelUsageProfile
+from ..usage_profiles import ElectricityUsage, YearlyFuelUsageProfile
 
 
 class HeatingAnswers(BaseModel):
@@ -59,7 +59,7 @@ class HeatingAnswers(BaseModel):
 
     def energy_usage_pattern(
         self, your_home, solar_aware: bool, use_alternative: bool = False
-    ) -> HeatingYearlyFuelUsageProfile:
+    ) -> YearlyFuelUsageProfile:
         """
         Return the yearly fuel usage profile for space heating.
 
@@ -82,7 +82,7 @@ class HeatingAnswers(BaseModel):
 
         Returns
         -------
-        HeatingYearlyFuelUsageProfile
+        YearlyFuelUsageProfile
             The yearly fuel usage profile for space heating, including fuel or
             electricity consumption as appropriate. If electric, a year's hourly
             usage profile (8760 hours) is provided if solar_aware is True.
@@ -105,7 +105,7 @@ class HeatingAnswers(BaseModel):
 
         # Return early for each main heating source
         if main_heating_source == "Piped gas heater":
-            return HeatingYearlyFuelUsageProfile(
+            return YearlyFuelUsageProfile(
                 natural_gas_kwh=heating_energy_service_demand
                 / GAS_SPACE_HEATING_EFFICIENCY,
                 natural_gas_connection_days=DAYS_IN_YEAR,
@@ -113,14 +113,14 @@ class HeatingAnswers(BaseModel):
             )
 
         if main_heating_source == "Bottled gas heater":
-            return HeatingYearlyFuelUsageProfile(
+            return YearlyFuelUsageProfile(
                 lpg_kwh=heating_energy_service_demand / LPG_SPACE_HEATING_EFFICIENCY,
                 lpg_tanks_rental_days=DAYS_IN_YEAR,
                 elx_connection_days=DAYS_IN_YEAR,
             )
 
         if main_heating_source == "Heat pump":
-            heating = HeatingYearlyFuelUsageProfile(
+            heating = YearlyFuelUsageProfile(
                 electricity_kwh=ElectricityUsage(
                     fixed_day_kwh=heating_energy_service_demand
                     / HEAT_PUMP_COP_BY_CLIMATE_ZONE[cz],
@@ -142,7 +142,7 @@ class HeatingAnswers(BaseModel):
             return heating
 
         if main_heating_source == "Electric heater":
-            return HeatingYearlyFuelUsageProfile(
+            return YearlyFuelUsageProfile(
                 electricity_kwh=ElectricityUsage(
                     fixed_day_kwh=heating_energy_service_demand
                     / ELECTRIC_HEATER_SPACE_HEATING_EFFICIENCY,
@@ -163,7 +163,7 @@ class HeatingAnswers(BaseModel):
             )
 
         if main_heating_source == "Wood burner":
-            return HeatingYearlyFuelUsageProfile(
+            return YearlyFuelUsageProfile(
                 wood_kwh=heating_energy_service_demand
                 / LOG_BURNER_SPACE_HEATING_EFFICIENCY,
                 elx_connection_days=DAYS_IN_YEAR,

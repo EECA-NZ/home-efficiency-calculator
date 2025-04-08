@@ -9,7 +9,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from app.models.usage_profiles import ElectricityUsage, HouseholdOtherElectricityUsage
+from app.models.usage_profiles import ElectricityUsage, YearlyFuelUsageProfile
 from app.services.profile_helpers import day_flag, night_flag
 
 from ...constants import DAYS_IN_YEAR, OTHER_ELX_KWH_PER_DAY
@@ -135,7 +135,7 @@ def other_electricity_energy_usage_profile():
     fixed_ngt_kwh = (uncontrolled_fixed_kwh * night_flag).sum()
     uncontrolled_fixed_kwh /= uncontrolled_fixed_kwh.sum()
 
-    return HouseholdOtherElectricityUsage(
+    return YearlyFuelUsageProfile(
         elx_connection_days=DAYS_IN_YEAR,
         electricity_kwh=ElectricityUsage(
             fixed_day_kwh=fixed_day_kwh,
