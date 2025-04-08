@@ -122,3 +122,29 @@ GAS_STORAGE_WATER_HEATING_EFFICIENCY = 0.885
 ELECTRIC_WATER_HEATING_EFFICIENCY = 1.0
 
 HOT_WATER_POWER_INPUT_KW = 3.0  # kW, assumed for all hot water systems
+
+
+#### Constants used for hot water hourly energy consumption profiles
+
+# Default time window constants
+SOLAR_WINDOW_START = "09:00:00"  # e.g., start of solar energy heating window
+SOLAR_WINDOW_END = "18:00:00"  # e.g., end of solar energy heating window (9 hours)
+NIGHT_WINDOW_START = "21:00:00"  # e.g., start of night heating window
+NIGHT_WINDOW_END = "09:00:00"  # e.g., end of night heating window (next day; 12 hours)
+
+HEATING_WINDOWS = {
+    "solar": (SOLAR_WINDOW_START, SOLAR_WINDOW_END),
+    "night": (NIGHT_WINDOW_START, NIGHT_WINDOW_END),
+}
+
+CYLINDER_HOT_WATER_TEMPERATURE = 65  # Celsius - typical hot water temperature.
+DELIVERED_HOT_WATER_TEMPERATURE = 40  # Celsius - typical demand temperature.
+# Although the tank is at 65°C, hot water at the tap is usually 40°C via mixing.
+# The fraction drawn from the tank is given by (40 - T_inlet) / (65 - T_inlet),
+# and the heating per kg to heat from T_inlet to 65°C is proportional to (65 - T_inlet).
+# After multiplying fraction by energy per kg, the (65 - T_inlet) terms cancel out.
+# Hence, the total heating demand is effectively proportional to (40 - T_inlet).
+
+DEFAULT_CARNOT_COP_SCALING_FACTOR = 0.4  # Default scaling factor for COP calculation.
+
+COP_CALCULATION = "constant"  # Use an annual average COP per climate zone

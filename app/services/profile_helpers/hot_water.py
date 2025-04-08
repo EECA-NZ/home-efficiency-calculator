@@ -17,36 +17,19 @@ import logging
 import numpy as np
 import pandas as pd
 
-from ...constants import HOT_WATER_HEAT_PUMP_COP_BY_CLIMATE_ZONE
+from ...constants import (
+    HOT_WATER_HEAT_PUMP_COP_BY_CLIMATE_ZONE,
+    HEATING_WINDOWS,
+    CYLINDER_HOT_WATER_TEMPERATURE,
+    DELIVERED_HOT_WATER_TEMPERATURE,
+    COP_CALCULATION,
+)
 from ..postcode_lookups.get_climate_zone import climate_zone
 from ..postcode_lookups.get_temperatures import hourly_ta
 from .general import flat_day_night_profiles
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# Default time window constants
-MORNING_WINDOW_START = "09:00:00"  # e.g., start of morning heating window
-MORNING_WINDOW_END = "13:00:00"  # e.g., end of morning heating window (4 hours)
-NIGHT_WINDOW_START = "21:00:00"  # e.g., start of night heating window
-NIGHT_WINDOW_END = "09:00:00"  # e.g., end of night heating window (next day; 12 hours)
-
-HEATING_WINDOWS = {
-    "morning": (MORNING_WINDOW_START, MORNING_WINDOW_END),
-    "night": (NIGHT_WINDOW_START, NIGHT_WINDOW_END),
-}
-
-CYLINDER_HOT_WATER_TEMPERATURE = 65  # Celsius - typical hot water temperature.
-DELIVERED_HOT_WATER_TEMPERATURE = 40  # Celsius - typical demand temperature.
-# Although the tank is at 65°C, hot water at the tap is usually 40°C via mixing.
-# The fraction drawn from the tank is given by (40 - T_inlet) / (65 - T_inlet),
-# and the heating per kg to heat from T_inlet to 65°C is proportional to (65 - T_inlet).
-# After multiplying fraction by energy per kg, the (65 - T_inlet) terms cancel out.
-# Hence, the total heating demand is effectively proportional to (40 - T_inlet).
-
-DEFAULT_CARNOT_COP_SCALING_FACTOR = 0.4  # Default scaling factor for COP calculation.
-
-COP_CALCULATION = "constant"  # Use an annual average COP per climate zone
 
 
 def default_hot_water_electricity_usage_timeseries() -> np.ndarray:
@@ -194,8 +177,8 @@ def normalized_solar_friendly_water_heating_profile(
       - Compute required
         heating hours = daily_energy / daily effective heat output.
       - Allocate the available hours uniformly over the
-        morning window,
-        defined by morning_window_start to morning_window_end.
+        solar energy window,
+        defined by solar_window_start to solar_window_end.
       - Allocate the remaining required hours uniformly over
       the night window,
         defined by night_window_start to night_window_end (which
@@ -228,12 +211,12 @@ def normalized_solar_friendly_water_heating_profile(
     hourly_index = pd.date_range(f"{year}-01-01", f"{year}-12-31 23:00", freq="h")
     profile = pd.Series(0.0, index=hourly_index)
 
-    morning_window_start, morning_window_end = heating_windows["morning"]
+    solar_window_start, solar_window_end = heating_windows["solar"]
     night_window_start, night_window_end = heating_windows["night"]
 
     # Compute window durations (in hours)
-    morning_duration = (
-        pd.Timedelta(morning_window_end) - pd.Timedelta(morning_window_start)
+    solar_duration = (
+        pd.Timedelta(solar_window_end) - pd.Timedelta(solar_window_start)
     ).total_seconds() / 3600
     night_duration = (
         pd.Timedelta("1 day")
@@ -248,22 +231,22 @@ def normalized_solar_friendly_water_heating_profile(
         required_hours = energy / output_kw
 
         # Allocate hours within the defined windows.
-        morning_hours = min(required_hours, morning_duration)
-        night_hours = min(max(required_hours - morning_duration, 0), night_duration)
+        solar_hours = min(required_hours, solar_duration)
+        night_hours = min(max(required_hours - solar_duration, 0), night_duration)
 
-        morning_energy = morning_hours * output_kw
+        solar_energy = solar_hours * output_kw
         night_energy = night_hours * output_kw
 
-        full_morning = int(np.floor(morning_hours))
-        frac_morning = morning_hours - full_morning
+        full_solar = int(np.floor(solar_hours))
+        frac_solar = solar_hours - full_solar
 
         full_night = int(np.floor(night_hours))
         frac_night = night_hours - full_night
 
         # Build time windows using the provided start times.
-        morning_window = pd.date_range(
-            day + pd.Timedelta(morning_window_start),
-            periods=int(morning_duration),
+        solar_window = pd.date_range(
+            day + pd.Timedelta(solar_window_start),
+            periods=int(solar_duration),
             freq="h",
         )
         night_window = pd.date_range(
@@ -272,15 +255,15 @@ def normalized_solar_friendly_water_heating_profile(
             freq="h",
         )
 
-        if morning_hours > 0:
-            energy_per_morning = morning_energy / morning_hours
+        if solar_hours > 0:
+            energy_per_solar_window = solar_energy / solar_hours
         else:
-            energy_per_morning = 0
-        for i, ts in enumerate(morning_window):
-            if i < full_morning:
-                profile.loc[ts] += energy_per_morning
-            elif i == full_morning and frac_morning > 0:
-                profile.loc[ts] += energy_per_morning * frac_morning
+            energy_per_solar_window = 0
+        for i, ts in enumerate(solar_window):
+            if i < full_solar:
+                profile.loc[ts] += energy_per_solar_window
+            elif i == full_solar and frac_solar > 0:
+                profile.loc[ts] += energy_per_solar_window * frac_solar
 
         if night_hours > 0:
             energy_per_night = night_energy / night_hours
@@ -326,7 +309,7 @@ def solar_friendly_hot_water_electricity_usage_timeseries(
          - For heat pumps: demand ∝ (40 - T_inlet) / COP(T_amb).
       2. For each day, compute
       required heating hours = daily_energy_demand / heater_input_kw.
-      4. Allocate the available hours within the morning window
+      4. Allocate the available hours within the solar window
       (e.g., 09:00–13:00) and the night window (e.g.,
       21:00–09:00 of the next day).
       5. Build an hourly profile from these allocations and
@@ -342,10 +325,10 @@ def solar_friendly_hot_water_electricity_usage_timeseries(
         Electrical input power of the system (kW).
     hot_water_heating_source :
         Heating system type (e.g., "Heat pump" or "Resistive").
-    morning_window_start : str, optional
-        Start time of the morning window (default "09:00:00").
-    morning_window_end : str, optional
-        End time of the morning window (default "13:00:00").
+    solar_window_start : str, optional
+        Start time of the solar window (default "09:00:00").
+    solar_window_end : str, optional
+        End time of the solar window (default "13:00:00").
     night_window_start : str, optional
         Start time of the night window (default "21:00:00").
     night_window_end : str, optional

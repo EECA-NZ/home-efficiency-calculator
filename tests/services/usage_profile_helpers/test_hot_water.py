@@ -10,8 +10,7 @@ import pytest
 
 # Import functions and constants from the module
 from app.services.profile_helpers.hot_water import (
-    MORNING_WINDOW_END,
-    MORNING_WINDOW_START,
+    HEATING_WINDOWS,
     carnot_cop,
     daily_electricity_kwh,
     default_hot_water_electricity_usage_timeseries,
@@ -121,28 +120,29 @@ def test_daily_electricity_kwh_heatpump_non_constant_temps():
     assert not np.allclose(series.values, series.values[0])
 
 
-def test_normalized_solar_friendly_water_heating_profile_morning_only():
+def test_normalized_solar_friendly_water_heating_profile_solar_only():
     """
     Test the normalized solar-friendly water heating profile.
     """
+    solar_window_start, solar_window_end = HEATING_WINDOWS["solar"]
     # Create dummy daily data for 10 days.
     dates = pd.date_range("2023-01-01", periods=10, freq="D")
     # Each day: 5 kWh demand and effective heat output of
-    # 2 kW yields required_hours=2.5 (<morning window of 4 hours)
+    # 2 kW yields required_hours=2.5 (<solar window of 4 hours)
     daily_energy = pd.Series(5.0, index=dates)
     daily_output = pd.Series(2.0, index=dates)
     profile = normalized_solar_friendly_water_heating_profile(
         daily_energy, daily_output
     )
     np.testing.assert_almost_equal(profile.sum(), 1.0)
-    # For each day, verify that allocation within the morning window is nonzero.
+    # For each day, verify that allocation within the solar window is nonzero.
     for day in dates:
-        morning_start = pd.Timestamp(
-            f"{day.strftime('%Y-%m-%d')} {MORNING_WINDOW_START}"
+        solar_start = pd.Timestamp(
+            f"{day.strftime('%Y-%m-%d')} {solar_window_start}"
         )
-        morning_end = pd.Timestamp(f"{day.strftime('%Y-%m-%d')} {MORNING_WINDOW_END}")
-        allocated = profile[morning_start:morning_end].sum()
-        assert allocated > 0, f"No energy allocated for morning on {day}"
+        solar_end = pd.Timestamp(f"{day.strftime('%Y-%m-%d')} {solar_window_end}")
+        allocated = profile[solar_start:solar_end].sum()
+        assert allocated > 0, f"No energy allocated for solar on {day}"
 
 
 def test_solar_friendly_hot_water_electricity_usage_timeseries_resistive():

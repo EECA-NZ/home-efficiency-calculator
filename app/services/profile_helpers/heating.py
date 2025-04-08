@@ -30,19 +30,18 @@ import logging
 import numpy as np
 import pandas as pd
 
-from ...constants import HEAT_PUMP_COP_BY_CLIMATE_ZONE
+from ...constants import (
+    HEAT_PUMP_COP_BY_CLIMATE_ZONE,
+    FULL_DAY_WINDOW,
+    BASELINE_WINDOWS,
+    SPACE_HEATING_SETPOINT,
+)
 from ..postcode_lookups.get_climate_zone import climate_zone
 from ..postcode_lookups.get_temperatures import hourly_ta
 from .hot_water import carnot_cop
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# Time window constants
-FULL_DAY_WINDOW = (7, 21)  # "full day" means 7am–9pm
-BASELINE_WINDOWS = [(7, 9), (17, 21)]  # "baseline" means 7–9am and 5–9pm
-
-DEFAULT_SPACE_HEATING_SETPOINT = 20.0
 
 
 def _days_for_week(week_num: int, option: str) -> int:
@@ -75,7 +74,7 @@ def _get_heating_cop_series(
     postcode: str,
     temperature_series: pd.Series,
     cop_calculation: str = "constant",
-    setpoint: float = DEFAULT_SPACE_HEATING_SETPOINT,
+    setpoint: float = SPACE_HEATING_SETPOINT,
 ) -> pd.Series:
     """
     Return an hourly COP series for space heating.
@@ -127,7 +126,7 @@ def _get_heating_cop_series(
 def space_heating_profile(
     postcode: str,
     heating_during_day: str,
-    setpoint: float = DEFAULT_SPACE_HEATING_SETPOINT,
+    setpoint: float = SPACE_HEATING_SETPOINT,
     main_heating_source: str = "Heat pump",
     cop_calculation: str = "constant",
 ) -> pd.Series:
