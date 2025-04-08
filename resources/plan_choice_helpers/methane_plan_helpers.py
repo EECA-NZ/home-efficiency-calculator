@@ -18,7 +18,7 @@ from app.models.user_answers import (
     SolarAnswers,
     YourHomeAnswers,
 )
-from app.services.energy_calculator import estimate_usage_from_profile
+from app.services.energy_calculator import estimate_usage_from_answers
 from resources.plan_choice_helpers.constants import NUMERICAL_COLUMNS
 from resources.plan_choice_helpers.data_loading import eval_or_return
 from resources.plan_choice_helpers.plan_filters import (
@@ -185,4 +185,4 @@ def load_gas_using_household_energy_usage_profile():
             add_solar=False,
         ),
     )
-    return estimate_usage_from_profile(household_profile)
+    return estimate_usage_from_answers(household_profile)

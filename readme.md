@@ -29,43 +29,55 @@ Before running the application, ensure you have Python and Docker installed on y
 It is assumed that the user is working in a powershell environment on a Windows machine.
 
 1. **Create and activate a virtual environment:**
-   ```bash
-   python -m venv .venv
-   .\.venv\Scripts\activate
+
+    ```bash
+    python -m venv .venv
+    .\.venv\Scripts\activate
     ```
 
 1. **Upgrade pip and install dependencies:**
+
     ```bash
     python -m pip install --upgrade pip
     python -m pip install -r requirements-dev.txt
-    python -m pip install . # or python -m pip install -e .
+    python -m pip install .  # or python -m pip install -e .
     ```
 
 1. **Install the pre-commit hooks:**
-   ```
-   pre-commit install
-   ```
-    This installs the Git hooks specified in `.pre-commit-config.yaml` and ensures that code formatting and linting checks run before each commit.
+
+    ```bash
+    pre-commit install
+    pre-commit install --hook-type pre-push
+    ```
+
+    This installs Git hooks specified in `.pre-commit-config.yaml`:
+
+    *   On **commit**, fast checks (`black`, `isort`, and `pylint` on staged files only) are run.
+
+    *   On **push**, thorough checks (`pylint` on the whole codebase and `pip-audit`) are run.
 
 1. **Run the test suite:**
+
     ```bash
     python -m pytest --verbose
     ```
 
 1. **Run the test suite with coverage:**
+
     ```bash
     python -m coverage run -m pytest
     python -m coverage report
     python -m coverage html
     ```
 
-1. **Run pylint:**
+1. **Run pylint manually (entire codebase):**
+
     ```bash
     python -m pylint --disable=R0801 $(git ls-files '*.py')
     ```
 
-1. **Run the application locally:**
-    Use Uvicorn to run the application with live reloading to restart the server after code changes:
+1. **Run the application locally:** Use Uvicorn to run the application with live reloading:
+
     ```bash
     python -m uvicorn app.main:app --reload
     ```

@@ -19,7 +19,7 @@ from app.models.user_answers import (
     SolarAnswers,
     YourHomeAnswers,
 )
-from app.services.energy_calculator import estimate_usage_from_profile
+from app.services.energy_calculator import estimate_usage_from_answers
 from app.services.profile_helpers.get_base_demand_profile import (
     other_electricity_energy_usage_profile,
 )
@@ -213,7 +213,7 @@ def load_electrified_household_energy_usage_profile():
             add_solar=False,
         ),
     )
-    household_energy_use = estimate_usage_from_profile(household_profile)
+    household_energy_use = estimate_usage_from_answers(household_profile)
     other_electricity_use = other_electricity_energy_usage_profile()
     household_energy_use.fixed_kwh.uncontrolled += (
         other_electricity_use.fixed_kwh.uncontrolled
