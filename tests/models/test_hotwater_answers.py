@@ -29,7 +29,7 @@ def test_water_heating_energy_usage():
     Expected values:
 
     """
-    profile = get_default_household_answers()
+    answers = get_default_household_answers()
     total_kwh = 2572.2628670365157
     anytime_kwh = total_kwh * HOT_WATER_FLEXIBLE_KWH_FRACTION
     fixed_kwh = total_kwh - anytime_kwh
@@ -59,11 +59,11 @@ def test_water_heating_energy_usage():
     }
     for hot_water_source, expected_energy_profile in hot_water_sources.items():
         hot_water = HotWaterAnswers(
-            hot_water_usage=profile["hot_water"].hot_water_usage,
+            hot_water_usage=answers["hot_water"].hot_water_usage,
             hot_water_heating_source=hot_water_source,
         )
         hot_water_energy_use = hot_water.energy_usage_pattern(
-            profile["your_home"], profile["solar"]
+            answers["your_home"], answers["solar"]
         )
         assert (
             hot_water_energy_use.elx_connection_days

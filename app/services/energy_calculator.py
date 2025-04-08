@@ -16,40 +16,40 @@ from app.services.profile_helpers.get_base_demand_profile import (
 )
 
 
-def uses_electricity(profile: HouseholdAnswers) -> bool:
+def uses_electricity(answers: HouseholdAnswers) -> bool:
     """
     Return True if the household uses electricity.
     """
-    return profile is not None
+    return answers is not None
 
 
-def uses_natural_gas(profile: HouseholdAnswers, use_alternatives: bool = False) -> bool:
+def uses_natural_gas(answers: HouseholdAnswers, use_alternatives: bool = False) -> bool:
     """
     Return True if the household uses natural gas, handling missing sections.
     """
     main_heating_source = (
-        profile.heating.main_heating_source
-        if profile.heating is not None and not use_alternatives
+        answers.heating.main_heating_source
+        if answers.heating is not None and not use_alternatives
         else (
-            profile.heating.alternative_main_heating_source
-            if profile.heating is not None
+            answers.heating.alternative_main_heating_source
+            if answers.heating is not None
             else None
         )
     )
     hot_water_heating_source = (
-        profile.hot_water.hot_water_heating_source
-        if profile.hot_water is not None and not use_alternatives
+        answers.hot_water.hot_water_heating_source
+        if answers.hot_water is not None and not use_alternatives
         else (
-            profile.hot_water.alternative_hot_water_heating_source
-            if profile.hot_water is not None
+            answers.hot_water.alternative_hot_water_heating_source
+            if answers.hot_water is not None
             else None
         )
     )
     cooktop = (
-        profile.cooktop.cooktop
-        if profile.cooktop is not None and not use_alternatives
+        answers.cooktop.cooktop
+        if answers.cooktop is not None and not use_alternatives
         else (
-            profile.cooktop.alternative_cooktop if profile.cooktop is not None else None
+            answers.cooktop.alternative_cooktop if answers.cooktop is not None else None
         )
     )
 
@@ -63,33 +63,33 @@ def uses_natural_gas(profile: HouseholdAnswers, use_alternatives: bool = False) 
     )
 
 
-def uses_lpg(profile: HouseholdAnswers, use_alternatives: bool = False) -> bool:
+def uses_lpg(answers: HouseholdAnswers, use_alternatives: bool = False) -> bool:
     """
     Return True if the household uses LPG, handling missing sections.
     """
     main_heating_source = (
-        profile.heating.main_heating_source
-        if profile.heating is not None and not use_alternatives
+        answers.heating.main_heating_source
+        if answers.heating is not None and not use_alternatives
         else (
-            profile.heating.alternative_main_heating_source
-            if profile.heating is not None
+            answers.heating.alternative_main_heating_source
+            if answers.heating is not None
             else None
         )
     )
     hot_water_heating_source = (
-        profile.hot_water.hot_water_heating_source
-        if profile.hot_water is not None and not use_alternatives
+        answers.hot_water.hot_water_heating_source
+        if answers.hot_water is not None and not use_alternatives
         else (
-            profile.hot_water.alternative_hot_water_heating_source
-            if profile.hot_water is not None
+            answers.hot_water.alternative_hot_water_heating_source
+            if answers.hot_water is not None
             else None
         )
     )
     cooktop = (
-        profile.cooktop.cooktop
-        if profile.cooktop is not None and not use_alternatives
+        answers.cooktop.cooktop
+        if answers.cooktop is not None and not use_alternatives
         else (
-            profile.cooktop.alternative_cooktop if profile.cooktop is not None else None
+            answers.cooktop.alternative_cooktop if answers.cooktop is not None else None
         )
     )
 
@@ -102,7 +102,7 @@ def uses_lpg(profile: HouseholdAnswers, use_alternatives: bool = False) -> bool:
     )
 
 
-def estimate_usage_from_profile(
+def estimate_usage_from_answers(
     answers: HouseholdAnswers,
     use_alternatives: bool = False,
     round_to_2dp: bool = False,
@@ -184,6 +184,9 @@ def estimate_usage_from_profile(
 
     # Variable electricity usage
     electricity_kwh = sum(profile.electricity_kwh for profile in profiles)
+
+    # Diverter model would be used here to modify the hot water hourly usage profile
+    # based on the solar generation profile and the remaining electricity usage.
 
     # Solar electricity generation
     solar_generation_kwh = sum(profile.solar_generation_kwh for profile in profiles)

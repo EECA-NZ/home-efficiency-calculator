@@ -12,7 +12,7 @@ def test_space_heating_energy_usage():
     """
     Test the energy usage pattern for space heating.
     """
-    profile = get_default_household_answers()
+    answers = get_default_household_answers()
     plans = get_default_plans()
 
     main_heating_sources = [
@@ -40,7 +40,7 @@ def test_space_heating_energy_usage():
         )
         # determine energy usage pattern
         heating_energy_use = heating.energy_usage_pattern(
-            profile["your_home"], profile["solar"]
+            answers["your_home"], answers["solar"]
         )
 
         # calculate costs by fuel

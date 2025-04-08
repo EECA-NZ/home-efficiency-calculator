@@ -16,7 +16,7 @@ from app.services.postcode_lookups.get_energy_plans import get_energy_plan
 
 from ...constants import EMISSIONS_FACTORS
 from ...models.user_answers import HouseholdAnswers, SolarAnswers
-from ...services.energy_calculator import estimate_usage_from_profile
+from ...services.energy_calculator import estimate_usage_from_answers
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -75,7 +75,7 @@ def calculate_solar_savings(profile):
         driving=profile.driving,
         solar=SolarAnswers(add_solar=True),
     )
-    with_solar_energy_usage_profile = estimate_usage_from_profile(
+    with_solar_energy_usage_profile = estimate_usage_from_answers(
         profile_with_solar,
         use_alternatives=True,
         include_other_electricity=True,

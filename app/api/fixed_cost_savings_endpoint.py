@@ -12,12 +12,12 @@ router = APIRouter()
 
 
 @router.post("/fixed-costs/savings", response_model=FixedCostsResponse)
-def household_energy_profile(profile: BasicHouseholdAnswers) -> FixedCostsResponse:
+def fixed_cost_savings(answers: BasicHouseholdAnswers) -> FixedCostsResponse:
     """
     Endpoint to retrieve gas fixed cost savings based on the user's home answers.
     """
     try:
-        gas_connection_savings = calculate_fixed_cost_savings(profile)
+        gas_connection_savings = calculate_fixed_cost_savings(answers)
         if gas_connection_savings is None:
             raise HTTPException(
                 status_code=400, detail="Gas connection savings not found"

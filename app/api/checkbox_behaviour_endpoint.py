@@ -12,12 +12,12 @@ router = APIRouter()
 
 
 @router.post("/checkbox-behaviour", response_model=CheckboxData)
-def household_energy_profile(profile: BasicHouseholdAnswers) -> CheckboxData:
+def gas_connection_checkbox_details(answers: BasicHouseholdAnswers) -> CheckboxData:
     """
     Determine the checkbox behaviour based on the user's home answers.
     """
     try:
-        checkbox = determine_gas_connection_checkbox(profile)
+        checkbox = determine_gas_connection_checkbox(answers)
         if checkbox is None:
             raise HTTPException(status_code=400, detail="Checkbox data not found")
         if not isinstance(checkbox, dict):

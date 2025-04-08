@@ -12,7 +12,7 @@ from ...models.user_answers import (
     SolarAnswers,
     YourHomeAnswers,
 )
-from ...services.energy_calculator import estimate_usage_from_profile
+from ...services.energy_calculator import estimate_usage_from_answers
 
 
 def get_default_your_home_answers():
@@ -115,5 +115,5 @@ def get_default_usage_profile():
         solar=get_default_solar_answers(),
         other=get_default_other_answers(),
     )
-    household_energy_use = estimate_usage_from_profile(household_profile)
+    household_energy_use = estimate_usage_from_answers(household_profile)
     return household_energy_use

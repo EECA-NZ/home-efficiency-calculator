@@ -29,7 +29,7 @@ from app.services.configuration import (
     get_default_wood_price,
     get_default_your_home_answers,
 )
-from app.services.energy_calculator import estimate_usage_from_profile
+from app.services.energy_calculator import estimate_usage_from_answers
 
 EXPECTED_COSTS_DEFAULT = (730.5, 2855.7396, 0.0, 0.0, 0.0)
 
@@ -101,7 +101,7 @@ def test_create_household_energy_profile_to_cost():
             household_profile.driving.vehicle_type
         ),
     )
-    household_energy_use = estimate_usage_from_profile(household_profile)
+    household_energy_use = estimate_usage_from_answers(household_profile)
     total_energy_costs = my_plan.calculate_cost(household_energy_use)
     assert (
         total_energy_costs.fixed_cost_nzd + total_energy_costs.variable_cost_nzd
@@ -133,7 +133,7 @@ def test_create_household_energy_profile_to_cost_with_solar():
             household_profile_with_solar.driving.vehicle_type
         ),
     )
-    household_energy_use_with_solar = estimate_usage_from_profile(
+    household_energy_use_with_solar = estimate_usage_from_answers(
         household_profile_with_solar
     )
     result = my_plan.calculate_cost(household_energy_use_with_solar)
