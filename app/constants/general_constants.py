@@ -10,9 +10,9 @@ Sources for emissions factors as follows:
 #   a five-year average (2019-2023) of MBIE numbers
 """
 
-CALENDAR_YEAR = 2019
+CALENDAR_YEAR = 2019  # used for setting days of the week
 
-DAYS_IN_YEAR = 365.25
+DAYS_IN_YEAR = 365.25  # average number of days in a year
 
 AVERAGE_HOUSEHOLD_SIZE = 2.69
 
