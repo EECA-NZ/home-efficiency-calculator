@@ -13,7 +13,7 @@ router = APIRouter()
 
 
 @router.post("/solar/savings", response_model=SolarSavingsResponse)
-def get_solar_savings(answers: BasicHouseholdAnswers):
+async def get_solar_savings(answers: BasicHouseholdAnswers):
     """
     Calculate savings and emissions reductions if solar is added to the household.
     """

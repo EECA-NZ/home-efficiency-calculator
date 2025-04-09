@@ -145,6 +145,6 @@ DELIVERED_HOT_WATER_TEMPERATURE = 40  # Celsius - typical demand temperature.
 # After multiplying fraction by energy per kg, the (65 - T_inlet) terms cancel out.
 # Hence, the total heating demand is effectively proportional to (40 - T_inlet).
 
-DEFAULT_CARNOT_COP_SCALING_FACTOR = 0.4  # Default scaling factor for COP calculation.
+# DEFAULT_CARNOT_COP_SCALING_FACTOR = 0.4  # Default scaling factor for COP calculation.
 
 COP_CALCULATION = "constant"  # Use an annual average COP per climate zone

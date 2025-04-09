@@ -8,7 +8,65 @@ import pytest
 from fastapi.testclient import TestClient
 from pytest import approx
 
+from app.api.fixed_cost_savings_endpoint import fixed_cost_savings
 from app.main import app
+from app.models.user_answers import (
+    BasicHouseholdAnswers,
+    CooktopAnswers,
+    DrivingAnswers,
+    HeatingAnswers,
+    HotWaterAnswers,
+    YourHomeAnswers,
+)
+
+
+@pytest.mark.asyncio
+async def test_fixed_cost_savings_direct_async():
+    """
+    Direct async test of fixed_cost_savings function (bypasses HTTP).
+    """
+    heating = HeatingAnswers(
+        main_heating_source="Piped gas heater",
+        alternative_main_heating_source="Heat pump",
+        heating_during_day="Never",
+        insulation_quality="Moderately insulated",
+    )
+    hot_water = HotWaterAnswers(
+        hot_water_usage="Average",
+        hot_water_heating_source="Piped gas instantaneous",
+        alternative_hot_water_heating_source="Electric hot water cylinder",
+    )
+    cooktop = CooktopAnswers(
+        cooktop="Piped gas",
+        alternative_cooktop="Electric induction",
+    )
+    driving = DrivingAnswers(
+        vehicle_size="Medium",
+        km_per_week="200",
+        vehicle_type="Petrol",
+        alternative_vehicle_type="Petrol",
+    )
+    your_home = YourHomeAnswers(
+        people_in_house=1,
+        postcode="6012",
+    )
+
+    householdanswers = BasicHouseholdAnswers(
+        your_home=your_home,
+        heating=heating,
+        hot_water=hot_water,
+        cooktop=cooktop,
+        driving=driving,
+    )
+
+    result = await fixed_cost_savings(
+        householdanswers,
+    )
+
+    data = result.model_dump()
+    assert "gas_connection_savings" in data
+    assert "natural_gas" in data["gas_connection_savings"]
+    assert "lpg" in data["gas_connection_savings"]
 
 
 @pytest.fixture(autouse=True, scope="session")

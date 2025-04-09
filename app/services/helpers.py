@@ -14,13 +14,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def answer_options(my_object, field):
-    """
-    For a given field on a pydantic model, return the possible answer options.
-    """
-    return type(my_object).model_fields[field].annotation.__args__
-
-
 def heating_frequency_factor(heating_days_per_week):
     """
     Calculate the heating frequency factor based on the number of heating days per week.

@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 @router.post("/fixed-costs/savings", response_model=FixedCostsResponse)
-def fixed_cost_savings(answers: BasicHouseholdAnswers) -> FixedCostsResponse:
+async def fixed_cost_savings(answers: BasicHouseholdAnswers) -> FixedCostsResponse:
     """
     Endpoint to retrieve gas fixed cost savings based on the user's home answers.
     """

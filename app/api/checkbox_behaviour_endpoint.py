@@ -12,7 +12,9 @@ router = APIRouter()
 
 
 @router.post("/checkbox-behaviour", response_model=CheckboxData)
-def gas_connection_checkbox_details(answers: BasicHouseholdAnswers) -> CheckboxData:
+async def gas_connection_checkbox_details(
+    answers: BasicHouseholdAnswers,
+) -> CheckboxData:
     """
     Determine the checkbox behaviour based on the user's home answers.
     """

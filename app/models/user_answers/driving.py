@@ -17,7 +17,6 @@ from ...constants import (
     EV_PUBLIC_CHARGING_FRACTION,
     FUEL_CONSUMPTION_LITRES_PER_100KM,
 )
-from ...models.hourly_profiles import flat_day_night_profiles
 from ...models.hourly_profiles.driving import solar_friendly_ev_charging_profile
 from ..usage_profiles import ElectricityUsage, YearlyFuelUsageProfile
 
@@ -33,22 +32,6 @@ class DrivingAnswers(BaseModel):
     alternative_vehicle_type: Optional[
         Literal["Petrol", "Diesel", "Hybrid", "Plug-in hybrid", "Electric"]
     ] = None
-
-    def ev_charging_profile(
-        self,
-    ):
-        """
-        Create a default electricity usage profile for electric vehicle charging.
-        The resulting array is normalized so that its sum is 1.
-
-        Returns
-        -------
-        np.ndarray
-            A 1D array of shape (8760,) where each element is 1/8760.
-        Placeholder for a more realistic profile.
-        """
-        _, night_profile = flat_day_night_profiles()
-        return night_profile
 
     # pylint: disable=unused-argument
     def energy_usage_pattern(

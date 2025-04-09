@@ -13,8 +13,6 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from app.models.hourly_profiles import ensure_8760_array
 
-FLAT_8760 = np.full(8760, 1 / 8760)
-
 
 class ElectricityUsage(BaseModel):
     """

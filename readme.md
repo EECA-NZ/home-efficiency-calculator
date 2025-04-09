@@ -76,6 +76,12 @@ It is assumed that the user is working in a powershell environment on a Windows 
     python -m pylint --disable=R0801 $(git ls-files '*.py')
     ```
 
+1. **Run vulture manually:**
+
+    ```bash
+    python -m vulture app tests scripts
+    ```
+
 1. **Run the application locally:** Use Uvicorn to run the application with live reloading:
 
     ```bash

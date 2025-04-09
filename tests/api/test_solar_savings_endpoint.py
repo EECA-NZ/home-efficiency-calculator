@@ -12,13 +12,66 @@ import pytest
 from fastapi.testclient import TestClient
 from pytest import approx
 
+from app.api.solar_savings_endpoint import get_solar_savings
 from app.main import app
+from app.models.user_answers import (
+    BasicHouseholdAnswers,
+    CooktopAnswers,
+    DrivingAnswers,
+    HeatingAnswers,
+    HotWaterAnswers,
+    SolarAnswers,
+    YourHomeAnswers,
+)
 from app.services.postcode_lookups.get_climate_zone import climate_zone
 from app.services.postcode_lookups.get_energy_plans import get_energy_plan
 
 # pylint: disable=fixme, too-many-locals, too-many-statements
 
 client = TestClient(app)
+
+
+@pytest.mark.asyncio
+async def test_get_solar_savings_direct_call():
+    """
+    Direct async test of the get_solar_savings function.
+    """
+    answers = BasicHouseholdAnswers(
+        your_home=YourHomeAnswers(
+            people_in_house=4,
+            postcode="6012",
+        ),
+        heating=HeatingAnswers(
+            main_heating_source="Piped gas heater",
+            alternative_main_heating_source="Heat pump",
+            heating_during_day="3-4 days a week",
+            insulation_quality="Not well insulated",
+        ),
+        hot_water=HotWaterAnswers(
+            hot_water_usage="High",
+            hot_water_heating_source="Electric hot water cylinder",
+            alternative_hot_water_heating_source="Hot water heat pump",
+        ),
+        cooktop=CooktopAnswers(
+            cooktop="Electric (coil or ceramic)",
+            alternative_cooktop="Electric induction",
+        ),
+        driving=DrivingAnswers(
+            vehicle_size="Small",
+            km_per_week="200",
+            vehicle_type="Petrol",
+            alternative_vehicle_type="Electric",
+        ),
+        solar=SolarAnswers(add_solar=True),
+    )
+
+    result = await get_solar_savings(answers)
+    response_data = result.model_dump()
+
+    assert response_data["annual_kwh_generated"] > 0
+    assert response_data["annual_earnings_solar_export"] >= 0
+    assert response_data["annual_savings_solar_self_consumption"] >= 0
+    assert response_data["annual_kg_co2e_saving"] > 0
 
 
 @pytest.fixture(autouse=True, scope="session")

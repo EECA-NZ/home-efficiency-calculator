@@ -162,21 +162,6 @@ class TestElectricityPlan(unittest.TestCase):
             import_rates={"Uncontrolled": self.uncontrolled},
             export_rates={"Uncontrolled": self.feed_in_tariff},
         )
-        self.electricity_plan_controlled = ElectricityPlan(
-            name="UncontrolledPlan",
-            fixed_rate=self.fixed_rate,
-            import_rates={
-                "Uncontrolled": self.uncontrolled,
-                "Controlled": self.controlled,
-            },
-            export_rates={"Uncontrolled": self.feed_in_tariff},
-        )
-        self.electricity_plan_night_all_inclusive = ElectricityPlan(
-            name="UncontrolledPlan",
-            fixed_rate=self.fixed_rate,
-            import_rates={"Night": self.night, "All inclusive": self.all_inclusive},
-            export_rates={"Uncontrolled": self.feed_in_tariff},
-        )
         self.electricity_plan_night_uncontrolled = ElectricityPlan(
             name="UncontrolledPlan",
             fixed_rate=self.fixed_rate,

@@ -46,3 +46,5 @@ profile = "black"
 markers = [
     "no_dummy: skip the dummy patch for hourly_ta"
 ]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

@@ -9,7 +9,7 @@ import logging
 import numpy as np
 
 from ..constants import CHECKBOX_BEHAVIOUR, DAYS_IN_YEAR
-from ..models.response_models import SavingsData, SavingsResponse
+from ..models.response_models import SavingsData
 from ..models.usage_profiles import EnergyCostBreakdown, YearlyFuelUsageProfile
 from ..models.user_answers import OtherAnswers
 from ..services.energy_calculator import uses_lpg, uses_natural_gas
@@ -117,119 +117,6 @@ def generate_savings_options(answers, field, your_home, solar_aware):
         )
     current_fuel_use = answers.energy_usage_pattern(your_home, solar_aware)
     return return_dictionary, current_fuel_use
-
-
-def calculate_savings_for_option_provided(answers, your_home, solar_aware):
-    """
-    Calculate the savings and emissions reduction for a given option.
-    """
-    if type(answers).__name__ == "HeatingAnswers":
-        option = answers.alternative_main_heating_source
-        field = "main_heating_source"
-    elif type(answers).__name__ == "HotWaterAnswers":
-        option = answers.alternative_hot_water_heating_source
-        field = "hot_water_heating_source"
-    elif type(answers).__name__ == "CooktopAnswers":
-        option = answers.alternative_cooktop
-        field = "cooktop"
-    elif type(answers).__name__ == "DrivingAnswers":
-        option = answers.alternative_vehicle_type
-        field = "vehicle_type"
-    else:
-        raise ValueError("Invalid answers type")
-    return calculate_savings_for_option(option, field, answers, your_home, solar_aware)
-
-
-def assemble_fuel_savings(totals):
-    """
-    Calculate fuel cost and CO2 savings for the household.
-
-    Returns:
-    - A dictionary of fuel cost and CO2 savings for the household.
-    """
-    variable_costs_savings_dict = {
-        "current": totals["total_current_variable_costs"],
-        "alternative": totals["total_alternative_variable_costs"],
-        "absolute_reduction": totals["total_current_variable_costs"]
-        - totals["total_alternative_variable_costs"],
-        "percentage_reduction": safe_percentage_reduction(
-            totals["total_current_variable_costs"],
-            totals["total_alternative_variable_costs"],
-        ),
-    }
-    emissions_savings_dict = {
-        "current": totals["total_current_emissions"],
-        "alternative": totals["total_alternative_emissions"],
-        "absolute_reduction": totals["total_current_emissions"]
-        - totals["total_alternative_emissions"],
-        "percentage_reduction": safe_percentage_reduction(
-            totals["total_current_emissions"], totals["total_alternative_emissions"]
-        ),
-    }
-    variable_costs_savings_dict = round_floats_to_2_dp(variable_costs_savings_dict)
-    emissions_savings_dict = round_floats_to_2_dp(emissions_savings_dict)
-    return SavingsResponse(
-        variable_cost_nzd=SavingsData(**variable_costs_savings_dict),
-        emissions_kg_co2e=SavingsData(**emissions_savings_dict),
-    )
-
-
-def assemble_total_savings(totals, solar_savings, gas_disconnection_savings):
-    """
-    Calculate total cost and CO2 savings for the household.
-
-    Returns:
-    - A dictionary of total cost and CO2 savings for the household.
-    """
-    gas_connection_costs_current = 0
-    gas_connection_costs_alternative = 0
-    for gas_connection_type in gas_disconnection_savings:
-        gas_connection_costs_current += gas_disconnection_savings[gas_connection_type][
-            "variable_cost_nzd"
-        ].current
-        gas_connection_costs_alternative += gas_disconnection_savings[
-            gas_connection_type
-        ]["variable_cost_nzd"].alternative
-
-    solar_export_earnings = solar_savings["annual_earnings_solar_export"]
-    solar_self_consumption_savings = solar_savings[
-        "annual_savings_solar_self_consumption"
-    ]
-    solar_savings_total = solar_export_earnings + solar_self_consumption_savings
-    current_cost = totals["total_current_variable_costs"] + gas_connection_costs_current
-    alternative_cost = (
-        totals["total_alternative_variable_costs"]
-        + gas_connection_costs_alternative
-        + solar_savings_total
-    )
-    total_cost_savings_dict = {
-        "current": current_cost,
-        "alternative": alternative_cost,
-        "absolute_reduction": current_cost - alternative_cost,
-        "percentage_reduction": safe_percentage_reduction(
-            current_cost, alternative_cost
-        ),
-    }
-
-    emissions_current = totals["total_current_emissions"]
-    emissions_alternative = (
-        totals["total_alternative_emissions"] + solar_savings["annual_kg_co2e_saving"]
-    )
-
-    emissions_savings_dict = {
-        "current": emissions_current,
-        "alternative": emissions_alternative,
-        "absolute_reduction": emissions_current - emissions_alternative,
-        "percentage_reduction": safe_percentage_reduction(
-            emissions_current, emissions_alternative
-        ),
-    }
-    total_cost_savings_dict = round_floats_to_2_dp(total_cost_savings_dict)
-    emissions_savings_dict = round_floats_to_2_dp(emissions_savings_dict)
-    return SavingsResponse(
-        variable_cost_nzd=SavingsData(**total_cost_savings_dict),
-        emissions_kg_co2e=SavingsData(**emissions_savings_dict),
-    )
 
 
 def determine_gas_connection_checkbox(profile):
