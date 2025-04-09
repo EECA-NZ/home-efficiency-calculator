@@ -26,9 +26,20 @@ from app.models.user_answers import (
 from app.services.postcode_lookups.get_climate_zone import climate_zone
 from app.services.postcode_lookups.get_energy_plans import get_energy_plan
 
-# pylint: disable=fixme, too-many-locals, too-many-statements
+# pylint: disable=too-many-locals, too-many-statements
 
 client = TestClient(app)
+
+
+@pytest.fixture(autouse=True, scope="session")
+def set_test_environment_variable():
+    """
+    Set the TEST_MODE environment variable to True.
+    This will ensure that the test data is used, allowing
+    the tests to run without the need for data files that
+    are not licensed for sharing publicly.
+    """
+    os.environ["TEST_MODE"] = "False"
 
 
 @pytest.mark.asyncio
@@ -72,17 +83,6 @@ async def test_get_solar_savings_direct_call():
     assert response_data["annual_earnings_solar_export"] >= 0
     assert response_data["annual_savings_solar_self_consumption"] >= 0
     assert response_data["annual_kg_co2e_saving"] > 0
-
-
-@pytest.fixture(autouse=True, scope="session")
-def set_test_environment_variable():
-    """
-    Set the TEST_MODE environment variable to True.
-    This will ensure that the test data is used, allowing
-    the tests to run without the need for data files that
-    are not licensed for sharing publicly.
-    """
-    os.environ["TEST_MODE"] = "False"
 
 
 def load_lookup_timeseries(
