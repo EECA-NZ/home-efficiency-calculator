@@ -22,8 +22,6 @@ from ...services.energy_calculator import estimate_usage_from_answers
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-ASSUMED_SELF_CONSUMPTION = 0.0
-
 
 def calculate_solar_savings(profile):
     """

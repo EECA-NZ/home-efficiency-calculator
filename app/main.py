@@ -59,9 +59,6 @@ app.include_router(component_savings_app.router)
 app.include_router(solar_savings_endpoint.router)
 app.include_router(fixed_cost_savings_endpoint.router)
 
-# Include the router for the household energy profile
-# app.include_router(household_savings_endpoint.router)
-
 
 def run():
     """
