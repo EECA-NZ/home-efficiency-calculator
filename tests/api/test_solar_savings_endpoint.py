@@ -42,6 +42,10 @@ def set_test_environment_variable():
     os.environ["TEST_MODE"] = "False"
 
 
+@pytest.mark.skipif(
+    os.environ.get("LOCAL_SOLAR_DATA", "True") != "True",
+    reason="Skipping solar test because local lookup table data is unavailable.",
+)
 @pytest.mark.asyncio
 async def test_get_solar_savings_direct_call():
     """

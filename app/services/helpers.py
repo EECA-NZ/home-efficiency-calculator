@@ -5,7 +5,6 @@ Module for generic helper functions.
 import logging
 
 import numpy as np
-import pandas as pd
 from pydantic import BaseModel
 
 from ..constants import HEATING_PERIOD_FACTOR
@@ -80,57 +79,6 @@ def safe_percentage_reduction(current: float, alternative: float) -> float:
     if current == 0:
         return np.nan if alternative != 0 else 0
     return 100 * (current - alternative) / current
-
-
-def load_lookup_timeseries(
-    lookup_csv_path: str, row_prefix: str, hour_count: int = 8760
-) -> np.ndarray:
-    """
-    Reads a CSV (with headers) and looks for a row where the first N columns
-    (N = number of commas in row_prefix + 1) match row_prefix when joined with commas.
-
-    Expects:
-      - A column named 'annual_total_kwh'.
-      - Hourly fractional columns named '0' .. '8759' (There are
-        8760 of them, scaled to sum to 1000).
-
-    Returns:
-      A NumPy array of length = hour_count,
-      scaled by (annual_total_kwh / 1000).
-    """
-    logger.warning("READING %s", lookup_csv_path)
-    df = pd.read_csv(lookup_csv_path)
-    if row_prefix.strip() == "":
-        match_len = 0
-    else:
-        prefix_parts = row_prefix.split(",")
-        match_len = len(prefix_parts)
-    if match_len > 0:
-        leading_col_names = df.columns[:match_len]
-        df["_combined"] = df[leading_col_names].astype(str).agg(",".join, axis=1)
-        matched_rows = df[df["_combined"] == row_prefix]
-    else:
-        matched_rows = df
-
-    if len(matched_rows) == 0:
-        raise ValueError(f"No rows found matching prefix: '{row_prefix}'")
-    if len(matched_rows) > 1:
-        raise ValueError(f"Multiple rows found matching prefix: '{row_prefix}'")
-
-    row = matched_rows.iloc[0]
-
-    if "annual_total_kwh" not in row:
-        raise ValueError("CSV does not contain a column named 'annual_total_kwh'.")
-    annual_total = float(row["annual_total_kwh"])
-
-    frac_cols = [str(i) for i in range(hour_count)]
-    if not all(col in row for col in frac_cols):
-        missing = [c for c in frac_cols if c not in row]
-        raise ValueError(
-            f"CSV is missing expected fractional columns, e.g. {missing[:10]}"
-        )
-    fractions = row[frac_cols].astype(float).to_numpy()
-    return (annual_total / 1000.0) * fractions
 
 
 def get_solar_answers(answers) -> dict:

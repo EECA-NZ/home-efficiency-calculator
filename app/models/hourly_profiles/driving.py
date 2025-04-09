@@ -7,26 +7,8 @@ import logging
 import numpy as np
 import pandas as pd
 
-from .general import flat_day_night_profiles
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-def ev_charging_profile() -> np.ndarray:
-    """
-    Create a default electricity usage profile for electric vehicle charging.
-    The resulting array is normalized so that its sum is 1.
-
-    Returns
-    -------
-    np.ndarray
-        A 1D array of shape (8760,), with constant non-zero values in night-time
-        hours.
-    Placeholder for a more realistic profile.
-    """
-    _, night_profile = flat_day_night_profiles()
-    return night_profile
 
 
 def _ev_charging_windows(day_of_week: int) -> list[tuple[str, str]]:
