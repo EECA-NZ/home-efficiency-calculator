@@ -8,7 +8,7 @@ import pstats
 
 # 1) Import your specific test function
 from tests.api.test_component_savings_endpoints import (
-    test_hot_water_savings_specific_alternative,
+    test_hot_water_savings_specific_alternative_2,
 )
 
 
@@ -22,15 +22,15 @@ def run_profile():
 
     # 2) Call the test function directly, timing it each time
     print("Running test_hot_water_savings_specific_alternative... A")
-    test_hot_water_savings_specific_alternative()
+    test_hot_water_savings_specific_alternative_2()
     print("Running test_hot_water_savings_specific_alternative... B")
-    test_hot_water_savings_specific_alternative()
+    test_hot_water_savings_specific_alternative_2()
     print("Running test_hot_water_savings_specific_alternative... C")
-    test_hot_water_savings_specific_alternative()
+    test_hot_water_savings_specific_alternative_2()
     print("Running test_hot_water_savings_specific_alternative... D")
-    test_hot_water_savings_specific_alternative()
+    test_hot_water_savings_specific_alternative_2()
     print("Running test_hot_water_savings_specific_alternative... E")
-    test_hot_water_savings_specific_alternative()
+    test_hot_water_savings_specific_alternative_2()
 
     profiler.disable()
 
