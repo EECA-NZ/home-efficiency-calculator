@@ -73,7 +73,6 @@ cooktop_types = [
 vehicle_types = ["Petrol", "Diesel", "Hybrid", "Plug-in hybrid", "Electric"]
 vehicle_sizes = ["Small", "Medium", "Large"]
 km_per_week = ["50 or less", "100", "200", "300", "400 or more"]
-add_solar = [True, False]  # Ignored for now
 
 # Cache for expensive functions
 energy_plan_cache = {}

@@ -48,8 +48,6 @@ vehicle_types = ["Petrol", "Diesel", "Hybrid", "Plug-in hybrid", "Electric", Non
 alternative_main_heating_sources = main_heating_sources.copy()
 alternative_hot_water_heating_sources = hot_water_heating_sources.copy()
 alternative_cooktop_types = cooktop_types.copy()
-alternative_vehicle_types = vehicle_types.copy()
-
 
 # Cache for expensive functions
 energy_plan_cache = {}
