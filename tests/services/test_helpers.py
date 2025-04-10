@@ -12,7 +12,7 @@ from app.models.hourly_profiles.get_base_demand_profile import (
 )
 from app.models.usage_profiles import ElectricityUsage, YearlyFuelUsageProfile
 from app.models.user_answers import SolarAnswers
-from app.services.configuration import get_default_electricity_plan
+from app.services.configuration import get_default_plan
 from app.services.helpers import add_gst, get_solar_answers
 from app.services.usage_calculation.hot_water_helpers import (
     other_water_kwh_per_year,
@@ -25,7 +25,7 @@ def test_add_gst():
     """
     Test the add_gst function.
     """
-    electricity_plan = get_default_electricity_plan()
+    electricity_plan = get_default_plan("electricity_plan")
     adjusted_electricity_plan = add_gst(electricity_plan)
     assert adjusted_electricity_plan.name == electricity_plan.name
     assert adjusted_electricity_plan.fixed_rate == electricity_plan.fixed_rate * 1.15

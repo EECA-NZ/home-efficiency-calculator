@@ -40,7 +40,7 @@ def test_space_heating_energy_usage():
         )
         # determine energy usage pattern
         heating_energy_use = heating.energy_usage_pattern(
-            answers["your_home"], answers["solar"]
+            answers.your_home, answers.solar
         )
 
         # calculate costs by fuel

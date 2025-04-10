@@ -9,10 +9,7 @@ from pytest import approx, raises
 
 from app.constants import DAYS_IN_YEAR
 from app.models.user_answers import CooktopAnswers, SolarAnswers, YourHomeAnswers
-from app.services.configuration import (
-    get_default_cooktop_answers,
-    get_default_your_home_answers,
-)
+from app.services.configuration import get_default_answer_section
 from app.services.cost_calculator import calculate_savings_for_option
 from app.services.postcode_lookups.get_energy_plans import get_energy_plan
 
@@ -73,8 +70,8 @@ def test_cooking_energy_usage():
     """
     Test the energy usage pattern for cooking.
     """
-    your_home = get_default_your_home_answers()
-    cooktop = get_default_cooktop_answers()
+    your_home = get_default_answer_section("your_home")
+    cooktop = get_default_answer_section("cooktop")
 
     # Modeled energy use in kWh for each cooktop type. This is based
     # on a linearized energy use model that preserves the average

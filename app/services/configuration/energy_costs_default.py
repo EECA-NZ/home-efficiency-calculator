@@ -25,8 +25,8 @@ From MBIE: Average Petrol and Diesel Costs from 1/09/2023 to 23/08/2024
     • Regular_Petrol_discounted_retail_price_NZc.p.l = 278.716297
 Source:
     https://www.mbie.govt.nz/building-and-energy/
-energy-and-natural-resources/energy-statistics-and-modelling/
-energy-statistics/oil-statistics
+    energy-and-natural-resources/energy-statistics-and-modelling/
+    energy-statistics/oil-statistics
 
 Wood pricing:
     Figures justified by:
@@ -56,29 +56,24 @@ from ...models.energy_plans import (
 )
 
 
-def get_default_electricity_plan():
+def _electricity():
     """
     Return a default electricity plan.
 
     Rewiring Aotearoa:
     • Electricity variable cost: 24.2c/kWh or 18c/kWh off-peak/ripple.
     • Electricity connection cost: Not included in any calculations.
-        (Homes are assumed on-grid in all cases.)
+      (Homes are assumed on-grid in all cases.)
     """
     return ElectricityPlan(
         name="Default Electricity Plan",
         fixed_rate=2.0,
-        import_rates={
-            "Day": 0.242,
-            "Night": 0.18,
-        },
-        export_rates={
-            "Uncontrolled": 0.12,
-        },
+        import_rates={"Day": 0.242, "Night": 0.18},
+        export_rates={"Uncontrolled": 0.12},
     )
 
 
-def get_default_natural_gas_plan():
+def _natural_gas():
     """
     Return a default natural gas plan.
 
@@ -89,28 +84,30 @@ def get_default_natural_gas_plan():
     return NaturalGasPlan(
         name="Default Natural Gas Plan",
         fixed_rate=1.60,
-        import_rates={
-            "Uncontrolled": 0.11,
-        },
+        import_rates={"Uncontrolled": 0.11},
     )
 
 
-def get_default_lpg_plan():
+def _lpg():
     """
     Return a default LPG plan.
 
     Rewiring Aotearoa:
-        • LPG variable cost: 24.4c/kWh.
-        • LPG bottle rental (per 45kg bottle): two bottles at
-            $5.75 per bottle per month ($69 per year per bottle).
+    • LPG variable cost: 24.4c/kWh.
+    • LPG bottle rental (per 45kg bottle): two bottles at
+      $5.75 per bottle per month ($69 per year per bottle).
     """
     return LPGPlan(
-        name="Default LPG Plan", per_lpg_kwh=0.244, fixed_rate=2 * 69 / 365.25
+        name="Default LPG Plan",
+        per_lpg_kwh=0.244,
+        fixed_rate=2 * 69 / 365.25,
     )
 
 
-def get_default_wood_price():
+def _wood():
     """
+    Return a default wood price per kWh.
+
     Figures justified by:
 
         Typical price per m³ from Consumer NZ:
@@ -125,7 +122,7 @@ def get_default_wood_price():
         Working Group 2: Methodology. Statistics Austria;
         Statistical Office of the Republic of Slovenia.
 
-        ($/m3)(m3/kg)(kg/MJ)(MJ/kWh) = ($/kWh)
+    ($/m³)(m³/kg)(kg/MJ)(MJ/kWh) = ($/kWh)
     """
     price_per_cubic_metre = 140
     thrown_density_kg_per_m3 = 307
@@ -141,7 +138,7 @@ def get_default_wood_price():
     )
 
 
-def get_default_petrol_price():
+def _petrol():
     """
     Return a default petrol plan.
 
@@ -154,7 +151,7 @@ def get_default_petrol_price():
     )
 
 
-def get_default_diesel_price():
+def _diesel():
     """
     Return a default diesel plan.
 
@@ -169,7 +166,7 @@ def get_default_diesel_price():
     )
 
 
-def get_default_public_ev_charger_rate():
+def _public_ev_charger():
     """
     Return a default public EV charger rate.
 
@@ -181,127 +178,72 @@ def get_default_public_ev_charger_rate():
     )
 
 
-def get_default_annual_non_energy_no_vehicle_costs():
-    """
-    Return a default set of annual non-energy costs
-    for no vehicle.
-    """
-    return NonEnergyVehicleCosts(
-        name="Vehicle Other Costs for no Vehicle",
-        nzd_per_year_licensing=0.0,
-        nzd_per_year_servicing_cost=0.0,
-        nzd_per_000_km_road_user_charges=0.0,
-    )
+# ---------------------------------------------------
+# Vehicle Non-Energy Cost Defaults (Consolidated)
+# ---------------------------------------------------
+
+_DEFAULT_VEHICLE_COSTS = {
+    "None": {"licensing": 0.0, "servicing": 0.0, "ruc": 0.0},
+    "Petrol": {"licensing": 107.09, "servicing": 1133.15, "ruc": 0},
+    "Diesel": {"licensing": 174.92, "servicing": 1133.15, "ruc": 76},
+    "Hybrid": {"licensing": 107.09, "servicing": 1133.15, "ruc": 0},
+    "Plug-in hybrid": {"licensing": 107.09, "servicing": 1133.15, "ruc": 53},
+    "Electric": {"licensing": 107.09, "servicing": 684.4, "ruc": 76},
+}
 
 
-def get_default_annual_non_energy_petrol_vehicle_costs():
-    """
-    Return a default set of annual non-energy costs
-    for a petrol vehicle.
-    """
-    return NonEnergyVehicleCosts(
-        name="Default Petrol Vehicle Other Costs",
-        nzd_per_year_licensing=107.09,
-        nzd_per_year_servicing_cost=1133.15,
-        nzd_per_000_km_road_user_charges=0,
-    )
-
-
-def get_default_annual_non_energy_diesel_vehicle_costs():
-    """
-    Return a default set of annual non-energy costs
-    for a diesel vehicle.
-    """
-    return NonEnergyVehicleCosts(
-        name="Default Diesel Vehicle Other Costs",
-        nzd_per_year_licensing=174.92,
-        nzd_per_year_servicing_cost=1133.15,
-        nzd_per_000_km_road_user_charges=76,
-    )
-
-
-def get_default_annual_non_energy_hybrid_vehicle_costs():
-    """
-    Return a default set of annual non-energy costs
-    for a hybrid vehicle.
-    """
-    return NonEnergyVehicleCosts(
-        name="Default Hybrid Vehicle Other Costs",
-        nzd_per_year_licensing=107.09,
-        nzd_per_year_servicing_cost=1133.15,
-        nzd_per_000_km_road_user_charges=0,
-    )
-
-
-def get_default_annual_non_energy_phev_costs():
-    """
-    Return a default set of annual non-energy costs
-    for a plug-in hybrid vehicle.
-    """
-    return NonEnergyVehicleCosts(
-        name="Default Plug-In-Hybrid Vehicle Other Costs",
-        nzd_per_year_licensing=107.09,
-        nzd_per_year_servicing_cost=1133.15,
-        nzd_per_000_km_road_user_charges=53,
-    )
-
-
-def get_default_annual_non_energy_electric_vehicle_costs():
-    """
-    Return a default set of annual non-energy costs
-    for an electric vehicle.
-    """
-    return NonEnergyVehicleCosts(
-        name="Default Electric Vehicle Other Costs",
-        nzd_per_year_licensing=107.09,
-        nzd_per_year_servicing_cost=684.4,
-        nzd_per_000_km_road_user_charges=76,
-    )
-
-
-def get_default_annual_other_vehicle_costs(vehicle_type):
+def get_default_annual_other_vehicle_costs(vehicle_type: str) -> NonEnergyVehicleCosts:
     """
     Return a default set of annual non-energy costs
     for the provided vehicle type.
     """
-    if vehicle_type == "None":
-        return get_default_annual_non_energy_no_vehicle_costs()
-    if vehicle_type == "Petrol":
-        return get_default_annual_non_energy_petrol_vehicle_costs()
-    if vehicle_type == "Diesel":
-        return get_default_annual_non_energy_diesel_vehicle_costs()
-    if vehicle_type == "Hybrid":
-        return get_default_annual_non_energy_hybrid_vehicle_costs()
-    if vehicle_type == "Plug-in hybrid":
-        return get_default_annual_non_energy_phev_costs()
-    if vehicle_type == "Electric":
-        return get_default_annual_non_energy_electric_vehicle_costs()
-    raise ValueError(f"Unknown vehicle type: {vehicle_type}")
+    if vehicle_type not in _DEFAULT_VEHICLE_COSTS:
+        raise ValueError(f"Unknown vehicle type: {vehicle_type}")
+    c = _DEFAULT_VEHICLE_COSTS[vehicle_type]
+    return NonEnergyVehicleCosts(
+        name=f"Default {vehicle_type} Vehicle Other Costs",
+        nzd_per_year_licensing=c["licensing"],
+        nzd_per_year_servicing_cost=c["servicing"],
+        nzd_per_000_km_road_user_charges=c["ruc"],
+    )
+
+
+# ---------------------------------------------------
+# Factory registry for all plans
+# ---------------------------------------------------
+
+_DEFAULT_PLAN_FACTORIES = {
+    "electricity_plan": _electricity,
+    "natural_gas_plan": _natural_gas,
+    "lpg_plan": _lpg,
+    "wood_price": _wood,
+    "petrol_price": _petrol,
+    "diesel_price": _diesel,
+    "public_charging_price": _public_ev_charger,
+}
+
+
+def get_default_plan(name: str):
+    """
+    Return a specific default plan by name.
+    Example names:
+        - 'electricity_plan'
+        - 'natural_gas_plan'
+        - 'wood_price'
+    """
+    if name not in _DEFAULT_PLAN_FACTORIES:
+        raise ValueError(f"No default plan registered for: {name}")
+    return _DEFAULT_PLAN_FACTORIES[name]()
 
 
 def get_default_plans():
     """
-    Return a default set of energy plans.
-
-    Returns
-    -------
-    dict
-        A dictionary of default energy plans.
+    Return a default set of energy plans and vehicle cost plans.
     """
     return {
-        "electricity_plan": get_default_electricity_plan(),
-        "natural_gas_plan": get_default_natural_gas_plan(),
-        "lpg_plan": get_default_lpg_plan(),
-        "wood_price": get_default_wood_price(),
-        "petrol_price": get_default_petrol_price(),
-        "diesel_price": get_default_diesel_price(),
-        "public_charging_price": get_default_public_ev_charger_rate(),
+        **{k: get_default_plan(k) for k in _DEFAULT_PLAN_FACTORIES},
         "other_vehicle_costs": {
-            "None": get_default_annual_non_energy_no_vehicle_costs(),
-            "Petrol": get_default_annual_non_energy_petrol_vehicle_costs(),
-            "Diesel": get_default_annual_non_energy_diesel_vehicle_costs(),
-            "Hybrid": get_default_annual_non_energy_hybrid_vehicle_costs(),
-            "Plug-in hybrid": get_default_annual_non_energy_phev_costs(),
-            "Electric": get_default_annual_non_energy_electric_vehicle_costs(),
+            vt: get_default_annual_other_vehicle_costs(vt)
+            for vt in _DEFAULT_VEHICLE_COSTS
         },
     }

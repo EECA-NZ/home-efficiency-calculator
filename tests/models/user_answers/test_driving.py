@@ -113,24 +113,24 @@ def test_savings_calculations():
     petrol_plan = HouseholdEnergyPlan(
         name="Basic Household Energy Plan",
         electricity_plan=MY_ELECTRICITY_PLAN,
-        natural_gas_plan=cfg.get_default_natural_gas_plan(),
-        lpg_plan=cfg.get_default_lpg_plan(),
-        wood_price=cfg.get_default_wood_price(),
-        petrol_price=cfg.get_default_petrol_price(),
-        diesel_price=cfg.get_default_diesel_price(),
-        public_charging_price=cfg.get_default_public_ev_charger_rate(),
+        natural_gas_plan=cfg.get_default_plan("natural_gas_plan"),
+        lpg_plan=cfg.get_default_plan("lpg_plan"),
+        wood_price=cfg.get_default_plan("wood_price"),
+        petrol_price=cfg.get_default_plan("petrol_price"),
+        diesel_price=cfg.get_default_plan("diesel_price"),
+        public_charging_price=cfg.get_default_plan("public_charging_price"),
         other_vehicle_costs=cfg.get_default_annual_other_vehicle_costs("Petrol"),
     )
 
     electric_plan = HouseholdEnergyPlan(
         name="Basic Household Energy Plan",
         electricity_plan=MY_ELECTRICITY_PLAN,
-        natural_gas_plan=cfg.get_default_natural_gas_plan(),
-        lpg_plan=cfg.get_default_lpg_plan(),
-        wood_price=cfg.get_default_wood_price(),
-        petrol_price=cfg.get_default_petrol_price(),
-        diesel_price=cfg.get_default_diesel_price(),
-        public_charging_price=cfg.get_default_public_ev_charger_rate(),
+        natural_gas_plan=cfg.get_default_plan("natural_gas_plan"),
+        lpg_plan=cfg.get_default_plan("lpg_plan"),
+        wood_price=cfg.get_default_plan("wood_price"),
+        petrol_price=cfg.get_default_plan("petrol_price"),
+        diesel_price=cfg.get_default_plan("diesel_price"),
+        public_charging_price=cfg.get_default_plan("public_charging_price"),
         other_vehicle_costs=cfg.get_default_annual_other_vehicle_costs("Electric"),
     )
 

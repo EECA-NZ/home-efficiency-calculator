@@ -13,21 +13,10 @@ from app.models.energy_plans import HouseholdEnergyPlan
 from app.models.user_answers import HouseholdAnswers, SolarAnswers
 from app.services.configuration import (
     get_default_annual_other_vehicle_costs,
-    get_default_cooktop_answers,
-    get_default_diesel_price,
-    get_default_driving_answers,
-    get_default_electricity_plan,
-    get_default_heating_answers,
-    get_default_hot_water_answers,
+    get_default_answer_section,
     get_default_household_answers,
-    get_default_lpg_plan,
-    get_default_natural_gas_plan,
-    get_default_petrol_price,
-    get_default_public_ev_charger_rate,
-    get_default_solar_answers,
+    get_default_plan,
     get_default_usage_profile,
-    get_default_wood_price,
-    get_default_your_home_answers,
 )
 from app.services.energy_calculator import estimate_usage_from_answers
 
@@ -53,15 +42,15 @@ def test_calculate_annual_costs():
     my_profile = get_default_usage_profile()
     my_plan = HouseholdEnergyPlan(
         name="Basic Household Energy Plan",
-        electricity_plan=get_default_electricity_plan(),
-        natural_gas_plan=get_default_natural_gas_plan(),
-        lpg_plan=get_default_lpg_plan(),
-        wood_price=get_default_wood_price(),
-        petrol_price=get_default_petrol_price(),
-        diesel_price=get_default_diesel_price(),
-        public_charging_price=get_default_public_ev_charger_rate(),
+        electricity_plan=get_default_plan("electricity_plan"),
+        natural_gas_plan=get_default_plan("natural_gas_plan"),
+        lpg_plan=get_default_plan("lpg_plan"),
+        wood_price=get_default_plan("wood_price"),
+        petrol_price=get_default_plan("petrol_price"),
+        diesel_price=get_default_plan("diesel_price"),
+        public_charging_price=get_default_plan("public_charging_price"),
         other_vehicle_costs=get_default_annual_other_vehicle_costs(
-            my_answers["driving"].vehicle_type
+            my_answers.driving.vehicle_type
         ),
     )
     my_costs = my_plan.calculate_cost(my_profile)
@@ -80,28 +69,28 @@ def test_create_household_energy_profile_to_cost():
     """
     Test constructing a profile and plan, and doing a cost calculation.
     """
-    household_profile = HouseholdAnswers(
-        your_home=get_default_your_home_answers(),
-        heating=get_default_heating_answers(),
-        hot_water=get_default_hot_water_answers(),
-        cooktop=get_default_cooktop_answers(),
-        driving=get_default_driving_answers(),
-        solar=get_default_solar_answers(),
+    my_answers = HouseholdAnswers(
+        your_home=get_default_answer_section("your_home"),
+        heating=get_default_answer_section("heating"),
+        hot_water=get_default_answer_section("hot_water"),
+        cooktop=get_default_answer_section("cooktop"),
+        driving=get_default_answer_section("driving"),
+        solar=get_default_answer_section("solar"),
     )
     my_plan = HouseholdEnergyPlan(
         name="Basic Household Energy Plan",
-        electricity_plan=get_default_electricity_plan(),
-        natural_gas_plan=get_default_natural_gas_plan(),
-        lpg_plan=get_default_lpg_plan(),
-        wood_price=get_default_wood_price(),
-        petrol_price=get_default_petrol_price(),
-        diesel_price=get_default_diesel_price(),
-        public_charging_price=get_default_public_ev_charger_rate(),
+        electricity_plan=get_default_plan("electricity_plan"),
+        natural_gas_plan=get_default_plan("natural_gas_plan"),
+        lpg_plan=get_default_plan("lpg_plan"),
+        wood_price=get_default_plan("wood_price"),
+        petrol_price=get_default_plan("petrol_price"),
+        diesel_price=get_default_plan("diesel_price"),
+        public_charging_price=get_default_plan("public_charging_price"),
         other_vehicle_costs=get_default_annual_other_vehicle_costs(
-            household_profile.driving.vehicle_type
+            my_answers.driving.vehicle_type
         ),
     )
-    household_energy_use = estimate_usage_from_answers(household_profile)
+    household_energy_use = estimate_usage_from_answers(my_answers)
     total_energy_costs = my_plan.calculate_cost(household_energy_use)
     assert (
         total_energy_costs.fixed_cost_nzd + total_energy_costs.variable_cost_nzd
@@ -112,30 +101,28 @@ def test_create_household_energy_profile_to_cost_with_solar():
     """
     Test constructing a profile and plan, and doing a cost calculation.
     """
-    household_profile_with_solar = HouseholdAnswers(
-        your_home=get_default_your_home_answers(),
-        heating=get_default_heating_answers(),
-        hot_water=get_default_hot_water_answers(),
-        cooktop=get_default_cooktop_answers(),
-        driving=get_default_driving_answers(),
+    my_answers_with_solar = HouseholdAnswers(
+        your_home=get_default_answer_section("your_home"),
+        heating=get_default_answer_section("heating"),
+        hot_water=get_default_answer_section("hot_water"),
+        cooktop=get_default_answer_section("cooktop"),
+        driving=get_default_answer_section("driving"),
         solar=SolarAnswers(add_solar=True),
     )
     my_plan = HouseholdEnergyPlan(
         name="Basic Household Energy Plan",
-        electricity_plan=get_default_electricity_plan(),
-        natural_gas_plan=get_default_natural_gas_plan(),
-        lpg_plan=get_default_lpg_plan(),
-        wood_price=get_default_wood_price(),
-        petrol_price=get_default_petrol_price(),
-        diesel_price=get_default_diesel_price(),
-        public_charging_price=get_default_public_ev_charger_rate(),
+        electricity_plan=get_default_plan("electricity_plan"),
+        natural_gas_plan=get_default_plan("natural_gas_plan"),
+        lpg_plan=get_default_plan("lpg_plan"),
+        wood_price=get_default_plan("wood_price"),
+        petrol_price=get_default_plan("petrol_price"),
+        diesel_price=get_default_plan("diesel_price"),
+        public_charging_price=get_default_plan("public_charging_price"),
         other_vehicle_costs=get_default_annual_other_vehicle_costs(
-            household_profile_with_solar.driving.vehicle_type
+            my_answers_with_solar.driving.vehicle_type
         ),
     )
-    household_energy_use_with_solar = estimate_usage_from_answers(
-        household_profile_with_solar
-    )
+    household_energy_use_with_solar = estimate_usage_from_answers(my_answers_with_solar)
     result = my_plan.calculate_cost(household_energy_use_with_solar)
     solar = result.solar
     assert solar is not None

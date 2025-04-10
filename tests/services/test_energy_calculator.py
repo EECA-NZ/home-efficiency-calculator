@@ -15,20 +15,20 @@ from app.services.energy_calculator import (
 )
 
 household_answers = HouseholdAnswers(
-    your_home=cfg.get_default_your_home_answers(),
-    heating=cfg.get_default_heating_answers(),
-    hot_water=cfg.get_default_hot_water_answers(),
-    cooktop=cfg.get_default_cooktop_answers(),
-    driving=cfg.get_default_driving_answers(),
-    solar=cfg.get_default_solar_answers(),
+    your_home=cfg.get_default_answer_section("your_home"),
+    heating=cfg.get_default_answer_section("heating"),
+    hot_water=cfg.get_default_answer_section("hot_water"),
+    cooktop=cfg.get_default_answer_section("cooktop"),
+    driving=cfg.get_default_answer_section("driving"),
+    solar=cfg.get_default_answer_section("solar"),
 )
 
 household_answers_with_solar = HouseholdAnswers(
-    your_home=cfg.get_default_your_home_answers(),
-    heating=cfg.get_default_heating_answers(),
-    hot_water=cfg.get_default_hot_water_answers(),
-    cooktop=cfg.get_default_cooktop_answers(),
-    driving=cfg.get_default_driving_answers(),
+    your_home=cfg.get_default_answer_section("your_home"),
+    heating=cfg.get_default_answer_section("heating"),
+    hot_water=cfg.get_default_answer_section("hot_water"),
+    cooktop=cfg.get_default_answer_section("cooktop"),
+    driving=cfg.get_default_answer_section("driving"),
     solar=SolarAnswers(add_solar=True),
 )
 

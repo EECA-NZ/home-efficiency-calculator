@@ -59,11 +59,11 @@ def test_water_heating_energy_usage():
     }
     for hot_water_source, expected_energy_profile in hot_water_sources.items():
         hot_water = HotWaterAnswers(
-            hot_water_usage=answers["hot_water"].hot_water_usage,
+            hot_water_usage=answers.hot_water.hot_water_usage,
             hot_water_heating_source=hot_water_source,
         )
         hot_water_energy_use = hot_water.energy_usage_pattern(
-            answers["your_home"], answers["solar"]
+            answers.your_home, answers.solar
         )
         assert (
             hot_water_energy_use.elx_connection_days
