@@ -10,7 +10,12 @@ from app.models.hourly_profiles.get_base_demand_profile import (
 )
 from app.models.usage_profiles import YearlyFuelUsageProfile
 from app.models.user_answers import HouseholdAnswers, SolarAnswers
-from app.services.helpers import get_solar_answers, round_floats_to_2_dp
+from app.services.helpers import (
+    get_attr_with_fallback,
+    get_profile_or_empty,
+    get_solar_answers,
+    round_floats_to_2_dp,
+)
 
 
 def uses_electricity(answers: HouseholdAnswers) -> bool:
@@ -24,31 +29,13 @@ def uses_natural_gas(answers: HouseholdAnswers, use_alternatives: bool = False) 
     """
     Return True if the household uses natural gas, handling missing sections.
     """
-    main_heating_source = (
-        answers.heating.main_heating_source
-        if answers.heating is not None and not use_alternatives
-        else (
-            answers.heating.alternative_main_heating_source
-            if answers.heating is not None
-            else None
-        )
+    main_heating_source = get_attr_with_fallback(
+        answers.heating, "main_heating_source", use_alternatives
     )
-    hot_water_heating_source = (
-        answers.hot_water.hot_water_heating_source
-        if answers.hot_water is not None and not use_alternatives
-        else (
-            answers.hot_water.alternative_hot_water_heating_source
-            if answers.hot_water is not None
-            else None
-        )
+    hot_water_heating_source = get_attr_with_fallback(
+        answers.hot_water, "hot_water_heating_source", use_alternatives
     )
-    cooktop = (
-        answers.cooktop.cooktop
-        if answers.cooktop is not None and not use_alternatives
-        else (
-            answers.cooktop.alternative_cooktop if answers.cooktop is not None else None
-        )
-    )
+    cooktop = get_attr_with_fallback(answers.cooktop, "cooktop", use_alternatives)
 
     return any(
         [
@@ -64,31 +51,13 @@ def uses_lpg(answers: HouseholdAnswers, use_alternatives: bool = False) -> bool:
     """
     Return True if the household uses LPG, handling missing sections.
     """
-    main_heating_source = (
-        answers.heating.main_heating_source
-        if answers.heating is not None and not use_alternatives
-        else (
-            answers.heating.alternative_main_heating_source
-            if answers.heating is not None
-            else None
-        )
+    main_heating_source = get_attr_with_fallback(
+        answers.heating, "main_heating_source", use_alternatives
     )
-    hot_water_heating_source = (
-        answers.hot_water.hot_water_heating_source
-        if answers.hot_water is not None and not use_alternatives
-        else (
-            answers.hot_water.alternative_hot_water_heating_source
-            if answers.hot_water is not None
-            else None
-        )
+    hot_water_heating_source = get_attr_with_fallback(
+        answers.hot_water, "hot_water_heating_source", use_alternatives
     )
-    cooktop = (
-        answers.cooktop.cooktop
-        if answers.cooktop is not None and not use_alternatives
-        else (
-            answers.cooktop.alternative_cooktop if answers.cooktop is not None else None
-        )
-    )
+    cooktop = get_attr_with_fallback(answers.cooktop, "cooktop", use_alternatives)
 
     return any(
         [
@@ -116,43 +85,18 @@ def estimate_usage_from_answers(
     solar = SolarAnswers(**get_solar_answers(answers))
     solar_aware = solar.add_solar if solar else False
 
-    # Initialize the profiles with default empty profiles to handle None scenarios
-    heating_profile = (
-        heating.energy_usage_pattern(
-            your_home, solar_aware, use_alternative=use_alternatives
-        )
-        if heating is not None
-        and (
-            not use_alternatives or heating.alternative_main_heating_source is not None
-        )
-        else YearlyFuelUsageProfile()
+    # Get energy usage profiles for each section of the household
+    heating_profile = get_profile_or_empty(
+        heating, your_home, solar_aware, use_alternatives
     )
-    hot_water_profile = (
-        hot_water.energy_usage_pattern(
-            your_home, solar_aware, use_alternative=use_alternatives
-        )
-        if hot_water is not None
-        and (
-            not use_alternatives
-            or hot_water.alternative_hot_water_heating_source is not None
-        )
-        else YearlyFuelUsageProfile()
+    hot_water_profile = get_profile_or_empty(
+        hot_water, your_home, solar_aware, use_alternatives
     )
-    cooktop_profile = (
-        cooktop.energy_usage_pattern(
-            your_home, solar_aware, use_alternative=use_alternatives
-        )
-        if cooktop is not None
-        and (not use_alternatives or cooktop.alternative_cooktop is not None)
-        else YearlyFuelUsageProfile()
+    cooktop_profile = get_profile_or_empty(
+        cooktop, your_home, solar_aware, use_alternatives
     )
-    driving_profile = (
-        driving.energy_usage_pattern(
-            your_home, solar_aware, use_alternative=use_alternatives
-        )
-        if driving is not None
-        and (not use_alternatives or driving.alternative_vehicle_type is not None)
-        else YearlyFuelUsageProfile()
+    driving_profile = get_profile_or_empty(
+        driving, your_home, solar_aware, use_alternatives
     )
     solar_profile = (
         solar.energy_generation(your_home) if solar else YearlyFuelUsageProfile()

@@ -7,6 +7,8 @@ import logging
 import numpy as np
 from pydantic import BaseModel
 
+from app.models.usage_profiles import YearlyFuelUsageProfile
+
 from ..constants import HEATING_PERIOD_FACTOR
 
 logging.basicConfig(level=logging.INFO)
@@ -124,3 +126,41 @@ def get_vehicle_type(answers, use_alternatives=False) -> str:
             if answers.driving.alternative_vehicle_type is not None:
                 return answers.driving.alternative_vehicle_type
     return "None"
+
+
+def get_attr_with_fallback(section, attr_name: str, use_alternative: bool = False):
+    """
+    Return the value of an attribute or its alternative equivalent from a section.
+    """
+    if section is None:
+        return None
+    if use_alternative:
+        alt_name = f"alternative_{attr_name}"
+        return getattr(section, alt_name, None)
+    return getattr(section, attr_name, None)
+
+
+def get_profile_or_empty(
+    section, your_home, solar_aware, use_alternative: bool = False
+):
+    """
+    Return a usage profile from the section if available and relevant;
+    otherwise return an empty YearlyFuelUsageProfile.
+    """
+    if section is None:
+        return YearlyFuelUsageProfile()
+
+    has_alternative = any(
+        hasattr(section, attr)
+        for attr in [
+            "alternative_main_heating_source",
+            "alternative_hot_water_heating_source",
+            "alternative_cooktop",
+            "alternative_vehicle_type",
+        ]
+    )
+
+    if not use_alternative or has_alternative:
+        return section.energy_usage_pattern(your_home, solar_aware, use_alternative)
+
+    return YearlyFuelUsageProfile()
