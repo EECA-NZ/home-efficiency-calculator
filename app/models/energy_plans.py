@@ -59,11 +59,10 @@ class ElectricityPlan(BaseModel):
         )
         # This calculator assumes that any shiftable usage that is not met by solar is
         # shifted to take advantage of the night rate (where available). This assumption
-        # implies smart energy management and may slightly overstate financial benefits
-        # of solar under real-world conditions. For present purposes, it allows us to
-        # calculate the incremental savings due to solar without having to model the
-        # household's energy management system in detail and without double counting
-        # the savings associated with shifting usage to the night rate.
+        # implies smart energy management. For present purposes, the assumption
+        # allows us to calculate the incremental savings due to solar without double
+        # counting the savings associated with electrification, which are calculated
+        # based on the household shifting fime-flexible usage to the night rate.
         if tariff_keys == {"Day", "Night"}:
             # Shiftable usage is assumed to be met by solar first, then by night rate.
             variable_cost = (
