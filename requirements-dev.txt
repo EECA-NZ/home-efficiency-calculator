@@ -20,4 +20,4 @@ scipy==1.*
 img2pdf==0.*
 setuptools==75.*
 vulture==2.*
-pytest-asyncio
+pytest-asyncio==0.26.*

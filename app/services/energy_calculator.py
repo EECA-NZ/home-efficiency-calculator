@@ -16,6 +16,10 @@ from app.services.helpers import (
     get_solar_answers,
     round_floats_to_2_dp,
 )
+from app.services.postcode_lookups.get_climate_zone import climate_zone
+from app.services.solar_calculator.solar_diverter import (
+    reroute_hot_water_to_solar_if_applicable,
+)
 
 
 def uses_electricity(answers: HouseholdAnswers) -> bool:
@@ -73,6 +77,7 @@ def estimate_usage_from_answers(
     use_alternatives: bool = False,
     round_to_2dp: bool = False,
     include_other_electricity: bool = False,
+    use_solar_diverter: bool = True,
 ) -> YearlyFuelUsageProfile:
     """
     Estimate the household's yearly fuel usage profile.
@@ -84,6 +89,7 @@ def estimate_usage_from_answers(
     driving = answers.driving
     solar = SolarAnswers(**get_solar_answers(answers))
     solar_aware = solar.add_solar if solar else False
+    cz = climate_zone(your_home.postcode)
 
     # Get energy usage profiles for each section of the household
     heating_profile = get_profile_or_empty(
@@ -123,11 +129,22 @@ def estimate_usage_from_answers(
         other_profile,
     ]
 
+    if solar_aware and use_solar_diverter:
+        rerouted_hot_water_electricity = reroute_hot_water_to_solar_if_applicable(
+            hw_electricity_kwh=hot_water_profile.electricity_kwh,
+            solar_generation_kwh=solar_profile.solar_generation_kwh,
+            other_electricity_kwh=heating_profile.electricity_kwh
+            + cooktop_profile.electricity_kwh
+            + driving_profile.electricity_kwh
+            + other_profile.electricity_kwh,
+            hot_water_heating_source=hot_water.alternative_hot_water_heating_source,
+            household_size=your_home.people_in_house,
+            climate_zone=cz,
+        )
+        hot_water_profile.electricity_kwh = rerouted_hot_water_electricity
+
     # Variable electricity usage
     electricity_kwh = sum(profile.electricity_kwh for profile in profiles)
-
-    # Diverter model would be used here to modify the hot water hourly usage profile
-    # based on the solar generation profile and the remaining electricity usage.
 
     # Solar electricity generation
     solar_generation_kwh = sum(profile.solar_generation_kwh for profile in profiles)

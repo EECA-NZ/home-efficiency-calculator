@@ -122,7 +122,9 @@ def test_create_household_energy_profile_to_cost_with_solar():
             my_answers_with_solar.driving.vehicle_type
         ),
     )
-    household_energy_use_with_solar = estimate_usage_from_answers(my_answers_with_solar)
+    household_energy_use_with_solar = estimate_usage_from_answers(
+        my_answers_with_solar, include_other_electricity=True, use_solar_diverter=True
+    )
     result = my_plan.calculate_cost(household_energy_use_with_solar)
     solar = result.solar
     assert solar is not None
@@ -147,4 +149,4 @@ def test_create_household_energy_profile_to_cost_with_solar():
     assert export_tariff == approx(0.12)
     assert total_solar_revenue_if_exported <= total_solar_savings_2
     assert total_solar_savings_2 <= total_solar_savings_if_self_consumed
-    assert self_consumption_percentage == approx(34.48756, rel=1e-4)
+    assert self_consumption_percentage == approx(46.44372, rel=1e-4)
