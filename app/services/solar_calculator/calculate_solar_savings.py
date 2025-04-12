@@ -77,7 +77,7 @@ def calculate_solar_savings(profile):
         profile_with_solar,
         use_alternatives=True,
         include_other_electricity=True,
-        use_solar_diverter=True,
+        use_solar_diverter=False,
     )
 
     annual_solar_kwh_generated = (

@@ -77,7 +77,7 @@ def estimate_usage_from_answers(
     use_alternatives: bool = False,
     round_to_2dp: bool = False,
     include_other_electricity: bool = False,
-    use_solar_diverter: bool = True,
+    use_solar_diverter: bool = False,
 ) -> YearlyFuelUsageProfile:
     """
     Estimate the household's yearly fuel usage profile.

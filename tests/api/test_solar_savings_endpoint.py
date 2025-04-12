@@ -302,6 +302,7 @@ profile5 = {
 
 def compare_api_calculation_with_manual_calculation(
     input_profile: dict,
+    use_solar_diverter: bool = False,
 ):
     """
     Compare the API calculation with the manual calculation.
@@ -397,7 +398,8 @@ def compare_api_calculation_with_manual_calculation(
         household_size=ppl,
         climate_zone=cz,
     )
-    hot_water_timeseries = rerouted_hw_profile.total_usage
+    if use_solar_diverter:
+        hot_water_timeseries = rerouted_hw_profile.total_usage
 
     assert len(solar_generation_timeseries) == 8760
     assert len(hot_water_timeseries) == 8760
