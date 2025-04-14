@@ -6,7 +6,7 @@ components of the home.
 import logging
 from typing import Type
 
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, HTTPException
 
 from ..models.response_models import (
     ComponentSavingsResponse,
@@ -30,7 +30,7 @@ from ..services.postcode_lookups.get_energy_plans import postcode_to_edb_zone
 # Set up logging
 logger = logging.getLogger(__name__)
 
-app = FastAPI()
+router = APIRouter()
 
 # These endpoints assume no solar. Solar is modeled
 # as being added *after* the appliance savings.
@@ -156,8 +156,7 @@ async def create_response(data, component_name):
     )
 
 
-# Endpoint example using the common function
-@app.post("/heating/savings", response_model=ComponentSavingsResponse)
+@router.post("/heating/savings", response_model=ComponentSavingsResponse)
 async def heating_savings(heating_answers: HeatingAnswers, your_home: YourHomeAnswers):
     """
     Endpoint to calculate savings for heating.
@@ -170,8 +169,7 @@ async def heating_savings(heating_answers: HeatingAnswers, your_home: YourHomeAn
     return await create_response(data, "heating")
 
 
-# Apply similar changes to other endpoints
-@app.post("/hot_water/savings", response_model=ComponentSavingsResponse)
+@router.post("/hot_water/savings", response_model=ComponentSavingsResponse)
 async def hot_water_savings(
     hot_water_answers: HotWaterAnswers, your_home: YourHomeAnswers
 ):
@@ -184,7 +182,7 @@ async def hot_water_savings(
     return await create_response(data, "hot_water")
 
 
-@app.post("/cooktop/savings", response_model=ComponentSavingsResponse)
+@router.post("/cooktop/savings", response_model=ComponentSavingsResponse)
 async def cooktop_savings(cooktop_answers: CooktopAnswers, your_home: YourHomeAnswers):
     """
     Endpoint to calculate savings for the cooktop.
@@ -193,7 +191,7 @@ async def cooktop_savings(cooktop_answers: CooktopAnswers, your_home: YourHomeAn
     return await create_response(data, "cooktop")
 
 
-@app.post("/driving/savings", response_model=ComponentSavingsResponse)
+@router.post("/driving/savings", response_model=ComponentSavingsResponse)
 async def driving_savings(driving_answers: DrivingAnswers, your_home: YourHomeAnswers):
     """
     Endpoint to calculate savings for driving.
