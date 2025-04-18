@@ -242,4 +242,5 @@ def space_heating_profile(
 
     logger.info("HERE IN HEATING USAGE PROFILE HELPERS")
 
-    return pd.Series(net_scheduled, index=df.index, name="heating_profile").to_numpy()
+    # Return as a pandas Series with DateTimeIndex, normalized to sum to 1
+    return pd.Series(net_scheduled, index=df.index, name="heating_profile")

@@ -66,10 +66,10 @@ class CheckboxData(BaseModel):
     gas connection fixed cost behaviour.
     """
 
-    checkbox_visible: Optional[bool]
-    checkbox_text: Optional[str]
-    checkbox_greyed_out: Optional[bool]
-    checkbox_default_on: Optional[bool]
+    checkbox_visible: Optional[bool] = None
+    checkbox_text: Optional[str] = None
+    checkbox_greyed_out: Optional[bool] = None
+    checkbox_default_on: Optional[bool] = None
 
 
 class FixedCostsResponse(BaseModel):

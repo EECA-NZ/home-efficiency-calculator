@@ -7,6 +7,7 @@ The same logic is applied to hot water heat
 pumps, on the basis that similar behaviour
 can be obtained with a smart controller.
 """
+
 # pylint: disable=too-few-public-methods, too-many-locals
 # pylint: disable=too-many-arguments, too-many-positional-arguments
 
