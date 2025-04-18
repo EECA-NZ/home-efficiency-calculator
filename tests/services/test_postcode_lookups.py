@@ -1,5 +1,8 @@
 """Tests for the postcode lookup service functions."""
+
 # pylint: disable=import-error
+
+import os
 
 import numpy as np
 import pandas as pd
@@ -30,6 +33,10 @@ def test_climate_zone_unknown_postcode_defaults_to_wellington():
     assert climate_zone("99999") == "Wellington"
 
 
+@pytest.mark.skipif(
+    os.environ.get("LOCAL_SOLAR_DATA", "True") != "True",
+    reason="Skipping solar test because local lookup table data is unavailable.",
+)
 def test_hourly_pmax_returns_array_length_8760_and_positive_values():
     """Test hourly_pmax returns an array of length 8760 with non-negative values."""
     arr = hourly_pmax("0110")
@@ -43,6 +50,10 @@ def test_hourly_pmax_returns_array_length_8760_and_positive_values():
     assert arr.sum() > 0
 
 
+@pytest.mark.skipif(
+    os.environ.get("LOCAL_SOLAR_DATA", "True") != "True",
+    reason="Skipping solar test because local lookup table data is unavailable.",
+)
 def test_hourly_pmax_unknown_postcode_defaults_to_wellington():
     """Test hourly_pmax for unknown postcodes defaults to Wellington zone mapping."""
     arr_unknown = hourly_pmax("ABCDE")
@@ -53,6 +64,10 @@ def test_hourly_pmax_unknown_postcode_defaults_to_wellington():
     assert np.allclose(arr_unknown, arr_default)
 
 
+@pytest.mark.skipif(
+    os.environ.get("LOCAL_SOLAR_DATA", "True") != "True",
+    reason="Skipping solar test because local lookup table data is unavailable.",
+)
 def test_hourly_ta_returns_series_length_8760_and_expected_value():
     """Test hourly_ta returns Series of length 8760 with correct first value."""
     ts = hourly_ta("0110")
@@ -64,6 +79,10 @@ def test_hourly_ta_returns_series_length_8760_and_expected_value():
     assert ts.iloc[0] == pytest.approx(14.8, rel=1e-6)
 
 
+@pytest.mark.skipif(
+    os.environ.get("LOCAL_SOLAR_DATA", "True") != "True",
+    reason="Skipping solar test because local lookup table data is unavailable.",
+)
 def test_hourly_ta_unknown_postcode_defaults_to_wellington():
     """Test hourly_ta for unknown postcodes defaults to Wellington zone mapping."""
     ts_unknown = hourly_ta("ABCDE")
