@@ -2,7 +2,6 @@
 Test solar diverter functionality.
 """
 
-
 import numpy as np
 
 from app.constants.hot_water_energy import HOT_WATER_POWER_INPUT_KW

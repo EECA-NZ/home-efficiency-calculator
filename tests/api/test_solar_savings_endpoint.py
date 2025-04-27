@@ -43,6 +43,7 @@ def set_test_environment_variable():
     the tests to run without the need for data files that
     are not licensed for sharing publicly.
     """
+    # Disable test mode so tests use the full supplementary data from resources
     os.environ["TEST_MODE"] = "False"
 
 

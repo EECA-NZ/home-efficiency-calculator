@@ -76,6 +76,7 @@ def hourly_ta(postcode: str) -> pd.Series:
     ValueError
         If no matching CSV file is found.
     """
+    # Determine whether to use test data or production data
     test_mode = os.getenv("TEST_MODE", "False").lower() == "true"
 
     zone = climate_zone(postcode).replace(" ", "_").lower()

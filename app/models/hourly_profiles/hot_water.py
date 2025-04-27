@@ -208,8 +208,11 @@ def normalized_solar_friendly_water_heating_profile(
     """
     if heating_windows is None:
         heating_windows = HEATING_WINDOWS
-    year = daily_energy.index[0].year
-    hourly_index = pd.date_range(f"{year}-01-01", f"{year}-12-31 23:00", freq="h")
+    # Build hourly index based on daily_energy dates (assumes non-leap 365 days)
+    # Start at first day midnight, for len(daily_energy)*24 hours
+    start_date = daily_energy.index[0]
+    hours_total = len(daily_energy) * 24
+    hourly_index = pd.date_range(start=start_date, periods=hours_total, freq="h")
     profile = pd.Series(0.0, index=hourly_index)
 
     solar_window_start, solar_window_end = heating_windows["solar"]
