@@ -1,4 +1,32 @@
 repos:
+  - repo: local
+    hooks:
+      - id: check-virtualenv-pre-commit
+        name: Check virtualenv activated (pre-commit)
+        entry: |
+          bash -c '
+          if [ -z "$VIRTUAL_ENV" ]; then
+            echo "ERROR: Please activate your virtual environment (.venv) before committing.";
+            exit 1;
+          fi
+          '
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: check-virtualenv-pre-push
+        name: Check virtualenv activated (pre-push)
+        entry: |
+          bash -c '
+          if [ -z "$VIRTUAL_ENV" ]; then
+            echo "ERROR: Please activate your virtual environment (.venv) before pushing.";
+            exit 1;
+          fi
+          '
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
   - repo: https://github.com/psf/black
     rev: 23.9.1
     hooks:

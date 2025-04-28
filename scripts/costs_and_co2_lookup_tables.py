@@ -1,5 +1,5 @@
 """
-Script to generate lookup table for the deviate PHP web app.
+Script to generate lookup tables for the deviate PHP web app.
 """
 
 import itertools
