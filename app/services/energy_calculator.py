@@ -202,8 +202,13 @@ def emissions_kg_co2e(usage_profile: YearlyFuelUsageProfile) -> float:
         (usage_profile.public_ev_charger_kwh, "electricity_kg_co2e_per_kwh"),
     ]
 
+    # assert that the keys in components are in EMISSIONS_FACTORS
+    for _, factor_name in components:
+        if factor_name not in EMISSIONS_FACTORS:
+            raise ValueError(f"Unknown emissions factor: {factor_name}")
+
+    # Calculate total emissions
     total_emissions = sum(
-        usage * EMISSIONS_FACTORS.get(factor_name, 0)
-        for usage, factor_name in components
+        usage * EMISSIONS_FACTORS[factor_name] for usage, factor_name in components
     )
     return total_emissions

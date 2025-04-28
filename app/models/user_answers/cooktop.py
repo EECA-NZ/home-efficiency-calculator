@@ -63,7 +63,6 @@ class CooktopAnswers(BaseModel):
             hourly usage profile (8760 hours) is provided if solar_aware is True.
         """
 
-        _ = solar_aware
         usage_factors = {
             "Electric induction": {
                 "standard_household_kwh": STANDARD_HOUSEHOLD_COOKTOP_ENERGY_USAGE_KWH[

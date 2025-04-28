@@ -82,9 +82,6 @@ class HotWaterAnswers(BaseModel):
             The yearly fuel usage profile for hot water heating. If electric, a year's
             hourly usage profile (8760 hours) is provided if solar_aware is True.
         """
-        # Unused for now but match expected function signature
-        _ = solar_aware
-
         hot_water_heating_source = (
             self.alternative_hot_water_heating_source
             if use_alternative

@@ -65,7 +65,6 @@ class DrivingAnswers(BaseModel):
             hourly usage profile (8760 hours) is provided if solar_aware is True.
         """
 
-        _ = solar_aware
         vehicle_type = (
             self.alternative_vehicle_type if use_alternative else self.vehicle_type
         )
