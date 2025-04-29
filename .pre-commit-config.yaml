@@ -1,3 +1,7 @@
+---
+# This file defines pre-commit and pre-push hooks.
+# Includes a virtual environment check and basic
+# tooling (black, isort, pylint, pip-audit, yamllint).
 repos:
   - repo: local
     hooks:
@@ -6,7 +10,7 @@ repos:
         entry: |
           bash -c '
           if [ -z "$VIRTUAL_ENV" ]; then
-            echo "ERROR: Please activate your virtual environment (.venv) before committing.";
+            echo "ERROR: Please activate .venv before committing.";
             exit 1;
           fi
           '
@@ -19,7 +23,7 @@ repos:
         entry: |
           bash -c '
           if [ -z "$VIRTUAL_ENV" ]; then
-            echo "ERROR: Please activate your virtual environment (.venv) before pushing.";
+            echo "ERROR: Please activate .venv before pushing.";
             exit 1;
           fi
           '
@@ -73,3 +77,8 @@ repos:
         additional_dependencies: ["pip-audit"]
         pass_filenames: false
         stages: [pre-push]
+
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.37.0
+    hooks:
+      - id: yamllint
