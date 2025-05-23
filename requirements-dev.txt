@@ -18,7 +18,7 @@ matplotlib==3.*
 numpy==1.*
 scipy==1.*
 img2pdf==0.*
-setuptools==75.*
+setuptools>=78.1.1,<79
 vulture==2.*
 pytest-asyncio==0.26.*
 h11>=0.16.0
