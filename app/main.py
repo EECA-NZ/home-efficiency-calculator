@@ -8,9 +8,11 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI, responses
 
-# Import the app from component_savings_endpoints
-from .api import household_savings_endpoint
-from .api.component_savings_endpoints import app as component_savings_app
+from .api.checkbox_behaviour_endpoint import router as checkbox_behaviour_router
+from .api.component_savings_endpoints import router as component_savings_router
+from .api.fixed_cost_savings_endpoint import router as fixed_cost_savings_router
+from .api.solar_savings_endpoint import router as solar_savings_router
+from .api.user_geography_endpoint import router as user_geography_router
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -31,7 +33,12 @@ async def lifespan(app_instance: FastAPI):
 
 
 # Pass the lifespan handler when creating the FastAPI instance
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    title="Home Energy Savings Calculator",
+    version="0.3.0",
+    description="API for estimating household energy and emissions savings.",
+    lifespan=lifespan,
+)
 
 
 @app.get("/")
@@ -42,11 +49,11 @@ def main():
     return responses.RedirectResponse(url="/docs/")
 
 
-# Include the router for the household energy profile
-app.include_router(household_savings_endpoint.router)
-
-# Include the router for component savings endpoints
-app.include_router(component_savings_app.router)
+app.include_router(user_geography_router)
+app.include_router(checkbox_behaviour_router)
+app.include_router(component_savings_router)
+app.include_router(solar_savings_router)
+app.include_router(fixed_cost_savings_router)
 
 
 def run():

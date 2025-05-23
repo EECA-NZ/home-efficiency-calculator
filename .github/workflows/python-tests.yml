@@ -28,6 +28,8 @@ jobs:
         pip install -r requirements-dev.txt
 
     - name: Run tests and generate coverage
+      env:
+        LOCAL_SOLAR_DATA: "False"
       run: |
         coverage run -m pytest
         coverage html

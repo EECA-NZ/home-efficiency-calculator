@@ -14,7 +14,9 @@ WATER_DENSITY_KG_PER_L = 1
 TEMPERATURE_SHOWER_C = 37
 
 # If hot water is provided by electriciy, this is the fraction of the total
-# hot water energy that is assumed to be provided using the flexible rate.
+# hot water energy that is assumed can be provided using the night rate.
+# In order to work within the constraints imposed by the lookup table approach
+# for solar self-consumption calculations, this is set to 1.0 for now.
 HOT_WATER_FLEXIBLE_KWH_FRACTION = 0.8
 
 SHOWER_WATER_USAGE_QUANTITIES = {
@@ -118,3 +120,29 @@ GAS_INSTANTANEOUS_WATER_HEATING_EFFICIENCY = 0.834
 GAS_STORAGE_WATER_HEATING_EFFICIENCY = 0.885
 
 ELECTRIC_WATER_HEATING_EFFICIENCY = 1.0
+
+HOT_WATER_POWER_INPUT_KW = 3.0  # kW, assumed for all hot water systems
+
+
+#### Constants used for hot water hourly energy consumption profiles
+
+# Default time window constants
+SOLAR_WINDOW_START = "09:00:00"  # e.g., start of solar energy heating window
+SOLAR_WINDOW_END = "18:00:00"  # e.g., end of solar energy heating window (9 hours)
+NIGHT_WINDOW_START = "21:00:00"  # e.g., start of night heating window
+NIGHT_WINDOW_END = "09:00:00"  # e.g., end of night heating window (next day; 12 hours)
+
+HEATING_WINDOWS = {
+    "solar": (SOLAR_WINDOW_START, SOLAR_WINDOW_END),
+    "night": (NIGHT_WINDOW_START, NIGHT_WINDOW_END),
+}
+
+CYLINDER_HOT_WATER_TEMPERATURE = 65  # Celsius - typical hot water temperature.
+DELIVERED_HOT_WATER_TEMPERATURE = 40  # Celsius - typical demand temperature.
+# Although the tank is at 65°C, hot water at the tap is usually 40°C via mixing.
+# The fraction drawn from the tank is given by (40 - T_inlet) / (65 - T_inlet),
+# and the heating per kg to heat from T_inlet to 65°C is proportional to (65 - T_inlet).
+# After multiplying fraction by energy per kg, the (65 - T_inlet) terms cancel out.
+# Hence, the total heating demand is effectively proportional to (40 - T_inlet).
+
+COP_CALCULATION = "constant"  # Use an annual average COP per climate zone

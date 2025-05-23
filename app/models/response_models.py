@@ -6,7 +6,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from .usage_profiles import YearlyFuelUsageProfile
+from .usage_profiles import YearlyFuelUsageReport
 
 
 class UserGeography(BaseModel):
@@ -45,8 +45,19 @@ class ComponentSavingsResponse(BaseModel):
 
     alternatives: dict[str, SavingsResponse]
     user_geography: UserGeography
-    current_fuel_use: YearlyFuelUsageProfile
-    alternative_fuel_use: Optional[YearlyFuelUsageProfile]
+    current_fuel_use: YearlyFuelUsageReport
+    alternative_fuel_use: Optional[YearlyFuelUsageReport]
+
+
+class SolarSavingsResponse(BaseModel):
+    """
+    Response model for the solar savings endpoint.
+    """
+
+    annual_kwh_generated: float
+    annual_kg_co2e_saving: float
+    annual_earnings_solar_export: float
+    annual_savings_solar_self_consumption: float
 
 
 class CheckboxData(BaseModel):
@@ -55,25 +66,15 @@ class CheckboxData(BaseModel):
     gas connection fixed cost behaviour.
     """
 
-    checkbox_visible: Optional[bool]
-    checkbox_text: Optional[str]
-    checkbox_greyed_out: Optional[bool]
-    checkbox_default_on: Optional[bool]
+    checkbox_visible: Optional[bool] = None
+    checkbox_text: Optional[str] = None
+    checkbox_greyed_out: Optional[bool] = None
+    checkbox_default_on: Optional[bool] = None
 
 
-class HouseholdSavingsResponse(BaseModel):
+class FixedCostsResponse(BaseModel):
     """
-    Response model for the household energy profile endpoint.
+    Response model for the fixed costs endpoint.
     """
 
-    heating_fuel_savings: Optional[SavingsResponse]
-    hot_water_fuel_savings: Optional[SavingsResponse]
-    cooktop_fuel_savings: Optional[SavingsResponse]
-    driving_fuel_savings: Optional[SavingsResponse]
-    total_fuel_savings: SavingsResponse
     gas_connection_savings: dict[str, SavingsResponse]
-    checkbox: CheckboxData
-    total_savings: SavingsResponse
-    user_geography: UserGeography
-    current_fuel_use: YearlyFuelUsageProfile
-    alternative_fuel_use: YearlyFuelUsageProfile

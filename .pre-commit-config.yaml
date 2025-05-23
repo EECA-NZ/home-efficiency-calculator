@@ -1,10 +1,43 @@
+---
+# This file defines pre-commit and pre-push hooks.
+# Includes a virtual environment check and basic
+# tooling (black, isort, pylint, pip-audit, yamllint).
 repos:
+  - repo: local
+    hooks:
+      - id: check-virtualenv-pre-commit
+        name: Check virtualenv activated (pre-commit)
+        entry: |
+          bash -c '
+          if [ -z "$VIRTUAL_ENV" ]; then
+            echo "ERROR: Please activate .venv before committing.";
+            exit 1;
+          fi
+          '
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: check-virtualenv-pre-push
+        name: Check virtualenv activated (pre-push)
+        entry: |
+          bash -c '
+          if [ -z "$VIRTUAL_ENV" ]; then
+            echo "ERROR: Please activate .venv before pushing.";
+            exit 1;
+          fi
+          '
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
   - repo: https://github.com/psf/black
     rev: 23.9.1
     hooks:
       - id: black
         language_version: default
         additional_dependencies: ["setuptools>=61.0"]
+
   - repo: https://github.com/pycqa/isort
     rev: 5.12.0
     hooks:
@@ -12,13 +45,40 @@ repos:
         args: ["--profile", "black"]
         language_version: default
         additional_dependencies: ["setuptools>=61.0"]
+
   - repo: https://github.com/pre-commit/mirrors-pylint
     rev: v2.7.4
     hooks:
       - id: pylint
-        name: pylint
+        name: pylint (staged files only)
         entry: pylint
         language: system
         types: [python]
         args: ["--rcfile=.pylintrc"]
+        pass_filenames: true
+        stages: [pre-commit]
         additional_dependencies: []
+
+  - repo: local
+    hooks:
+      - id: pylint-full-codebase
+        name: pylint (full codebase)
+        language: system
+        entry: bash -c 'pylint --disable=R0801 $(git ls-files "*.py")'
+        pass_filenames: false
+        stages: [pre-push]
+
+  - repo: local
+    hooks:
+      - id: pip-audit
+        name: pip-audit
+        language: python
+        entry: python scripts/pip_audit_hook.py
+        additional_dependencies: ["pip-audit"]
+        pass_filenames: false
+        stages: [pre-push]
+
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.37.0
+    hooks:
+      - id: yamllint
