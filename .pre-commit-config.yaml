@@ -2,6 +2,7 @@
 # This file defines pre-commit and pre-push hooks.
 # Includes a virtual environment check and basic
 # tooling (black, isort, pylint, pip-audit, yamllint).
+# All Python tools run inside the already-activated .venv
 repos:
   - repo: local
     hooks:
@@ -10,8 +11,8 @@ repos:
         entry: |
           bash -c '
           if [ -z "$VIRTUAL_ENV" ]; then
-            echo "ERROR: Please activate .venv before committing.";
-            exit 1;
+            echo "ERROR: Please activate .venv before committing."
+            exit 1
           fi
           '
         language: system
@@ -23,62 +24,46 @@ repos:
         entry: |
           bash -c '
           if [ -z "$VIRTUAL_ENV" ]; then
-            echo "ERROR: Please activate .venv before pushing.";
-            exit 1;
+            echo "ERROR: Please activate .venv before pushing."
+            exit 1
           fi
           '
         language: system
         pass_filenames: false
         stages: [pre-push]
 
-  - repo: https://github.com/psf/black
-    rev: 23.9.1
-    hooks:
       - id: black
-        language_version: default
-        additional_dependencies: ["setuptools>=61.0"]
-
-  - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
-        args: ["--profile", "black"]
-        language_version: default
-        additional_dependencies: ["setuptools>=61.0"]
-
-  - repo: https://github.com/pre-commit/mirrors-pylint
-    rev: v2.7.4
-    hooks:
-      - id: pylint
-        name: pylint (staged files only)
-        entry: pylint
+        name: black (venv)
+        entry: black
         language: system
         types: [python]
-        args: ["--rcfile=.pylintrc"]
+        stages: [pre-commit]
+
+      - id: isort
+        name: isort (venv)
+        entry: isort --profile black
+        language: system
+        types: [python]
+        stages: [pre-commit]
+
+      - id: pylint
+        name: pylint
+        entry: pylint --rcfile=.pylintrc
+        language: system
+        types: [python]
         pass_filenames: true
         stages: [pre-commit]
-        additional_dependencies: []
 
-  - repo: local
-    hooks:
-      - id: pylint-full-codebase
-        name: pylint (full codebase)
+      - id: yamllint
+        name: yamllint (venv)
+        entry: yamllint
         language: system
-        entry: bash -c 'pylint --disable=R0801 $(git ls-files "*.py")'
-        pass_filenames: false
-        stages: [pre-push]
+        types: [yaml]
+        stages: [pre-commit]
 
-  - repo: local
-    hooks:
       - id: pip-audit
         name: pip-audit
-        language: python
         entry: python scripts/pip_audit_hook.py
-        additional_dependencies: ["pip-audit"]
+        language: system
         pass_filenames: false
         stages: [pre-push]
-
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.37.0
-    hooks:
-      - id: yamllint

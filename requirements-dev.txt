@@ -12,6 +12,7 @@ fiona==1.*
 pyproj==3.*
 coverage==7.*
 pip-audit==2.*
+yamllint==1.*
 networkx==3.*
 geopandas==1.*
 matplotlib==3.*
