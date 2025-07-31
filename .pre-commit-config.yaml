@@ -1,24 +1,60 @@
+---
+# This file defines pre-commit and pre-push hooks.
+# Includes a virtual environment check and basic
+# tooling (black, isort, pylint, pip-audit, yamllint).
+# All Python tools run inside the already-activated .venv
 repos:
-  - repo: https://github.com/psf/black
-    rev: 23.9.1
+  - repo: local
     hooks:
+
+      - id: check-virtualenv-pre-commit
+        name: Check virtualenv activated (pre-commit)
+        entry: >
+          python -c "import sys; exit(sys.prefix==sys.base_prefix)"
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: check-virtualenv-pre-push
+        name: Check virtualenv activated (pre-push)
+        entry: >
+          python -c "import sys; exit(sys.prefix==sys.base_prefix)"
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
       - id: black
-        language_version: default
-        additional_dependencies: ["setuptools>=61.0"]
-  - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
-        args: ["--profile", "black"]
-        language_version: default
-        additional_dependencies: ["setuptools>=61.0"]
-  - repo: https://github.com/pre-commit/mirrors-pylint
-    rev: v2.7.4
-    hooks:
-      - id: pylint
-        name: pylint
-        entry: pylint
+        name: black (venv)
+        entry: black
         language: system
         types: [python]
-        args: ["--rcfile=.pylintrc"]
-        additional_dependencies: []
+        stages: [pre-commit]
+
+      - id: isort
+        name: isort (venv)
+        entry: isort --profile black
+        language: system
+        types: [python]
+        stages: [pre-commit]
+
+      - id: pylint
+        name: pylint
+        entry: pylint --rcfile=.pylintrc
+        language: system
+        types: [python]
+        pass_filenames: true
+        stages: [pre-commit]
+
+      - id: yamllint
+        name: yamllint (venv)
+        entry: yamllint
+        language: system
+        types: [yaml]
+        stages: [pre-commit]
+
+      - id: pip-audit
+        name: pip-audit
+        entry: python scripts/pip_audit_hook.py
+        language: system
+        pass_filenames: false
+        stages: [pre-push]

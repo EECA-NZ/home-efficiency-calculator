@@ -12,4 +12,3 @@ from .general_constants import *
 from .heating_energy import *
 from .hot_water_energy import *
 from .other_electricity import *
-from .solar_energy import *

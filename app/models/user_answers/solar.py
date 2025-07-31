@@ -4,22 +4,23 @@ Class for storing user answers on solar generation.
 
 from pydantic import BaseModel
 
-from ...constants import DAYS_IN_YEAR, SOLAR_RESOURCE_KWH_PER_DAY
-from ...services import get_climate_zone
-from ..usage_profiles import SolarYearlyFuelGenerationProfile
+from ...services.postcode_lookups import get_solar_generation
+from ..usage_profiles import SolarGeneration, YearlyFuelUsageProfile
 
 
 class SolarAnswers(BaseModel):
     """
-    Does the house include solar panels?
+    Should the calculations include adding solar panels?
+
+    Note that it is assumed that the user does not have solar panels.
     """
 
-    hasSolar: bool
+    add_solar: bool
 
     def energy_generation(
         self,
         your_home,
-    ) -> SolarYearlyFuelGenerationProfile:
+    ) -> YearlyFuelUsageProfile:
         """
         Return the yearly energy generation profile for solar energy generation.
 
@@ -35,13 +36,18 @@ class SolarAnswers(BaseModel):
         SolarYearlyFuelUsageProfile
             The yearly fuel usage profile for solar energy generation.
         """
-        my_climate_zone = get_climate_zone.climate_zone(your_home.postcode)
-        annual_generation_kwh = 0
-        if self.hasSolar:
-            annual_generation_kwh = (
-                SOLAR_RESOURCE_KWH_PER_DAY[my_climate_zone] * DAYS_IN_YEAR
+        if self.add_solar:
+            solar_generation_profile = get_solar_generation.hourly_pmax(
+                your_home.postcode
             )
-
-        return SolarYearlyFuelGenerationProfile(
-            inflexible_day_kwh=-annual_generation_kwh,
+            solar_generation_kwh = solar_generation_profile.sum()
+            solar_generation_profile /= solar_generation_kwh
+            hourly_solar_generation_kwh = SolarGeneration(
+                solar_generation_kwh=solar_generation_kwh,
+                solar_generation_profile=solar_generation_profile,
+            )
+        else:
+            hourly_solar_generation_kwh = SolarGeneration()
+        return YearlyFuelUsageProfile(
+            solar_generation_kwh=hourly_solar_generation_kwh,
         )

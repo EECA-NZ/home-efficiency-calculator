@@ -1,5 +1,8 @@
-fastapi
-pydantic
-uvicorn
-requests
-httpx
+fastapi==0.*
+pydantic==2.*
+uvicorn==0.*
+httpx==0.*
+pillow>=11.3.0
+requests>=2.32.4
+urllib3>=2.5.0
+starlette>=0.47.2
