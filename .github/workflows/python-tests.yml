@@ -5,11 +5,12 @@ on:
   push:
     branches-ignore:
       - gh-pages
+    pull_request:
 
 permissions:
   contents: read
-  pages: write      # required for deploy-pages
-  id-token: write   # required for deploy-pages
+  pages: write
+  id-token: write
 
 jobs:
   test:
@@ -40,13 +41,17 @@ jobs:
           coverage run -m pytest
           coverage html
 
+      # Only prepare the Pages artifact when building main
       - name: Upload coverage site as Pages artifact
         if: success()
+        #if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
-          path: htmlcov  # uploads the folder created by `coverage html`
+          path: htmlcov
 
   deploy:
+    # Deploy only from main
+    # if: github.ref == 'refs/heads/main'
     needs: test
     runs-on: ubuntu-latest
     environment:
