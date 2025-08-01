@@ -5,7 +5,9 @@ on:
   push:
     branches-ignore:
       - gh-pages
-    pull_request:
+  pull_request:
+    branches-ignore:
+      - gh-pages
 
 permissions:
   contents: read
@@ -43,15 +45,13 @@ jobs:
 
       # Only prepare the Pages artifact when building main
       - name: Upload coverage site as Pages artifact
-        if: success()
-        #if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: htmlcov
 
   deploy:
-    # Deploy only from main
-    # if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     needs: test
     runs-on: ubuntu-latest
     environment:
