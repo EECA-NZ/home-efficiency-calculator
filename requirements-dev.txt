@@ -22,3 +22,4 @@ setuptools==80.*
 vulture==2.*
 pytest-asyncio==1.2.*
 h11>=0.16.0
+filelock>=3.20.0
