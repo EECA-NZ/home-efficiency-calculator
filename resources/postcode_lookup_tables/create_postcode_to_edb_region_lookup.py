@@ -21,7 +21,7 @@ from resources.postcode_lookup_tables.helpers import (
 # Constants
 OUTPUT_CSV = "./output/postcode_to_edb_region.csv"
 EDB_REGION_SHAPEFILE = "../supplementary_data/EDB_Boundaries/EDBBoundaries.shp"
-POSTCODE_SHAPEFILE = "../supplementary_data/PNF_V2024Q2_V01/PN_V2024Q2V01_POLYGONS.shp"
+POSTCODE_SHAPEFILE = "../supplementary_data/PNF_V2025Q2_V02/PN_V2025Q2V01_POLYGONS.shp"
 
 # Functions
 

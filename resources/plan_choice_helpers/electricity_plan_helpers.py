@@ -28,7 +28,6 @@ from resources.plan_choice_helpers.data_loading import eval_or_return
 from resources.plan_choice_helpers.plan_filters import (
     is_big_four_retailer,
     is_simple_all_inclusive,
-    is_simple_controlled_uncontrolled,
     is_simple_day_night,
     is_simple_uncontrolled,
     open_plans,
@@ -148,7 +147,6 @@ def filter_electricity_plans(full_df):
         & (~full_df["Name"].str.lower().str.contains("broadband", na=False))
         & (
             full_df.apply(is_simple_all_inclusive, axis=1)
-            | full_df.apply(is_simple_controlled_uncontrolled, axis=1)
             | full_df.apply(is_simple_day_night, axis=1)
             | full_df.apply(is_simple_uncontrolled, axis=1)
         )
@@ -215,16 +213,14 @@ def load_electrified_household_energy_usage_profile():
     )
     household_energy_use = estimate_usage_from_answers(household_profile)
     other_electricity_use = other_electricity_energy_usage_profile()
-    household_energy_use.fixed_kwh.uncontrolled += (
-        other_electricity_use.fixed_kwh.uncontrolled
+    household_energy_use.electricity_kwh.fixed_day_kwh += (
+        other_electricity_use.electricity_kwh.fixed_day_kwh
     )
-    household_energy_use.anytime_kwh.uncontrolled += (
-        other_electricity_use.anytime_kwh.uncontrolled
+    household_energy_use.electricity_kwh.fixed_ngt_kwh += (
+        other_electricity_use.electricity_kwh.fixed_ngt_kwh
     )
-    household_energy_use.fixed_kwh.controllable += (
-        other_electricity_use.fixed_kwh.controllable
+    household_energy_use.electricity_kwh.shift_abl_kwh += (
+        other_electricity_use.electricity_kwh.shift_abl_kwh
     )
-    household_energy_use.anytime_kwh.controllable += (
-        other_electricity_use.anytime_kwh.controllable
-    )
+
     return household_energy_use

@@ -29,6 +29,8 @@ def map_locations_to_edb(locations_str: str) -> str:
     str
         The EDB name if a single EDB is found, otherwise "Unknown".
     """
+    if not isinstance(locations_str, str) or locations_str.strip() == "":
+        return np.nan
     locations = [loc.strip() for loc in locations_str.split(",")]
     edbs_found = set()
     for loc in locations:
@@ -76,7 +78,7 @@ def show_plan(
     return full_df.loc[idx]
 
 
-def row_to_plan(row: pd.Series) -> ElectricityPlan:
+def row_to_plan(row: pd.Series) -> ElectricityPlan | NaturalGasPlan:
     """
     Convert a DataFrame row to an ElectricityPlan instance.
 
@@ -101,7 +103,15 @@ def row_to_plan(row: pd.Series) -> ElectricityPlan:
         if not pd.isna(row.get(key)):
             pricing_dict[key] = row[key]
 
-    return ElectricityPlan(
+    if row["Energy type"].lower() == "electricity":
+        return ElectricityPlan(
+            name=str(row["PlanId"]),
+            fixed_rate=row["Daily charge"],
+            import_rates=pricing_dict,
+            export_rates={"Uncontrolled": 0.12},
+        )
+
+    return NaturalGasPlan(
         name=str(row["PlanId"]),
         fixed_rate=row["Daily charge"],
         import_rates=pricing_dict,
@@ -110,7 +120,7 @@ def row_to_plan(row: pd.Series) -> ElectricityPlan:
 
 
 def add_gst(
-    plan: Union[ElectricityPlan, NaturalGasPlan]
+    plan: Union[ElectricityPlan, NaturalGasPlan],
 ) -> Union[ElectricityPlan, NaturalGasPlan]:
     """
     Add GST (Goods and Services Tax) to the plan's charges.
@@ -147,7 +157,6 @@ def calculate_optimal_plan_by_edb(profile, filtered_df):
             plan = row_to_plan(plan_data)
             cost = plan.calculate_cost(profile)
             total_cost = cost.fixed_cost_nzd + cost.variable_cost_nzd
-
             if total_cost < lowest_cost:
                 lowest_cost = total_cost
                 best_plan = plan
