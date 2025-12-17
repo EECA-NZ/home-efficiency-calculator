@@ -69,7 +69,7 @@ def _electricity():
         name="Default Electricity Plan",
         fixed_rate=2.0,
         import_rates={"Day": 0.242, "Night": 0.18},
-        export_rates={"Uncontrolled": 0.12},
+        export_rates={"Uncontrolled": 0.136},
     )
 
 

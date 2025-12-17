@@ -143,7 +143,7 @@ def plan_dictionaries(plan_type: str, plan_class):
                     name=f"{plan_type.capitalize()} PlanId {row['name']}",
                     fixed_rate=fixed_rate,
                     import_rates=import_rates,
-                    export_rates={"Uncontrolled": 0.12},
+                    export_rates={"Uncontrolled": 0.136},
                 )
             else:
                 # e.g. NaturalGasPlan

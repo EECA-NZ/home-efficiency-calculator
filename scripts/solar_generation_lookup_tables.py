@@ -35,7 +35,6 @@ FLOAT_FORMAT = "%.6f"
 
 # Constants for placeholders
 DEFAULT_POSTCODE = "6012"
-EXPORT_RATE = 0.12  # NZD per kWh for exported electricity
 TIMESERIES_SUM = 1000.0  # Sum of hour columns for each row
 
 # Constant for the lookup directory. Relative to the script location.
@@ -418,6 +417,7 @@ def transform_plans_to_dataframe():
         plan_name = plan.name
         rate_dict = plan.import_rates
         fixed_rate = plan.fixed_rate
+        export_rate = plan.export_rates["Uncontrolled"]
 
         if rate_dict.keys() == {"All inclusive"}:
             all_val = rate_dict["All inclusive"]
@@ -436,7 +436,7 @@ def transform_plans_to_dataframe():
             "fixed_rate": fixed_rate,
             "import_rates_day": day_rate,
             "import_rates_night": night_rate,
-            "import_rates_export": EXPORT_RATE,
+            "import_rates_export": export_rate,
         }
 
     df = pd.DataFrame.from_dict(modified_plans, orient="index")
