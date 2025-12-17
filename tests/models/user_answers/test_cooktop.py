@@ -169,7 +169,7 @@ def manual_cost_calculation_electric_induction():
     day_usage = COOKTOP.energy_usage_pattern(
         YOUR_HOME, SOLAR, use_alternative=True
     ).electricity_kwh.fixed_day_kwh
-    cost_per_kwh_day = energy_plan.electricity_plan.import_rates["Day"]
+    cost_per_kwh_day = energy_plan.electricity_plan.import_rates["All inclusive"]
     annual_running_cost = day_usage * cost_per_kwh_day
     return annual_running_cost
 

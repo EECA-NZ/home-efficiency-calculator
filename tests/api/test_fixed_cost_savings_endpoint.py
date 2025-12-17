@@ -119,9 +119,9 @@ def test_fixed_cost_savings_removing_gas_connection():
     expected_savings = {
         "natural_gas": {
             "variable_cost_nzd": {
-                "current": approx(370.54),
+                "current": approx(689.18),
                 "alternative": approx(0),
-                "absolute_reduction": approx(370.54),
+                "absolute_reduction": approx(689.18),
                 "percentage_reduction": approx(100),
             },
             "emissions_kg_co2e": {
@@ -191,8 +191,8 @@ def test_fixed_cost_savings_keeping_gas_connection():
     expected_savings = {
         "natural_gas": {
             "variable_cost_nzd": {
-                "current": approx(370.54),
-                "alternative": approx(370.54),
+                "current": approx(689.18),
+                "alternative": approx(689.18),
                 "absolute_reduction": approx(0),
                 "percentage_reduction": approx(0),
             },

@@ -36,7 +36,7 @@ class YourHomeAnswers(BaseModel):
         return value.zfill(4)
 
     @model_validator(mode="after")
-    def check_postcode(cls, model):
+    def check_postcode(self):
         """
         Validate that the postcode is recognized (a key from the
         climate zone lookup) and accepted (not in the exclude list).
@@ -44,12 +44,10 @@ class YourHomeAnswers(BaseModel):
         Raises:
             ValueError: If the postcode is not in the known list or is excluded.
         """
-        if model.postcode in exclude_postcodes:
+        if self.postcode in exclude_postcodes:
+            raise ValueError(f"Postcode '{self.postcode}' is not covered by this tool.")
+        if self.postcode not in known_postcodes:
             raise ValueError(
-                f"Postcode '{model.postcode}' is not covered by this tool."
+                f"Invalid postcode '{self.postcode}'. Please provide a valid postcode."
             )
-        if model.postcode not in known_postcodes:
-            raise ValueError(
-                f"Invalid postcode '{model.postcode}'. Please provide a valid postcode."
-            )
-        return model
+        return self

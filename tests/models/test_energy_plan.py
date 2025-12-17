@@ -35,9 +35,9 @@ def test_edb_zone_to_electricity_plan():
     """
     plan = edb_zone_to_electricity_plan("Wellington Electricity")
     assert re.match(r"Electricity PlanId [0-9]+|Default Electricity Plan", plan.name)
-    assert plan.fixed_rate in (2.4172999999999996, 2.0)
+    assert plan.fixed_rate in (2.2424999999999997, 2.0)
     assert plan.import_rates in (
-        {"Day": 0.21228999999999998, "Night": 0.17204},
+        {"All inclusive": 0.210335},
         {"Day": 0.242, "Night": 0.18},
     )
 
@@ -48,9 +48,9 @@ def test_postcode_to_electricity_plan():
     """
     plan = postcode_to_electricity_plan("6012")
     assert re.match(r"Electricity PlanId [0-9]+|Default Electricity Plan", plan.name)
-    assert plan.fixed_rate in (2.4172999999999996, 2.0)
+    assert plan.fixed_rate in (2.2424999999999997, 2.0)
     assert plan.import_rates in (
-        {"Day": 0.21228999999999998, "Night": 0.17204},
+        {"All inclusive": 0.210335},
         {"Day": 0.242, "Night": 0.18},
     )
 
@@ -65,9 +65,9 @@ def test_get_energy_plan():
         r"Electricity PlanId [0-9]+|Default Electricity Plan",
         plan.electricity_plan.name,
     )
-    assert plan.electricity_plan.fixed_rate in (2.4172999999999996, 2.0)
+    assert plan.electricity_plan.fixed_rate in (2.2424999999999997, 2.0)
     assert plan.electricity_plan.import_rates in (
-        {"Day": 0.21228999999999998, "Night": 0.17204},
+        {"All inclusive": 0.210335},
         {"Day": 0.242, "Night": 0.18},
     )
     assert (
@@ -76,12 +76,12 @@ def test_get_energy_plan():
     )
     # Plan tariffs are either RA numbers or averages from Powerswitch dataset
     assert plan.natural_gas_plan.import_rates["Uncontrolled"] == approx(
-        0.11
+        0.13915
     ) or plan.natural_gas_plan.import_rates["Uncontrolled"] == approx(
         0.21389999999999998
     )
     assert plan.natural_gas_plan.fixed_rate == approx(
-        1.6
+        1.88688
     ) or plan.natural_gas_plan.fixed_rate == approx(1.01449)
     assert plan.lpg_plan.name == "Default LPG Plan"
     assert plan.lpg_plan.per_lpg_kwh == 0.244
