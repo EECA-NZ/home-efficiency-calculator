@@ -7,6 +7,20 @@ WORKDIR /app
 # Copy the local code to the container's workspace
 COPY . /app
 
+
+# Install CA certificates
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+# Optional: install additional corporate CA certs if provided
+# (e.g. Zscaler) - injected at build time
+ARG EXTRA_CA_CERT
+COPY ${EXTRA_CA_CERT:-/dev/null} /usr/local/share/ca-certificates/extra-ca.crt
+RUN if [ -f /usr/local/share/ca-certificates/extra-ca.crt ]; then \
+      update-ca-certificates; \
+    fi
+
 # Ensure pip is up to date
 RUN pip install --upgrade pip
 
@@ -20,7 +34,7 @@ RUN pip install -v --root-user-action=ignore .
 EXPOSE 80
 
 # Define environment variable
-ENV NAME World
+ENV NAME=World
 
 # Command to run the application
 CMD ["electrify_app"]
