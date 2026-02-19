@@ -9,6 +9,7 @@ from typing import Union
 import numpy as np
 import pandas as pd
 
+from app.constants import DEFAULT_SOLAR_EXPORT_RATE
 from app.models.energy_plans import ElectricityPlan, NaturalGasPlan
 from resources.plan_choice_helpers.constants import locations_to_edb
 
@@ -108,14 +109,14 @@ def row_to_plan(row: pd.Series) -> ElectricityPlan | NaturalGasPlan:
             name=str(row["PlanId"]),
             fixed_rate=row["Daily charge"],
             import_rates=pricing_dict,
-            export_rates={"Uncontrolled": 0.12},
+            export_rates={"Uncontrolled": DEFAULT_SOLAR_EXPORT_RATE},
         )
 
     return NaturalGasPlan(
         name=str(row["PlanId"]),
         fixed_rate=row["Daily charge"],
         import_rates=pricing_dict,
-        export_rates={"Uncontrolled": 0.12},
+        export_rates={"Uncontrolled": DEFAULT_SOLAR_EXPORT_RATE},
     )
 
 
