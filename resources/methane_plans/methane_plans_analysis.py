@@ -30,7 +30,7 @@ from resources.postcode_lookup_tables.geo_utils import load_and_transform_shapef
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-LOCAL_TARIFF_DATA_PATH = "../supplementary_data/tariff_data/tariffDataReport_240903.csv"
+LOCAL_TARIFF_DATA_PATH = "../supplementary_data/tariff_data/tariffDataReport_251203.csv"
 EDB_REGION_SHAPEFILE = "../supplementary_data/EDB_Boundaries/EDBBoundaries.shp"
 OUTPUT_DIR = "bynetwork"
 

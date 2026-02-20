@@ -99,7 +99,8 @@ def filter_methane_plans(full_df):
     all_retailer_locs = full_df["Retailer location name"].unique()
     all_network_locs = full_df["Network location names"].unique()
 
-    full_df["EDB"] = full_df["Network location names"].apply(map_locations_to_edb)
+    stripped_locations = full_df["Network location names"].str.rstrip(" (Gas)")
+    full_df["EDB"] = stripped_locations.apply(map_locations_to_edb)
 
     # Drop tariffs for low density network locations
     ignore_networks = full_df.loc[

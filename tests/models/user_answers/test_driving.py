@@ -196,7 +196,7 @@ def test_savings_calculations():
     )
     assert (
         electric_energy_costs.variable_cost_nzd
-        == approx(manual_calculation_ev(0.17204))
+        == approx(manual_calculation_ev(0.210335))
     ) or (
         electric_energy_costs.variable_cost_nzd == approx(manual_calculation_ev(0.18))
     )

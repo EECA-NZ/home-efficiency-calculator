@@ -146,7 +146,7 @@ def test_create_household_energy_profile_to_cost_with_solar():
 
     assert total_solar_generation == approx(6779.145125, rel=1e-4)
     assert day_tariff == approx(0.242)
-    assert export_tariff == approx(0.12)
+    assert export_tariff == approx(0.136)
     assert total_solar_revenue_if_exported <= total_solar_savings_2
     assert total_solar_savings_2 <= total_solar_savings_if_self_consumed
     assert self_consumption_percentage == approx(46.55, rel=1e-3)

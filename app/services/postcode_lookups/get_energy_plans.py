@@ -34,7 +34,7 @@ import logging
 
 import pandas as pd
 
-from ...constants import DAILY_DUAL_FUEL_DISCOUNT
+from ...constants import DAILY_DUAL_FUEL_DISCOUNT, DEFAULT_SOLAR_EXPORT_RATE
 from ...models.energy_plans import ElectricityPlan, HouseholdEnergyPlan, NaturalGasPlan
 from ..configuration import get_default_plans
 
@@ -143,7 +143,7 @@ def plan_dictionaries(plan_type: str, plan_class):
                     name=f"{plan_type.capitalize()} PlanId {row['name']}",
                     fixed_rate=fixed_rate,
                     import_rates=import_rates,
-                    export_rates={"Uncontrolled": 0.12},
+                    export_rates={"Uncontrolled": DEFAULT_SOLAR_EXPORT_RATE},
                 )
             else:
                 # e.g. NaturalGasPlan

@@ -1,11 +1,9 @@
-
-
 Step 1: Set Variables
 ---------------------
 
 The instructions below assume that you are in the project's root directory.
 
-Typically it will be necessary to first login to Azure.
+Typically it will be necessary to first login to Azure. Select the 'dev' account.
 ```powershell
 az login --scope https://management.core.windows.net//.default
 ```
@@ -17,10 +15,11 @@ $acrName = "eecaacrdwbidevaue"
 $location = "australiaeast"
 $appServicePlan = "home-efficiency-plan"
 $webAppName = "home-efficiency-calculator-app"
-$image = "home-efficiency-calculator:0.3.0"
+$image = "home-efficiency-calculator:1.1.0"
 $loginServer = az acr show -n $acrName --query loginServer --output tsv
 $imageTag = "$loginServer/$image"
 $acrPassword = az acr credential show -n $acrName --query "passwords[0].value" -o tsv
+$extraCAcert = "/path/to/ZscalerRootCertificate-2048-SHA256-Feb2025.crt"
 ```
 
 Step 2: Ensure the Docker image is built and pushed to the Azure Container Registry
@@ -28,7 +27,9 @@ Step 2: Ensure the Docker image is built and pushed to the Azure Container Regis
 
 ```powershell
 docker login -u $acrName -p $acrPassword $loginServer
-docker build -t $image .
+# If not running from behind ZScaler, no need to pass the
+# EXTRA_CA_CERT build argument in the following command:
+docker build --build-arg EXTRA_CA_CERT=$extraCAcert -t $image .
 docker tag $image $imageTag
 docker push $imageTag
 ```
@@ -63,10 +64,10 @@ Step 5: Configure the container with ACR credentials
 az webapp config container set `
   --name $webAppName `
   --resource-group $resourceGroup `
-  --docker-custom-image-name $imageTag `
-  --docker-registry-server-url https://$loginServer `
-  --docker-registry-server-user $acrName `
-  --docker-registry-server-password $acrPassword
+  --container-image-name $imageTag `
+  --container-registry-url https://$loginServer `
+  --container-registry-user $acrName `
+  --container-registry-password $acrPassword
 ```
 
 Step 6: Restart the app and tell Azure explicitly to run Uvicorn on port 80
@@ -93,9 +94,46 @@ az webapp show `
 ```
 
 Point your browser at:
-
 ```
-https://home-efficiency-calculator-app.azurewebsites.net/docs
+https://home-efficiency-calculator-app.azurewebsites.net/
+```
+
+### Post a request to the API:
+```
+curl -Method 'POST' `
+  -Uri 'https://home-efficiency-calculator-app.azurewebsites.net/solar/savings/' `
+  -Headers @{
+        "Accept"="application/json"
+        "Content-Type"="application/json"
+    } `
+  -Body '{
+  "your_home": {
+    "people_in_house": 1,
+    "postcode": "6012"
+  },
+  "heating": {
+    "main_heating_source": "Piped gas heater",
+    "alternative_main_heating_source": "Heat pump",
+    "heating_during_day": "Never",
+    "insulation_quality": "Not well insulated"
+  },
+  "hot_water": {
+    "hot_water_usage": "Low",
+    "hot_water_heating_source": "Electric hot water cylinder",
+    "alternative_hot_water_heating_source": "Hot water heat pump"
+  },
+  "cooktop": {
+    "cooktop": "Piped gas",
+    "alternative_cooktop": "Electric induction"
+  },
+  "driving": {
+    "vehicle_size": "Small",
+    "km_per_week": "200",
+    "vehicle_type": "Petrol",
+    "alternative_vehicle_type": "Electric"
+  }
+}' `
+-OutFile 'response.json'
 ```
 
 
@@ -150,10 +188,10 @@ docker push $imageTag
 az webapp config container set `
   --name $webAppName `
   --resource-group $resourceGroup `
-  --docker-custom-image-name $imageTag `
-  --docker-registry-server-url https://$loginServer `
-  --docker-registry-server-user $acrName `
-  --docker-registry-server-password $acrPassword
+  --container-image-name $imageTag `
+  --container-registry-url https://$loginServer `
+  --container-registry-user $acrName `
+  --container-registry-password $acrPassword
 
 # Optionally, you can force a restart to ensure the new container gets pulled:
 az webapp restart `

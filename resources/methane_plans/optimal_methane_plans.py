@@ -24,7 +24,7 @@ from resources.plan_choice_helpers.plan_utils import (
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-LOCAL_TARIFF_DATA_PATH = "../supplementary_data/tariff_data/tariffDataReport_240903.csv"
+LOCAL_TARIFF_DATA_PATH = "../supplementary_data/tariff_data/tariffDataReport_251203.csv"
 OUTPUT_FILE = "output/selected_methane_plan_tariffs_by_edb_gst_inclusive.csv"
 
 POSTCODE_TO_EDB_CSV = (
