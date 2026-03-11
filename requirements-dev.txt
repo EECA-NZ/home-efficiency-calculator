@@ -1,6 +1,6 @@
 -r requirements.txt
 pytest==8.*
-pylint==3.*
+pylint==4.*
 black==25.*
 isort==6.*
 pre-commit==4.*
