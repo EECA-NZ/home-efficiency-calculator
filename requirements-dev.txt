@@ -2,7 +2,7 @@
 pytest==8.*
 pylint==3.*
 black==25.*
-isort==6.*
+isort==7.*
 pre-commit==4.*
 pandas==2.*
 openpyxl==3.*
