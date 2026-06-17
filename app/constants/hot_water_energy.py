@@ -93,27 +93,92 @@ HEAT_PUMP_WATER_CYLINDER_SIZES = {
     "Large": 300,
 }
 
-HOT_WATER_HEAT_PUMP_COP_BY_CLIMATE_ZONE = {
-    "Northland": 4.12,
-    "Auckland": 4.12,
-    "Hamilton": 3.60,
-    "Bay of Plenty": 3.99,
-    "Rotorua": 3.55,
-    "Taupo": 3.24,
-    "New Plymouth": 3.93,
-    "East Coast": 3.76,
-    "Manawatu": 3.84,
-    "Wairarapa": 3.33,
-    "Wellington": 4.15,
-    "Nelson-Marlborough": 3.72,
-    "West Coast": 3.69,
-    "Christchurch": 3.29,
-    "Queenstown-Lakes": 3.01,
-    "Central Otago": 2.76,
-    "Dunedin": 3.88,
-    "Invercargill": 3.59,
-    "Unknown": 3.0,
+HPWH_REFERENCE_CLIMATE_ZONE = "Wairarapa"
+HPWH_REFERENCE_COP = 3.5
+HPWH_CLIMATE_VARIATION_DERATING_COEFFICIENT = 0.5
+
+# The 2026 HPWH update uses the same climate ordering as the earlier
+# water-heating model, but de-rates the climate spread relative to the
+# space-heating proxy that was previously used.
+HPWH_CLIMATE_PROXY_SPACE_HEATING_COP_BY_CLIMATE_ZONE = {
+    "Northland": 4.937402580645153,
+    "Auckland": 4.938623225806459,
+    "Hamilton": 4.306072258064516,
+    "Bay of Plenty": 4.783739354838718,
+    "Rotorua": 4.2536709677419395,
+    "Taupo": 3.874429677419356,
+    "New Plymouth": 4.702352258064507,
+    "East Coast": 4.5019612903225745,
+    "Manawatu": 4.593669677419356,
+    "Wairarapa": 3.991598709677423,
+    "Wellington": 4.965360000000005,
+    "Nelson-Marlborough": 4.45849032258065,
+    "West Coast": 4.417089032258067,
+    "Christchurch": 3.9340180645161253,
+    "Queenstown-Lakes": 3.605394838709677,
+    "Central Otago": 3.3033806451612913,
+    "Dunedin": 4.646802580645164,
+    "Invercargill": 4.304938064516125,
 }
+
+
+def derated_hpwh_cop_from_space_heating_proxy(
+    space_heating_cop: float,
+    reference_space_heating_cop: float,
+    reference_hpwh_cop: float = HPWH_REFERENCE_COP,
+    derating_coefficient: float = HPWH_CLIMATE_VARIATION_DERATING_COEFFICIENT,
+) -> float:
+    """
+    Convert a space-heating COP proxy into a HPWH component COP.
+
+    The 2026 model retains the relative climate ordering from the prior
+    water-heating model, but only applies part of that spread.
+    """
+    climate_ratio = space_heating_cop / reference_space_heating_cop
+    derated_ratio = 1 + derating_coefficient * (climate_ratio - 1)
+    return reference_hpwh_cop * derated_ratio
+
+
+def adjusted_hpwh_standing_loss_kwh_per_day(
+    existing_standing_loss_kwh_per_day: float,
+    existing_fittings_heat_loss_kwh_per_day: float | None = None,
+    fittings_heat_loss_multiplier: float | None = None,
+) -> float:
+    """
+    Adjust a legacy HPWH standing-loss value for the outdoor fittings uplift.
+    """
+    if existing_fittings_heat_loss_kwh_per_day is None:
+        existing_fittings_heat_loss_kwh_per_day = (
+            HPWH_EXISTING_FITTINGS_HEAT_LOSS_KWH_PER_DAY
+        )
+    if fittings_heat_loss_multiplier is None:
+        fittings_heat_loss_multiplier = HPWH_OUTDOOR_FITTINGS_HEAT_LOSS_MULTIPLIER
+    return existing_standing_loss_kwh_per_day + (
+        existing_fittings_heat_loss_kwh_per_day * (fittings_heat_loss_multiplier - 1)
+    )
+
+
+def build_hpwh_cop_by_climate_zone() -> dict[str, float]:
+    """
+    Build the 2026 HPWH component COP map from explicit model assumptions.
+    """
+    reference_space_heating_cop = HPWH_CLIMATE_PROXY_SPACE_HEATING_COP_BY_CLIMATE_ZONE[
+        HPWH_REFERENCE_CLIMATE_ZONE
+    ]
+    climate_zone_cops = {
+        climate_zone: derated_hpwh_cop_from_space_heating_proxy(
+            space_heating_cop=space_heating_cop,
+            reference_space_heating_cop=reference_space_heating_cop,
+        )
+        for climate_zone, space_heating_cop in (
+            HPWH_CLIMATE_PROXY_SPACE_HEATING_COP_BY_CLIMATE_ZONE.items()
+        )
+    }
+    climate_zone_cops["Unknown"] = HPWH_REFERENCE_COP
+    return climate_zone_cops
+
+
+HOT_WATER_HEAT_PUMP_COP_BY_CLIMATE_ZONE = build_hpwh_cop_by_climate_zone()
 
 GAS_INSTANTANEOUS_WATER_HEATING_EFFICIENCY = 0.834
 
@@ -122,6 +187,17 @@ GAS_STORAGE_WATER_HEATING_EFFICIENCY = 0.885
 ELECTRIC_WATER_HEATING_EFFICIENCY = 1.0
 
 HOT_WATER_POWER_INPUT_KW = 3.0  # kW, assumed for all hot water systems
+
+HPWH_OUTDOOR_HEAT_LOSS_AIR_SPEED_M_PER_S = 3.5
+HPWH_TEST_STANDARD_AIR_SPEED_M_PER_S = 0.375
+HPWH_OUTDOOR_FITTINGS_HEAT_LOSS_MULTIPLIER = 1.0
+HPWH_EXISTING_FITTINGS_HEAT_LOSS_KWH_PER_DAY = 0.4
+HPWH_STANDING_LOSS_DAYS_PER_YEAR = 365.25
+HPWH_EXISTING_STANDING_LOSS_KWH_PER_DAY_BY_TANK_SIZE = {
+    170: 3.4896966368039277,
+    250: 3.9037626898851556,
+    300: 4.118396418165106,
+}
 
 
 #### Constants used for hot water hourly energy consumption profiles
