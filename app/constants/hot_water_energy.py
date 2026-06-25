@@ -93,27 +93,92 @@ HEAT_PUMP_WATER_CYLINDER_SIZES = {
     "Large": 300,
 }
 
-HOT_WATER_HEAT_PUMP_COP_BY_CLIMATE_ZONE = {
-    "Northland": 4.12,
-    "Auckland": 4.12,
-    "Hamilton": 3.60,
-    "Bay of Plenty": 3.99,
-    "Rotorua": 3.55,
-    "Taupo": 3.24,
-    "New Plymouth": 3.93,
-    "East Coast": 3.76,
-    "Manawatu": 3.84,
-    "Wairarapa": 3.33,
-    "Wellington": 4.15,
-    "Nelson-Marlborough": 3.72,
-    "West Coast": 3.69,
-    "Christchurch": 3.29,
-    "Queenstown-Lakes": 3.01,
-    "Central Otago": 2.76,
-    "Dunedin": 3.88,
-    "Invercargill": 3.59,
-    "Unknown": 3.0,
+HPWH_REFERENCE_CLIMATE_ZONE = "Wairarapa"
+HPWH_BASELINE_COP = 3.5
+HPWH_CLIMATE_COP_DERATE_FACTOR = 0.5
+
+# The 2026 HPWH update uses the same climate ordering as the earlier
+# water-heating model, but de-rates the climate spread relative to
+# air-to-air heat pump performance by climate zone.
+AIR_TO_AIR_HEAT_PUMP_COP_BY_CLIMATE_ZONE = {
+    "Northland": 4.937402580645153,
+    "Auckland": 4.938623225806459,
+    "Hamilton": 4.306072258064516,
+    "Bay of Plenty": 4.783739354838718,
+    "Rotorua": 4.2536709677419395,
+    "Taupo": 3.874429677419356,
+    "New Plymouth": 4.702352258064507,
+    "East Coast": 4.5019612903225745,
+    "Manawatu": 4.593669677419356,
+    "Wairarapa": 3.991598709677423,
+    "Wellington": 4.965360000000005,
+    "Nelson-Marlborough": 4.45849032258065,
+    "West Coast": 4.417089032258067,
+    "Christchurch": 3.9340180645161253,
+    "Queenstown-Lakes": 3.605394838709677,
+    "Central Otago": 3.3033806451612913,
+    "Dunedin": 4.646802580645164,
+    "Invercargill": 4.304938064516125,
 }
+
+HPWH_OUTDOOR_FITTINGS_HEAT_LOSS_MULTIPLIER = 1.0
+HPWH_BASELINE_FITTINGS_HEAT_LOSS_KWH_PER_DAY = 0.4
+HPWH_BASELINE_CYLINDER_HEAT_LOSS_KWH_PER_DAY_BY_TANK_SIZE = {
+    170: 3.0896966368039278,
+    250: 3.5037626898851557,
+    300: 3.718396418165106,
+}
+
+
+def parameterized_hpwh_cop_from_air_to_air_climate_cop(
+    air_to_air_heat_pump_cop: float,
+    reference_air_to_air_heat_pump_cop: float,
+    baseline_hpwh_cop: float,
+    climate_cop_derate_factor: float,
+) -> float:
+    """
+    Convert an air-to-air heat-pump climate COP into a HPWH component COP.
+
+    The 2026 model retains the relative climate ordering from the prior
+    water-heating model, but only applies part of that spread.
+    """
+    climate_ratio = air_to_air_heat_pump_cop / reference_air_to_air_heat_pump_cop
+    derated_ratio = 1 + climate_cop_derate_factor * (climate_ratio - 1)
+    return baseline_hpwh_cop * derated_ratio
+
+
+def hpwh_cop_from_air_to_air_climate_cop(
+    air_to_air_heat_pump_cop: float,
+) -> float:
+    """
+    Convert an air-to-air heat-pump climate COP into the app's HPWH COP.
+    """
+    reference_air_to_air_heat_pump_cop = AIR_TO_AIR_HEAT_PUMP_COP_BY_CLIMATE_ZONE[
+        HPWH_REFERENCE_CLIMATE_ZONE
+    ]
+    return parameterized_hpwh_cop_from_air_to_air_climate_cop(
+        air_to_air_heat_pump_cop=air_to_air_heat_pump_cop,
+        reference_air_to_air_heat_pump_cop=reference_air_to_air_heat_pump_cop,
+        baseline_hpwh_cop=HPWH_BASELINE_COP,
+        climate_cop_derate_factor=HPWH_CLIMATE_COP_DERATE_FACTOR,
+    )
+
+
+def build_hpwh_cop_by_climate_zone() -> dict[str, float]:
+    """
+    Build the 2026 HPWH component COP map from explicit model assumptions.
+    """
+    climate_zone_cops = {
+        climate_zone: hpwh_cop_from_air_to_air_climate_cop(air_to_air_heat_pump_cop)
+        for climate_zone, air_to_air_heat_pump_cop in (
+            AIR_TO_AIR_HEAT_PUMP_COP_BY_CLIMATE_ZONE.items()
+        )
+    }
+    climate_zone_cops["Unknown"] = HPWH_BASELINE_COP
+    return climate_zone_cops
+
+
+HOT_WATER_HEAT_PUMP_COP_BY_CLIMATE_ZONE = build_hpwh_cop_by_climate_zone()
 
 GAS_INSTANTANEOUS_WATER_HEATING_EFFICIENCY = 0.834
 

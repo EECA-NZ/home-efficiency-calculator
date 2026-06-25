@@ -3,7 +3,6 @@ Module for generic helper functions.
 """
 
 from ...constants import (
-    AVERAGE_AIR_TEMPERATURE_BY_CLIMATE_ZONE,
     DAYS_IN_YEAR,
     ELECTRIC_HOT_WATER_CYLINDER_LOSSES_55_DEGREE_DELTA_T_KWH_PER_DAY,
     ELECTRIC_HOT_WATER_CYLINDER_SIZES,
@@ -14,6 +13,9 @@ from ...constants import (
     HEAT_PUMP_WATER_CYLINDER_SIZES,
     HOT_WATER_HEAT_PUMP_COP_BY_CLIMATE_ZONE,
     HOT_WATER_STORAGE_TEMPERATURE_C,
+    HPWH_BASELINE_CYLINDER_HEAT_LOSS_KWH_PER_DAY_BY_TANK_SIZE,
+    HPWH_BASELINE_FITTINGS_HEAT_LOSS_KWH_PER_DAY,
+    HPWH_OUTDOOR_FITTINGS_HEAT_LOSS_MULTIPLIER,
     INDOOR_CYLINDER_AMBIENT_TEMPERATURE_C,
     INLET_WATER_TEMPERATURE_BY_CLIMATE_ZONE,
     OTHER_WATER_USAGE_QUANTITIES,
@@ -114,7 +116,7 @@ def other_water_kwh_per_year(climate_zone, household_size):
     return other_kwh_per_year
 
 
-def standing_loss_kwh_per_year(hot_water_heating_source, household_size, climate_zone):
+def standing_loss_kwh_per_year(hot_water_heating_source, household_size, _climate_zone):
     """
     Calculate the standing loss for the hot water cylinder.
 
@@ -126,10 +128,6 @@ def standing_loss_kwh_per_year(hot_water_heating_source, household_size, climate
     - Standing loss in kWh/year.
     """
     tank_description = TANK_SIZE_BY_HOUSEHOLD_SIZE[household_size]
-    outdoor_delta_t = (
-        HOT_WATER_STORAGE_TEMPERATURE_C
-        - AVERAGE_AIR_TEMPERATURE_BY_CLIMATE_ZONE[climate_zone]
-    )
     indoor_delta_t = (
         HOT_WATER_STORAGE_TEMPERATURE_C - INDOOR_CYLINDER_AMBIENT_TEMPERATURE_C
     )
@@ -150,7 +148,7 @@ def standing_loss_kwh_per_year(hot_water_heating_source, household_size, climate
     if hot_water_heating_source == "Hot water heat pump":
         return (
             heat_pump_cylinder_heat_loss_kwh_per_day(
-                HEAT_PUMP_WATER_CYLINDER_SIZES[tank_description], outdoor_delta_t
+                HEAT_PUMP_WATER_CYLINDER_SIZES[tank_description]
             )
             * DAYS_IN_YEAR
         )
@@ -180,6 +178,19 @@ def hot_water_heating_efficiency(hot_water_heating_source, climate_zone):
     if hot_water_heating_source == "Hot water heat pump":
         return HOT_WATER_HEAT_PUMP_COP_BY_CLIMATE_ZONE[climate_zone]
     raise ValueError(f"Unknown hot water heating source: {hot_water_heating_source}")
+
+
+def hpwh_standing_loss_with_fittings_multiplier(
+    baseline_cylinder_heat_loss_kwh_per_day: float,
+    fittings_heat_loss_multiplier: float = HPWH_OUTDOOR_FITTINGS_HEAT_LOSS_MULTIPLIER,
+) -> float:
+    """
+    Calculate HPWH standing loss from cylinder heat loss plus fittings loss.
+    """
+    return (
+        baseline_cylinder_heat_loss_kwh_per_day
+        + HPWH_BASELINE_FITTINGS_HEAT_LOSS_KWH_PER_DAY * fittings_heat_loss_multiplier
+    )
 
 
 def hot_water_cylinder_heat_loss_kwh_per_day(tank_size, delta_t=55):
@@ -230,17 +241,20 @@ def gas_storage_heat_loss_kwh_per_day(tank_size, delta_t=55):
 def heat_pump_cylinder_heat_loss_kwh_per_day(tank_size, delta_t=55):
     """
     Calculate the heat loss for a heat pump hot water cylinder.
-    Based on heat exchanger MEPS in AU 4692.
-    - This was based on a 55 degree temperature rise; correct with
-    linear scaling if another delta T is appropriate.
-    - 0.2 added for TPR valve,
-    - 0.2 added for two fittings.
+    The 2026 HPWH update uses per-tank cylinder heat loss plus a fittings
+    component that can be scaled for outdoor exposure.
 
     Parameters:
     - tank_size: The size of the hot water cylinder in litres.
-    - delta_t: Temperature difference between hot water and ambient.
+    - delta_t: Unused for the 2026 spreadsheet-aligned HPWH model.
 
     Returns:
     - The heat loss in kWh/day.
     """
-    return tank_size ** (0.3261) * 0.6099 * (delta_t / 55) + 0.2 + 0.2
+    _ = delta_t
+    if tank_size not in HPWH_BASELINE_CYLINDER_HEAT_LOSS_KWH_PER_DAY_BY_TANK_SIZE:
+        raise ValueError(f"Unknown tank size: {tank_size}")
+    baseline_cylinder_heat_loss = (
+        HPWH_BASELINE_CYLINDER_HEAT_LOSS_KWH_PER_DAY_BY_TANK_SIZE[tank_size]
+    )
+    return hpwh_standing_loss_with_fittings_multiplier(baseline_cylinder_heat_loss)

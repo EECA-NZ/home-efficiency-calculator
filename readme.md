@@ -3,9 +3,8 @@
 ![Linting](https://github.com/EECA-NZ/home-efficiency-calculator/actions/workflows/pylint.yml/badge.svg)
 ![Tests](https://github.com/EECA-NZ/home-efficiency-calculator/actions/workflows/python-tests.yml/badge.svg)
 [Test Coverage Report](https://eeca-nz.github.io/home-efficiency-calculator/htmlcov)
-[API documentation](https://home-efficiency-calculator-app.azurewebsites.net/docs)
 
-This repository contains the source code for the [Home efficiency calculator](http://home-efficiency-calculator.australiaeast.azurecontainer.io:8000/docs), a FastAPI application designed to provide insights into household energy costs and CO2 emissions.
+This repository contains the source code for the Home efficiency calculator, a FastAPI application designed to provide insights into household energy costs and CO2 emissions.
 
 It is used to serve the numbers behind EECA's public-facing [Home energy savings calculator](https://www.genless.govt.nz/for-everyone/at-home/energy-saving-appliances/home-energy-savings-calculator/) web app.
 
