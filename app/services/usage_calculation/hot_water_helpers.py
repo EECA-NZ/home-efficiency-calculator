@@ -13,8 +13,9 @@ from ...constants import (
     HEAT_PUMP_WATER_CYLINDER_SIZES,
     HOT_WATER_HEAT_PUMP_COP_BY_CLIMATE_ZONE,
     HOT_WATER_STORAGE_TEMPERATURE_C,
-    HPWH_EXISTING_STANDING_LOSS_KWH_PER_DAY_BY_TANK_SIZE,
-    HPWH_STANDING_LOSS_DAYS_PER_YEAR,
+    HPWH_BASELINE_CYLINDER_HEAT_LOSS_KWH_PER_DAY_BY_TANK_SIZE,
+    HPWH_BASELINE_FITTINGS_HEAT_LOSS_KWH_PER_DAY,
+    HPWH_OUTDOOR_FITTINGS_HEAT_LOSS_MULTIPLIER,
     INDOOR_CYLINDER_AMBIENT_TEMPERATURE_C,
     INLET_WATER_TEMPERATURE_BY_CLIMATE_ZONE,
     OTHER_WATER_USAGE_QUANTITIES,
@@ -23,7 +24,6 @@ from ...constants import (
     TEMPERATURE_SHOWER_C,
     WATER_DENSITY_KG_PER_L,
     WATER_SPECIFIC_HEAT_CAPACITY_KWH_PER_KG_K,
-    adjusted_hpwh_standing_loss_kwh_per_day,
 )
 
 
@@ -150,7 +150,7 @@ def standing_loss_kwh_per_year(hot_water_heating_source, household_size, _climat
             heat_pump_cylinder_heat_loss_kwh_per_day(
                 HEAT_PUMP_WATER_CYLINDER_SIZES[tank_description]
             )
-            * HPWH_STANDING_LOSS_DAYS_PER_YEAR
+            * DAYS_IN_YEAR
         )
     return 0
 
@@ -178,6 +178,19 @@ def hot_water_heating_efficiency(hot_water_heating_source, climate_zone):
     if hot_water_heating_source == "Hot water heat pump":
         return HOT_WATER_HEAT_PUMP_COP_BY_CLIMATE_ZONE[climate_zone]
     raise ValueError(f"Unknown hot water heating source: {hot_water_heating_source}")
+
+
+def hpwh_standing_loss_with_fittings_multiplier(
+    baseline_cylinder_heat_loss_kwh_per_day: float,
+    fittings_heat_loss_multiplier: float = HPWH_OUTDOOR_FITTINGS_HEAT_LOSS_MULTIPLIER,
+) -> float:
+    """
+    Calculate HPWH standing loss from cylinder heat loss plus fittings loss.
+    """
+    return (
+        baseline_cylinder_heat_loss_kwh_per_day
+        + HPWH_BASELINE_FITTINGS_HEAT_LOSS_KWH_PER_DAY * fittings_heat_loss_multiplier
+    )
 
 
 def hot_water_cylinder_heat_loss_kwh_per_day(tank_size, delta_t=55):
@@ -228,9 +241,8 @@ def gas_storage_heat_loss_kwh_per_day(tank_size, delta_t=55):
 def heat_pump_cylinder_heat_loss_kwh_per_day(tank_size, delta_t=55):
     """
     Calculate the heat loss for a heat pump hot water cylinder.
-    The 2026 HPWH update starts from the legacy per-tank standing losses
-    used in the earlier spreadsheet model, then increases the fittings
-    contribution to reflect outdoor exposure.
+    The 2026 HPWH update uses per-tank cylinder heat loss plus a fittings
+    component that can be scaled for outdoor exposure.
 
     Parameters:
     - tank_size: The size of the hot water cylinder in litres.
@@ -240,9 +252,9 @@ def heat_pump_cylinder_heat_loss_kwh_per_day(tank_size, delta_t=55):
     - The heat loss in kWh/day.
     """
     _ = delta_t
-    if tank_size not in HPWH_EXISTING_STANDING_LOSS_KWH_PER_DAY_BY_TANK_SIZE:
+    if tank_size not in HPWH_BASELINE_CYLINDER_HEAT_LOSS_KWH_PER_DAY_BY_TANK_SIZE:
         raise ValueError(f"Unknown tank size: {tank_size}")
-    base_cylinder_heat_loss = HPWH_EXISTING_STANDING_LOSS_KWH_PER_DAY_BY_TANK_SIZE[
-        tank_size
-    ]
-    return adjusted_hpwh_standing_loss_kwh_per_day(base_cylinder_heat_loss)
+    baseline_cylinder_heat_loss = (
+        HPWH_BASELINE_CYLINDER_HEAT_LOSS_KWH_PER_DAY_BY_TANK_SIZE[tank_size]
+    )
+    return hpwh_standing_loss_with_fittings_multiplier(baseline_cylinder_heat_loss)

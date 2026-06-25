@@ -136,7 +136,7 @@ async def create_response(data, component_name):
     ComponentSavingsResponse
         The response for the household component.
     """
-    (options_dict, user_geography, current_fuel_use, alternative_fuel_use) = data
+    options_dict, user_geography, current_fuel_use, alternative_fuel_use = data
     if "error" in options_dict:
         logger.error("Error calculating %s savings: %s", component_name, data["error"])
         raise HTTPException(status_code=500, detail=data["error"])

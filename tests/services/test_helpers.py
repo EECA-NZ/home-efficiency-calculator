@@ -7,16 +7,14 @@ Tests for the helpers module.
 from pytest import approx
 
 from app.constants import (
+    AIR_TO_AIR_HEAT_PUMP_COP_BY_CLIMATE_ZONE,
     DAY_NIGHT_FRAC,
     DAYS_IN_YEAR,
-    HPWH_CLIMATE_PROXY_SPACE_HEATING_COP_BY_CLIMATE_ZONE,
-    HPWH_EXISTING_STANDING_LOSS_KWH_PER_DAY_BY_TANK_SIZE,
+    HPWH_BASELINE_CYLINDER_HEAT_LOSS_KWH_PER_DAY_BY_TANK_SIZE,
     HPWH_REFERENCE_CLIMATE_ZONE,
-    HPWH_REFERENCE_COP,
-    HPWH_STANDING_LOSS_DAYS_PER_YEAR,
     OTHER_ELX_KWH_PER_DAY,
-    adjusted_hpwh_standing_loss_kwh_per_day,
-    derated_hpwh_cop_from_space_heating_proxy,
+    hpwh_cop_from_air_to_air_climate_cop,
+    parameterized_hpwh_cop_from_air_to_air_climate_cop,
 )
 from app.models.hourly_profiles.get_base_demand_profile import (
     other_electricity_energy_usage_profile,
@@ -27,6 +25,7 @@ from app.services.configuration import get_default_plan
 from app.services.helpers import add_gst, get_solar_answers
 from app.services.usage_calculation.hot_water_helpers import (
     hot_water_heating_efficiency,
+    hpwh_standing_loss_with_fittings_multiplier,
     other_water_kwh_per_year,
     shower_kwh_per_year,
     standing_loss_kwh_per_year,
@@ -149,54 +148,38 @@ def test_hpwh_cop_settings_match_sheet_final_values():
     """
     Test the final 2026 spreadsheet settings for the COP de-rating calculation.
     """
-    reference_proxy_cop = HPWH_CLIMATE_PROXY_SPACE_HEATING_COP_BY_CLIMATE_ZONE[
-        HPWH_REFERENCE_CLIMATE_ZONE
-    ]
-
-    wellington_cop = derated_hpwh_cop_from_space_heating_proxy(
-        space_heating_cop=HPWH_CLIMATE_PROXY_SPACE_HEATING_COP_BY_CLIMATE_ZONE[
-            "Wellington"
-        ],
-        reference_space_heating_cop=reference_proxy_cop,
-        reference_hpwh_cop=HPWH_REFERENCE_COP,
-        derating_coefficient=0.5,
+    wellington_cop = hpwh_cop_from_air_to_air_climate_cop(
+        AIR_TO_AIR_HEAT_PUMP_COP_BY_CLIMATE_ZONE["Wellington"]
     )
-    christchurch_cop = derated_hpwh_cop_from_space_heating_proxy(
-        space_heating_cop=HPWH_CLIMATE_PROXY_SPACE_HEATING_COP_BY_CLIMATE_ZONE[
-            "Christchurch"
-        ],
-        reference_space_heating_cop=reference_proxy_cop,
-        reference_hpwh_cop=HPWH_REFERENCE_COP,
-        derating_coefficient=0.5,
+    christchurch_cop = hpwh_cop_from_air_to_air_climate_cop(
+        AIR_TO_AIR_HEAT_PUMP_COP_BY_CLIMATE_ZONE["Christchurch"]
     )
 
     assert wellington_cop == approx(3.9269172284110274)
     assert christchurch_cop == approx(3.4747554460352017)
 
 
-def test_hpwh_cop_settings_match_sheet_old_values():
+def test_hpwh_cop_settings_match_legacy_values():
     """
-    Test the pre-2026 spreadsheet settings using the same proxy calculation.
+    Test the legacy spreadsheet settings using the same climate-ratio calculation.
     """
-    reference_proxy_cop = HPWH_CLIMATE_PROXY_SPACE_HEATING_COP_BY_CLIMATE_ZONE[
+    reference_air_to_air_heat_pump_cop = AIR_TO_AIR_HEAT_PUMP_COP_BY_CLIMATE_ZONE[
         HPWH_REFERENCE_CLIMATE_ZONE
     ]
 
-    wellington_cop = derated_hpwh_cop_from_space_heating_proxy(
-        space_heating_cop=HPWH_CLIMATE_PROXY_SPACE_HEATING_COP_BY_CLIMATE_ZONE[
-            "Wellington"
-        ],
-        reference_space_heating_cop=reference_proxy_cop,
-        reference_hpwh_cop=3.3333333333333335,
-        derating_coefficient=1.0,
+    wellington_cop = parameterized_hpwh_cop_from_air_to_air_climate_cop(
+        air_to_air_heat_pump_cop=AIR_TO_AIR_HEAT_PUMP_COP_BY_CLIMATE_ZONE["Wellington"],
+        reference_air_to_air_heat_pump_cop=reference_air_to_air_heat_pump_cop,
+        baseline_hpwh_cop=3.3333333333333335,
+        climate_cop_derate_factor=1.0,
     )
-    christchurch_cop = derated_hpwh_cop_from_space_heating_proxy(
-        space_heating_cop=HPWH_CLIMATE_PROXY_SPACE_HEATING_COP_BY_CLIMATE_ZONE[
+    christchurch_cop = parameterized_hpwh_cop_from_air_to_air_climate_cop(
+        air_to_air_heat_pump_cop=AIR_TO_AIR_HEAT_PUMP_COP_BY_CLIMATE_ZONE[
             "Christchurch"
         ],
-        reference_space_heating_cop=reference_proxy_cop,
-        reference_hpwh_cop=3.3333333333333335,
-        derating_coefficient=1.0,
+        reference_air_to_air_heat_pump_cop=reference_air_to_air_heat_pump_cop,
+        baseline_hpwh_cop=3.3333333333333335,
+        climate_cop_derate_factor=1.0,
     )
 
     assert wellington_cop == approx(4.1465090064971957)
@@ -207,44 +190,48 @@ def test_hpwh_standing_loss_settings_match_sheet_final_values():
     """
     Test the final 2026 spreadsheet settings for HPWH standing loss uplift.
     """
-    small_daily_loss = adjusted_hpwh_standing_loss_kwh_per_day(
-        HPWH_EXISTING_STANDING_LOSS_KWH_PER_DAY_BY_TANK_SIZE[170]
+    small_daily_loss = hpwh_standing_loss_with_fittings_multiplier(
+        HPWH_BASELINE_CYLINDER_HEAT_LOSS_KWH_PER_DAY_BY_TANK_SIZE[170]
     )
-    large_daily_loss = adjusted_hpwh_standing_loss_kwh_per_day(
-        HPWH_EXISTING_STANDING_LOSS_KWH_PER_DAY_BY_TANK_SIZE[300]
+    large_daily_loss = hpwh_standing_loss_with_fittings_multiplier(
+        HPWH_BASELINE_CYLINDER_HEAT_LOSS_KWH_PER_DAY_BY_TANK_SIZE[300]
     )
 
     assert small_daily_loss == approx(3.4896966368039277)
-    assert small_daily_loss * HPWH_STANDING_LOSS_DAYS_PER_YEAR == approx(
-        1274.6116965926346
-    )
+    assert small_daily_loss * DAYS_IN_YEAR == approx(1274.6116965926346)
     assert large_daily_loss == approx(4.118396418165106)
-    assert large_daily_loss * HPWH_STANDING_LOSS_DAYS_PER_YEAR == approx(
-        1504.2442917348048
-    )
+    assert large_daily_loss * DAYS_IN_YEAR == approx(1504.2442917348048)
 
 
-def test_hpwh_standing_loss_settings_match_sheet_old_values():
+def test_hpwh_standing_loss_settings_preserve_baseline_values():
     """
-    Test the legacy spreadsheet standing-loss settings before the outdoor uplift.
+    Test that a fittings multiplier of 1.0 preserves the baseline values.
     """
-    small_daily_loss = adjusted_hpwh_standing_loss_kwh_per_day(
-        HPWH_EXISTING_STANDING_LOSS_KWH_PER_DAY_BY_TANK_SIZE[170],
+    small_daily_loss = hpwh_standing_loss_with_fittings_multiplier(
+        HPWH_BASELINE_CYLINDER_HEAT_LOSS_KWH_PER_DAY_BY_TANK_SIZE[170],
         fittings_heat_loss_multiplier=1.0,
     )
-    medium_daily_loss = adjusted_hpwh_standing_loss_kwh_per_day(
-        HPWH_EXISTING_STANDING_LOSS_KWH_PER_DAY_BY_TANK_SIZE[250],
+    medium_daily_loss = hpwh_standing_loss_with_fittings_multiplier(
+        HPWH_BASELINE_CYLINDER_HEAT_LOSS_KWH_PER_DAY_BY_TANK_SIZE[250],
         fittings_heat_loss_multiplier=1.0,
     )
 
     assert small_daily_loss == approx(3.4896966368039277)
-    assert small_daily_loss * HPWH_STANDING_LOSS_DAYS_PER_YEAR == approx(
-        1274.6116965926346
-    )
+    assert small_daily_loss * DAYS_IN_YEAR == approx(1274.6116965926346)
     assert medium_daily_loss == approx(3.9037626898851556)
-    assert medium_daily_loss * HPWH_STANDING_LOSS_DAYS_PER_YEAR == approx(
-        1425.8493224805532
+    assert medium_daily_loss * DAYS_IN_YEAR == approx(1425.8493224805532)
+
+
+def test_hpwh_standing_loss_uplift_applies_multiplier_directly_to_fittings():
+    """
+    Test the spreadsheet-style fittings adjustment explicitly.
+    """
+    adjusted_daily_loss = hpwh_standing_loss_with_fittings_multiplier(
+        HPWH_BASELINE_CYLINDER_HEAT_LOSS_KWH_PER_DAY_BY_TANK_SIZE[170],
+        fittings_heat_loss_multiplier=1.5,
     )
+
+    assert adjusted_daily_loss == approx(3.689696636803928)
 
 
 def test_other_electricity_energy_usage_profile_1():

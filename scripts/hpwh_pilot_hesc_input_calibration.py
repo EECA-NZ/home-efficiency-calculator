@@ -12,24 +12,24 @@ import statistics
 from dataclasses import dataclass
 from pathlib import Path
 
+from app.constants import DAYS_IN_YEAR
 from app.constants.hot_water_energy import (
+    AIR_TO_AIR_HEAT_PUMP_COP_BY_CLIMATE_ZONE,
     AVERAGE_AIR_TEMPERATURE_BY_CLIMATE_ZONE,
     HEAT_PUMP_WATER_CYLINDER_SIZES,
     HOT_WATER_HEAT_PUMP_COP_BY_CLIMATE_ZONE,
-    HPWH_CLIMATE_PROXY_SPACE_HEATING_COP_BY_CLIMATE_ZONE,
-    HPWH_CLIMATE_VARIATION_DERATING_COEFFICIENT,
-    HPWH_EXISTING_STANDING_LOSS_KWH_PER_DAY_BY_TANK_SIZE,
+    HPWH_BASELINE_COP,
+    HPWH_BASELINE_CYLINDER_HEAT_LOSS_KWH_PER_DAY_BY_TANK_SIZE,
+    HPWH_CLIMATE_COP_DERATE_FACTOR,
     HPWH_OUTDOOR_FITTINGS_HEAT_LOSS_MULTIPLIER,
     HPWH_REFERENCE_CLIMATE_ZONE,
-    HPWH_REFERENCE_COP,
-    HPWH_STANDING_LOSS_DAYS_PER_YEAR,
     OTHER_WATER_USAGE_QUANTITIES,
     SHOWER_WATER_USAGE_QUANTITIES,
     TANK_SIZE_BY_HOUSEHOLD_SIZE,
-    adjusted_hpwh_standing_loss_kwh_per_day,
-    derated_hpwh_cop_from_space_heating_proxy,
+    parameterized_hpwh_cop_from_air_to_air_climate_cop,
 )
 from app.services.usage_calculation.hot_water_helpers import (
+    hpwh_standing_loss_with_fittings_multiplier,
     other_water_kwh_per_year,
     shower_kwh_per_year,
     standing_loss_kwh_per_year,
@@ -55,7 +55,7 @@ VALID_PEOPLE_IN_HOUSE = {1, 2, 3, 4, 5, 6}
 TARGET_REFRIGERANT = "R290"
 TARGET_SYSTEM_TYPE = "Integral"
 VALID_INSTALL_LOCATIONS = {"", "Outdoor"}
-OLD_COP_BY_CLIMATE_ZONE = {
+LEGACY_HPWH_COP_BY_CLIMATE_ZONE = {
     "Northland": 4.12,
     "Auckland": 4.12,
     "Hamilton": 3.60,
@@ -108,19 +108,19 @@ class TuningParameters:
     """
 
     reference_cop: float
-    derating_coefficient: float
+    climate_cop_derate_factor: float
     fittings_multiplier: float
 
 
-OLD_REFERENCE_COP = OLD_COP_BY_CLIMATE_ZONE[HPWH_REFERENCE_CLIMATE_ZONE]
-OLD_TUNING_PARAMETERS = TuningParameters(
-    reference_cop=OLD_REFERENCE_COP,
-    derating_coefficient=1.0,
+LEGACY_REFERENCE_COP = LEGACY_HPWH_COP_BY_CLIMATE_ZONE[HPWH_REFERENCE_CLIMATE_ZONE]
+LEGACY_TUNING_PARAMETERS = TuningParameters(
+    reference_cop=LEGACY_REFERENCE_COP,
+    climate_cop_derate_factor=1.0,
     fittings_multiplier=1.0,
 )
-CURRENT_TUNING_PARAMETERS = TuningParameters(
-    reference_cop=HPWH_REFERENCE_COP,
-    derating_coefficient=HPWH_CLIMATE_VARIATION_DERATING_COEFFICIENT,
+MODEL_DEFAULT_TUNING_PARAMETERS = TuningParameters(
+    reference_cop=HPWH_BASELINE_COP,
+    climate_cop_derate_factor=HPWH_CLIMATE_COP_DERATE_FACTOR,
     fittings_multiplier=HPWH_OUTDOOR_FITTINGS_HEAT_LOSS_MULTIPLIER,
 )
 
@@ -230,16 +230,14 @@ def hesc_input_component_cop(climate_zone: str, params: TuningParameters) -> flo
     """
     Predict HPWH component COP from app-style climate information only.
     """
-    reference_space_heating_cop = HPWH_CLIMATE_PROXY_SPACE_HEATING_COP_BY_CLIMATE_ZONE[
+    reference_air_to_air_heat_pump_cop = AIR_TO_AIR_HEAT_PUMP_COP_BY_CLIMATE_ZONE[
         HPWH_REFERENCE_CLIMATE_ZONE
     ]
-    return derated_hpwh_cop_from_space_heating_proxy(
-        space_heating_cop=HPWH_CLIMATE_PROXY_SPACE_HEATING_COP_BY_CLIMATE_ZONE[
-            climate_zone
-        ],
-        reference_space_heating_cop=reference_space_heating_cop,
-        reference_hpwh_cop=params.reference_cop,
-        derating_coefficient=params.derating_coefficient,
+    return parameterized_hpwh_cop_from_air_to_air_climate_cop(
+        air_to_air_heat_pump_cop=AIR_TO_AIR_HEAT_PUMP_COP_BY_CLIMATE_ZONE[climate_zone],
+        reference_air_to_air_heat_pump_cop=reference_air_to_air_heat_pump_cop,
+        baseline_hpwh_cop=params.reference_cop,
+        climate_cop_derate_factor=params.climate_cop_derate_factor,
     )
 
 
@@ -249,13 +247,13 @@ def hesc_input_standing_loss_kwh(people: int, fittings_multiplier: float) -> flo
     """
     tank_size = HEAT_PUMP_WATER_CYLINDER_SIZES[TANK_SIZE_BY_HOUSEHOLD_SIZE[people]]
     return (
-        adjusted_hpwh_standing_loss_kwh_per_day(
-            existing_standing_loss_kwh_per_day=(
-                HPWH_EXISTING_STANDING_LOSS_KWH_PER_DAY_BY_TANK_SIZE[tank_size]
+        hpwh_standing_loss_with_fittings_multiplier(
+            baseline_cylinder_heat_loss_kwh_per_day=(
+                HPWH_BASELINE_CYLINDER_HEAT_LOSS_KWH_PER_DAY_BY_TANK_SIZE[tank_size]
             ),
             fittings_heat_loss_multiplier=fittings_multiplier,
         )
-        * HPWH_STANDING_LOSS_DAYS_PER_YEAR
+        * DAYS_IN_YEAR
     )
 
 
@@ -279,7 +277,7 @@ def hesc_input_predicted_cop(
     return delivered_kwh / ((delivered_kwh + standing_loss_kwh) / component_cop)
 
 
-def old_hesc_input_predicted_cop(
+def legacy_hesc_input_predicted_cop(
     climate_zone: str, people: int, usage_bucket: str
 ) -> float:
     """
@@ -289,11 +287,11 @@ def old_hesc_input_predicted_cop(
         other_water_kwh_per_year(climate_zone, people)
     )
     standing_loss_kwh = hesc_input_standing_loss_kwh(people, 1.0)
-    component_cop = OLD_COP_BY_CLIMATE_ZONE[climate_zone]
+    component_cop = LEGACY_HPWH_COP_BY_CLIMATE_ZONE[climate_zone]
     return delivered_kwh / ((delivered_kwh + standing_loss_kwh) / component_cop)
 
 
-def current_hesc_input_predicted_cop(
+def default_hesc_input_predicted_cop(
     climate_zone: str,
     people: int,
     usage_bucket: str,
@@ -376,11 +374,11 @@ def calibrate_parameters(
     best_params = None
     best_score = None
     for reference_cop in reference_cop_values:
-        for derating_coefficient in derating_values:
+        for climate_cop_derate_factor in derating_values:
             for fittings_multiplier in fittings_multiplier_values:
                 params = TuningParameters(
                     reference_cop=reference_cop,
-                    derating_coefficient=derating_coefficient,
+                    climate_cop_derate_factor=climate_cop_derate_factor,
                     fittings_multiplier=fittings_multiplier,
                 )
                 score = objective_function(sites, params)
@@ -397,16 +395,16 @@ def prediction_rows(
     optimized_params: TuningParameters,
 ) -> list[dict[str, float | int | str]]:
     """
-    Build per-site prediction rows for old, current, and optimized models.
+    Build per-site prediction rows for legacy, default, and optimized models.
     """
     rows = []
     for site in sites:
-        old_prediction = old_hesc_input_predicted_cop(
+        legacy_prediction = legacy_hesc_input_predicted_cop(
             site.climate_zone,
             site.people,
             site.usage_bucket,
         )
-        current_prediction = current_hesc_input_predicted_cop(
+        default_prediction = default_hesc_input_predicted_cop(
             site.climate_zone,
             site.people,
             site.usage_bucket,
@@ -425,11 +423,11 @@ def prediction_rows(
                 "people": site.people,
                 "usage_bucket": site.usage_bucket,
                 "observed_cop": site.observed_cop,
-                "old_hesc_input_prediction": old_prediction,
-                "current_hesc_input_prediction": current_prediction,
+                "legacy_hesc_input_prediction": legacy_prediction,
+                "default_hesc_input_prediction": default_prediction,
                 "optimized_hesc_input_prediction": optimized_prediction,
-                "old_hesc_input_error": old_prediction - site.observed_cop,
-                "current_hesc_input_error": current_prediction - site.observed_cop,
+                "legacy_hesc_input_error": legacy_prediction - site.observed_cop,
+                "default_hesc_input_error": default_prediction - site.observed_cop,
                 "optimized_hesc_input_error": (
                     optimized_prediction - site.observed_cop
                 ),
@@ -495,8 +493,8 @@ def print_model_metrics_table(
     Print overall model-performance metrics for each coefficient set.
     """
     model_specs = [
-        ("old", OLD_TUNING_PARAMETERS, "old_hesc_input_prediction"),
-        ("current", CURRENT_TUNING_PARAMETERS, "current_hesc_input_prediction"),
+        ("legacy", LEGACY_TUNING_PARAMETERS, "legacy_hesc_input_prediction"),
+        ("default", MODEL_DEFAULT_TUNING_PARAMETERS, "default_hesc_input_prediction"),
         ("optimized", optimized_params, "optimized_hesc_input_prediction"),
     ]
     print("Overall COP performance by coefficient set")
@@ -511,7 +509,7 @@ def print_model_metrics_table(
         )
         print(
             f"{label:<10}  {params.reference_cop:>7.2f}  "
-            f"{params.derating_coefficient:>7.2f}  "
+            f"{params.climate_cop_derate_factor:>7.2f}  "
             f"{params.fittings_multiplier:>8.2f}  "
             f"{observed_mean:>8.3f}  {predicted_mean:>8.3f}  "
             f"{bias:>8.3f}  {mae:>8.3f}  {rmse:>8.3f}"
@@ -526,8 +524,8 @@ def print_average_cop_table(rows: list[dict[str, float | int | str]]) -> None:
     print("Average COP by NIWA climate zone and HESC usage scenario")
     print(
         f"{'climate_zone':<20}  {'usage':<8}  {'n':>3}  "
-        f"{'observed':>8}  {'old':>8}  {'current':>8}  "
-        f"{'optimized':>10}  {'%Δ old->curr':>13}"
+        f"{'observed':>8}  {'legacy':>8}  {'default':>8}  "
+        f"{'optimized':>10}  {'%Δ leg->def':>13}"
     )
     for climate_zone in climate_zones:
         for usage_bucket in USAGE_BUCKET_ORDER:
@@ -540,25 +538,25 @@ def print_average_cop_table(rows: list[dict[str, float | int | str]]) -> None:
             observed_mean = mean_or_none(
                 [float(row["observed_cop"]) for row in stratum_rows]
             )
-            old_mean = mean_or_none(
-                [float(row["old_hesc_input_prediction"]) for row in stratum_rows]
+            legacy_mean = mean_or_none(
+                [float(row["legacy_hesc_input_prediction"]) for row in stratum_rows]
             )
-            current_mean = mean_or_none(
-                [float(row["current_hesc_input_prediction"]) for row in stratum_rows]
+            default_mean = mean_or_none(
+                [float(row["default_hesc_input_prediction"]) for row in stratum_rows]
             )
             optimized_mean = mean_or_none(
                 [float(row["optimized_hesc_input_prediction"]) for row in stratum_rows]
             )
-            current_cop_delta = None
-            if old_mean and current_mean:
-                current_cop_delta = current_mean / old_mean - 1
+            default_cop_delta = None
+            if legacy_mean and default_mean:
+                default_cop_delta = default_mean / legacy_mean - 1
             print(
                 f"{climate_zone:<20}  {USAGE_SCENARIO_LABELS[usage_bucket]:<8}  "
                 f"{len(stratum_rows):>3}  {format_optional_cop(observed_mean):>8}  "
-                f"{format_optional_cop(old_mean):>8}  "
-                f"{format_optional_cop(current_mean):>8}  "
+                f"{format_optional_cop(legacy_mean):>8}  "
+                f"{format_optional_cop(default_mean):>8}  "
                 f"{format_optional_cop(optimized_mean):>10}  "
-                f"{format_optional_percent(current_cop_delta):>13}"
+                f"{format_optional_percent(default_cop_delta):>13}"
             )
 
 
@@ -566,27 +564,27 @@ def print_representative_hesc_input_cop_table(
     optimized_params: TuningParameters,
 ) -> None:
     """
-    Print old/current/optimized COP for representative HESC input scenarios.
+    Print legacy/default/optimized COP for representative HESC input scenarios.
     """
     scenarios = [
         (2, "Low"),
         (4, "Average"),
         (6, "High"),
     ]
-    climate_zones = list(HPWH_CLIMATE_PROXY_SPACE_HEATING_COP_BY_CLIMATE_ZONE)
+    climate_zones = list(AIR_TO_AIR_HEAT_PUMP_COP_BY_CLIMATE_ZONE)
     print("Representative HESC-input effective COP")
     print(
         f"{'climate_zone':<20}  {'people':>6}  {'usage':<8}  "
-        f"{'old':>8}  {'current':>8}  {'optimized':>10}  {'%Δ old->curr':>13}"
+        f"{'legacy':>8}  {'default':>8}  {'optimized':>10}  {'%Δ leg->def':>13}"
     )
     for climate_zone in climate_zones:
         for people, usage_bucket in scenarios:
-            old_cop = old_hesc_input_predicted_cop(
+            legacy_cop = legacy_hesc_input_predicted_cop(
                 climate_zone,
                 people,
                 usage_bucket,
             )
-            current_cop = current_hesc_input_predicted_cop(
+            default_cop = default_hesc_input_predicted_cop(
                 climate_zone,
                 people,
                 usage_bucket,
@@ -597,19 +595,19 @@ def print_representative_hesc_input_cop_table(
                 usage_bucket,
                 optimized_params,
             )
-            current_cop_delta = current_cop / old_cop - 1
+            default_cop_delta = default_cop / legacy_cop - 1
             print(
                 f"{climate_zone:<20}  {people:>6}  "
                 f"{USAGE_SCENARIO_LABELS[usage_bucket]:<8}  "
-                f"{old_cop:>8.3f}  {current_cop:>8.3f}  "
+                f"{legacy_cop:>8.3f}  {default_cop:>8.3f}  "
                 f"{optimized_cop:>10.3f}  "
-                f"{current_cop_delta:>13.1%}"
+                f"{default_cop_delta:>13.1%}"
             )
 
 
 def write_comparison_csv(rows: list[dict[str, float | int | str]], output_path: Path):
     """
-    Write the per-site old/current/best comparison CSV.
+    Write the per-site legacy/default/optimized comparison CSV.
     """
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8", newline="") as csv_file:
@@ -659,18 +657,18 @@ def write_observed_scatter_plots(
     output_dir: Path,
 ) -> list[Path]:
     """
-    Write old/current/optimized calculated-vs-observed scatter plots.
+    Write legacy/default/optimized calculated-vs-observed scatter plots.
     """
     plot_specs = [
         (
-            "old_hesc_input_prediction",
-            "Old HESC-input COP vs observed",
-            "hpwh_pilot_hesc_input_old_vs_observed.png",
+            "legacy_hesc_input_prediction",
+            "Legacy HESC-input COP vs observed",
+            "hpwh_pilot_hesc_input_legacy_vs_observed.png",
         ),
         (
-            "current_hesc_input_prediction",
-            "Current HESC-input COP vs observed",
-            "hpwh_pilot_hesc_input_current_vs_observed.png",
+            "default_hesc_input_prediction",
+            "Default HESC-input COP vs observed",
+            "hpwh_pilot_hesc_input_default_vs_observed.png",
         ),
         (
             "optimized_hesc_input_prediction",
@@ -709,12 +707,12 @@ def main() -> None:
     parser.add_argument(
         "--comparison-csv",
         default=str(DEFAULT_COMPARISON_CSV_PATH),
-        help="Path for the per-site old/current/best comparison CSV.",
+        help="Path for the per-site legacy/default/optimized comparison CSV.",
     )
     parser.add_argument(
         "--plot-dir",
         default=str(DEFAULT_PLOT_DIR),
-        help="Directory for old/current/best calculated-vs-observed PNG plots.",
+        help="Directory for legacy/default/optimized calculated-vs-observed PNG plots.",
     )
     parser.add_argument(
         "--min-days-with-data",
