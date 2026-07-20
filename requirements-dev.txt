@@ -6,7 +6,7 @@ isort==6.*
 pre-commit==4.*
 pandas==2.*
 openpyxl==3.*
-ipython==8.*
+ipython==9.*
 seaborn==0.*
 fiona==1.*
 pyproj==3.*
