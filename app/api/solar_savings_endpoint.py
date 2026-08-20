@@ -17,18 +17,18 @@ async def get_solar_savings(answers: BasicHouseholdAnswers):
     """
     Calculate savings and emissions reductions if solar is added to the household.
     """
-    assert (
-        answers.heating.alternative_main_heating_source is not None
-    ), "Missing alternative heating source"
-    assert (
-        answers.hot_water.alternative_hot_water_heating_source is not None
-    ), "Missing alternative hot water heating source"
-    assert (
-        answers.cooktop.alternative_cooktop is not None
-    ), "Missing alternative cooktop"
-    assert (
-        answers.driving.alternative_vehicle_type is not None
-    ), "Missing alternative vehicle type"
+    if answers.heating.alternative_main_heating_source is None:
+        raise HTTPException(
+            status_code=422, detail="Missing alternative heating source"
+        )
+    if answers.hot_water.alternative_hot_water_heating_source is None:
+        raise HTTPException(
+            status_code=422, detail="Missing alternative hot water heating source"
+        )
+    if answers.cooktop.alternative_cooktop is None:
+        raise HTTPException(status_code=422, detail="Missing alternative cooktop")
+    if answers.driving.alternative_vehicle_type is None:
+        raise HTTPException(status_code=422, detail="Missing alternative vehicle type")
 
     try:
         solar_savings = calculate_solar_savings(answers)

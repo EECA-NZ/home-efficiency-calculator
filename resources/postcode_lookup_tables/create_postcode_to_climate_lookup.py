@@ -41,7 +41,8 @@ def main():
     my_climate_zones_gdf = load_gpkg(CLIMATE_GPKG)
 
     print("Checking consistency of CRS...")
-    assert my_postcode_gdf.crs == my_climate_zones_gdf.crs
+    if my_postcode_gdf.crs != my_climate_zones_gdf.crs:
+        raise ValueError("Postcode and climate-zone coordinate systems must match.")
 
     print("Plotting postcode and climate zone boundaries...")
     plot_maps(

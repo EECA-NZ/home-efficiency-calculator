@@ -6,13 +6,15 @@ build-backend = "setuptools.build_meta"
 name = "home_efficiency_calculator"
 version = "0.3.0"
 description = "A web API for household energy cost and CO2 emissions estimates"
+requires-python = ">=3.12"
 authors = [{ name = "EECA", email = "DataAndAnalytics@eeca.govt.nz" }]
 dependencies = [
     "fastapi",
     "pydantic",
     "uvicorn",
-    "requests",
-    "httpx"
+    "httpx",
+    "numpy",
+    "pandas"
 ]
 
 [project.scripts]

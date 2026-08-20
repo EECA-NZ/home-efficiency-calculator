@@ -72,8 +72,8 @@ def test_carnot_cop():
     expected = (65 + 273.15) / (65 - 10)
     result = carnot_cop(65, 10)
     np.testing.assert_almost_equal(result, expected, decimal=2)
-    with pytest.raises(AssertionError):
-        carnot_cop(65, 70)  # Should assert because T_hot is not > T_cold.
+    with pytest.raises(ValueError):
+        carnot_cop(65, 70)  # T_hot must be greater than T_cold.
 
 
 def test_daily_electricity_kwh_resistive():

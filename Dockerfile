@@ -15,9 +15,9 @@ RUN apt-get update && apt-get install -y \
 
 # Optional: install additional corporate CA certs if provided
 # (e.g. Zscaler) - injected at build time
-ARG EXTRA_CA_CERT
-COPY ${EXTRA_CA_CERT:-/dev/null} /usr/local/share/ca-certificates/extra-ca.crt
-RUN if [ -f /usr/local/share/ca-certificates/extra-ca.crt ]; then \
+ARG EXTRA_CA_CERT=.docker/empty-ca.crt
+COPY ${EXTRA_CA_CERT} /usr/local/share/ca-certificates/extra-ca.crt
+RUN if grep -q '[^[:space:]]' /usr/local/share/ca-certificates/extra-ca.crt; then \
       update-ca-certificates; \
     fi
 
@@ -25,13 +25,18 @@ RUN if [ -f /usr/local/share/ca-certificates/extra-ca.crt ]; then \
 RUN pip install --upgrade pip
 
 # Install necessary packages
-COPY requirements.txt requirements-dev.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir -r requirements-dev.txt
+COPY requirements.txt ./
+RUN pip install --no-cache-dir --require-hashes -r requirements.txt
 RUN pip install -v --root-user-action=ignore .
 
-# Make port 80 available to the world outside this container
-EXPOSE 80
+# Run the application without root privileges. The API listens on port 8000,
+# which does not require elevated privileges.
+RUN groupadd --system app && useradd --system --gid app --home-dir /app app \
+ && chown -R app:app /app
+USER app
+
+# Make the application's port available outside the container.
+EXPOSE 8000
 
 # Define environment variable
 ENV NAME=World

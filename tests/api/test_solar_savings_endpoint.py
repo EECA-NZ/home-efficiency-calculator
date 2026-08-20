@@ -5,6 +5,7 @@ vs export for various input profiles. Starting point.
 
 import importlib.resources as pkg_resources
 import os
+from copy import deepcopy
 
 import numpy as np
 import pandas as pd
@@ -450,6 +451,17 @@ def compare_api_calculation_with_manual_calculation(
     assert response_data["annual_kg_co2e_saving"] == approx(
         annual_kg_co2e_saving, rel=1e-2, abs=1
     )
+
+
+def test_solar_savings_rejects_missing_alternative_heating_source():
+    """The endpoint returns a client error for an incomplete solar request."""
+    input_profile = deepcopy(profile0)
+    input_profile["heating"]["alternative_main_heating_source"] = None
+
+    response = client.post("/solar/savings", json=input_profile)
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == "Missing alternative heating source"
 
 
 @pytest.mark.skipif(

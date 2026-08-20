@@ -40,7 +40,8 @@ def main():
     ] = "Centralines Ltd"
 
     print("Checking consistency of CRS...")
-    assert my_postcode_gdf.crs == my_edb_boundaries_gdf.crs
+    if my_postcode_gdf.crs != my_edb_boundaries_gdf.crs:
+        raise ValueError("Postcode and EDB coordinate systems must match.")
 
     print("Loading tariff data...")
     my_tariff_data = pd.read_csv(

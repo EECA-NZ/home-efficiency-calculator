@@ -72,12 +72,17 @@ def apply_solar_diverter_energy_model(
     - HotWaterDiverterResult containing the new demand
         profile and tank state over time.
     """
-    assert (
-        len(load_hw_kwh) == HOURS_IN_YEAR
-        and len(load_less_hw_kwh) == HOURS_IN_YEAR
-        and len(solar_generation_kwh) == HOURS_IN_YEAR
-        and len(non_hw_electricity_demand) == HOURS_IN_YEAR
+    profile_lengths = (
+        len(load_hw_kwh),
+        len(load_less_hw_kwh),
+        len(solar_generation_kwh),
+        len(non_hw_electricity_demand),
     )
+    if any(length != HOURS_IN_YEAR for length in profile_lengths):
+        raise ValueError(
+            "All hourly profiles must contain "
+            f"{HOURS_IN_YEAR} values; received {profile_lengths}."
+        )
 
     exported_energy_kwh = np.maximum(
         0, solar_generation_kwh - non_hw_electricity_demand

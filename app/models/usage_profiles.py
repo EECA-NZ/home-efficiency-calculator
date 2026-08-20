@@ -208,13 +208,14 @@ class ElectricityUsage(BaseModel):
         """
         Fixed-time electricity usage timeseries (kWh):
         (fixed_day_kwh + fixed_ngt_kwh) * fixed_profile
-        Raises AssertionError if usage is nonzero but no profile was provided.
+        Raises ValueError if usage is nonzero but no profile was provided.
         """
         total_fixed_kwh = self.fixed_day_kwh + self.fixed_ngt_kwh
         if total_fixed_kwh > 0:
-            assert (
-                self.fixed_profile is not None
-            ), "fixed_profile must be provided for nonzero fixed usage."
+            if self.fixed_profile is None:
+                raise ValueError(
+                    "fixed_profile must be provided for nonzero fixed usage."
+                )
             return total_fixed_kwh * self.fixed_profile
         return np.zeros(8760)
 
@@ -223,12 +224,13 @@ class ElectricityUsage(BaseModel):
         """
         Shiftable electricity usage timeseries (kWh):
         shift_abl_kwh * shift_profile
-        Raises AssertionError if usage is nonzero but no profile was provided.
+        Raises ValueError if usage is nonzero but no profile was provided.
         """
         if self.shift_abl_kwh > 0:
-            assert (
-                self.shift_profile is not None
-            ), "shift_profile must be provided for nonzero shiftable usage."
+            if self.shift_profile is None:
+                raise ValueError(
+                    "shift_profile must be provided for nonzero shiftable usage."
+                )
             return self.shift_abl_kwh * self.shift_profile
         return np.zeros(8760)
 
@@ -237,7 +239,7 @@ class ElectricityUsage(BaseModel):
         """
         Shiftable electricity usage timeseries (kWh):
         shift_abl_kwh * shift_profile
-        Raises AssertionError if usage is nonzero but no profile was provided.
+        Raises ValueError if usage is nonzero but no profile was provided.
         """
         return self.total_fixed_time_usage + self.total_shift_able_usage
 

@@ -385,8 +385,8 @@ def calibrate_parameters(
                 if best_score is None or score < best_score:
                     best_params = params
                     best_score = score
-    assert best_params is not None
-    assert best_score is not None
+    if best_params is None or best_score is None:
+        raise ValueError("At least one parameter combination is required.")
     return best_params, best_score
 
 
