@@ -44,11 +44,20 @@ def test_default_hot_water_profile_length_and_sum():
     assert np.allclose(arr, day_profile)
 
 
-def test_space_heating_profile_shape_and_sum_non_heatpump():
+def test_space_heating_profile_shape_and_sum_non_heatpump(monkeypatch):
     """
     Space heating profile for electric heater (non-heatpump) should cover 8760 hours,
     have all non-negative values, and a positive total.
     """
+    hourly_temperatures = pd.Series(
+        10.0,
+        index=pd.date_range("2019-01-01", periods=8760, freq="h"),
+    )
+    monkeypatch.setattr(
+        "app.models.hourly_profiles.heating.hourly_ta",
+        lambda _postcode: hourly_temperatures,
+    )
+
     series = space_heating_profile(
         postcode="6012",
         heating_during_day="Never",

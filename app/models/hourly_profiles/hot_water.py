@@ -68,7 +68,8 @@ def carnot_cop(temp_hot: float, temp_cold: float) -> float:
     float
         The Carnot COP. (Note: This is a theoretical maximum.)
     """
-    assert temp_hot > temp_cold, "Hot temperature must exceed cold temperature."
+    if temp_hot <= temp_cold:
+        raise ValueError("Hot temperature must exceed cold temperature.")
     return (temp_hot + 273.15) / (temp_hot - temp_cold)
 
 
@@ -225,7 +226,8 @@ def normalized_solar_friendly_water_heating_profile(
     for day in daily_energy.index:
         energy = daily_energy.loc[day]
         output_kw = daily_output.loc[day]
-        assert output_kw > 0, "Output must be positive."
+        if output_kw <= 0:
+            raise ValueError("Output must be positive.")
         required_hours = energy / output_kw
 
         # Allocate hours within the defined windows.
